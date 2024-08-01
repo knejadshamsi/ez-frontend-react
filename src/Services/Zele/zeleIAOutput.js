@@ -1,11 +1,7 @@
 import React from 'react'
 import { Drawer, Tabs, Space, Button } from 'antd';
-import {useServiceStore} from '../../Stores'
 
-const ZeleIAOutput = ({zeleState, setZeleState}) => {
-
-  const setActiveService = useServiceStore((state)=> state.setActiveService)
-
+export default function ZeleIAOutput({zeleState, setZeleState}){
   return(
     <Drawer
       title="Results"
@@ -83,5 +79,3 @@ const ZeleIAOutput = ({zeleState, setZeleState}) => {
     </Drawer>
   )
 }
-
-export {ZeleIAOutput}

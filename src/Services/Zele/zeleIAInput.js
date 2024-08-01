@@ -3,7 +3,7 @@ import { Button, Drawer, Divider, Radio , Checkbox, Space, Tooltip, notification
 import { LoadingOutlined, QuestionCircleOutlined } from '@ant-design/icons'
 
 
-const ZeleIAInput = ({formState, setFormState, zeleState, setZeleState , goHandler}) => {
+export default function ZeleIAInput({formState, setFormState, zeleState, setZeleState , goHandler}){
 
   const labels = {
     exemptions: {
@@ -209,5 +209,3 @@ const ZeleIAInput = ({formState, setFormState, zeleState, setZeleState , goHandl
     
   )
 }
-
-export {ZeleIAInput}

@@ -1,7 +1,7 @@
-import React, {useEffect, useState} from 'react'
+import React, {useState} from 'react'
 import { Modal } from 'antd';
-import {ZeleIAInput} from './zeleIAInput'
-import {ZeleIAOutput} from './zeleIAOutput'
+import ZeleIAInput from './zeleIAInput'
+import ZeleIAOutput from './zeleIAOutput'
 import {useServiceStore, useZeleStore} from '../../Stores'
 
 export default function ZeleIA() {
@@ -19,21 +19,11 @@ export default function ZeleIA() {
   const zeleState = useZeleStore((state) => state.zele)
   const setZeleState = useZeleStore((state)=> state.setZeleState)
 
-  // const [inputDrawerShow,setInputDrawerShow] = useState(false)
-  // const [onputDrawerShow,setOnputDrawerShow] = useState(false)
-
-  // useEffect({
-  //   if()
-  // },[])
-
   const [disclaimerText,setDisclaimerText] = useState("")
 
   // Handlers
   const zoneHandler =() => {
     setZeleState("PARAMETER_SELECTION")
-    //setZeleState('userWelcome',false)
-    //setZeleState('userParameterSelection',true)
-    //setZeleState('userZoneSelection',true)
   }
 
   const goHandler = () => {
