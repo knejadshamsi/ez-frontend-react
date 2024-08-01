@@ -1,42 +1,27 @@
 import './App.css';
-import { Layout, Menu, Button } from "antd";
+import { Layout } from "antd";
 import DeckGL from '@deck.gl/react'
 import {Map, Source, Layer} from 'react-map-gl'
+import HeaderContent from './Interface/HeaderContent'
 import LayersMenu from './Interface/LayersMenu'
+import Services from './Services';
+import { EditableGeoJsonLayer } from '@nebula.gl/layers';
 
-// Functions
-const Test = ()=> {
-  console.log("test")
-}
-
-// Defines
+// Definitions 
 const { Header, Content, Sider } = Layout;
-const menuItems = [
-  {key:'layers', label: 'Layers'},
-  {key:'services', label: 'Services',  children: 
-    [{ label: 'Building Info', key: 'bldg-info'},
-      { label: 'IDF Generator', key: 'IDF-Generator'}, 
-      { label: 'Single-Building Retrofit', key: 'Single-Building-Retrofit'}, 
-      { label: 'Multi-Building Retrofit', key: 'Multi-Building-Retrofit'}, 
-      { label: 'ZELE Impact analysis', key: 'ZELE',  onClick:Test} ]},
-  {key:'workbench', label: 'Workbench'}
-]
+
 const apiAccess = process.env.REACT_APP_ACCESS_TOKEN
 // Styles
 const leyoutStyle = { height: '100vh', overflow: 'hidden'}
 const headerStyle = { height:'64px', backgroundColor: 'white', display: 'flex', justyContent: "center", alignItems:"center"}
-const menuStyle = {flexGrow: '1', border: 'none', userSelect: 'none'}
-const buttonStyle = { margin: '0 20px 0 0',}
 const LayersMenuStyle = { paddingInline: "1rem", paddingTop:"1rem"}
 const deckglStyle = { width: '100%', height: '100vh', position: 'relative'}
 
-
 function App() {
   return (
-  <Layout   style={leyoutStyle}>
+  <Layout  style={leyoutStyle}>
   <Header style={headerStyle}>
-    <Menu mode="horizontal" items={menuItems} style={menuStyle} />
-    <Button style={buttonStyle}>En</Button>
+    <HeaderContent />
   </Header>
   <Layout>
     <Sider style={LayersMenuStyle} theme="light"><LayersMenu /></Sider>
@@ -62,6 +47,7 @@ function App() {
         </Map>
       </DeckGL>
     </Content>
+    <Services />
   </Layout>
 </Layout>
   );
