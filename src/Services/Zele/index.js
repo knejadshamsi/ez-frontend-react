@@ -3,7 +3,15 @@ import { Modal } from 'antd';
 import ZeleIAInput from './zeleIAInput'
 import ZeleIAOutput from './zeleIAOutput'
 import {useServiceStore, useZeleStore} from '../../Stores'
+import { EditableGeoJsonLayer } from '@nebula.gl/layers';
 
+const layers = [
+  new EditableGeoJsonLayer({
+    id: 'geojson-layer',
+    data:{},
+    mode: 'view'
+  })
+];
 export default function ZeleIA() {
 
   //Local Form state
