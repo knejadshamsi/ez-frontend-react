@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Layout } from "antd";
-import DeckGL from '@deck.gl/react';
+import DeckGL from 'deck.gl';
 import {Map, Source, Layer} from 'react-map-gl';
 import HeaderContent from './Interface/HeaderContent';
 import LayersMenu from './Interface/LayersMenu';
 import Services from './Services';
 import {useZeleStore, usePolyStore} from './Stores'
-import { EditableGeoJsonLayer, DrawPolygonMode, ViewMode } from '@deck.gl-community/editable-layers';
+import {EditableGeoJsonLayer,DrawLineStringMode,DrawPolygonMode, ViewMode} from '@deck.gl-community/editable-layers';
 import './App.css';
 
 // Definitions 
@@ -25,8 +25,8 @@ function App() {
   const setZeleState = useZeleStore((state)=> state.setZeleState)
   const poly = usePolyStore((state)=> state.poly)
   const setPolyState = usePolyStore((state)=> state.setPolyState)
-  const layers = [new EditableGeoJsonLayer({id: 'editable-leyer', data:poly, mode:zeleStore==="ZONE_SELECTION"? DrawPolygonMode:  ViewMode, selectedFeatureIndexes:[], onEdit: ({updatedData})=> {setPolyState(updatedData); }})]
-  
+  const layer = new EditableGeoJsonLayer({id: 'editable-leyer', data:poly, mode:zeleStore==="ZONE_SELECTION"? DrawPolygonMode:  ViewMode, selectedFeatureIndexes:[], onEdit: ({updatedData})=> {setPolyState(updatedData); }})
+
   return (
   <Layout  style={leyoutStyle}>
   <Header style={headerStyle}>
@@ -35,7 +35,7 @@ function App() {
   <Layout>
     <Sider style={LayersMenuStyle} theme="light"><LayersMenu /></Sider>
     <Content>
-      <DeckGL style={deckglStyle} layers={layers} controller initialViewState={{longitude: -73.561036 ,latitude: 45.5126846,zoom: 15, pitch: 40, }}>
+      <DeckGL style={deckglStyle} layers={[layer]} controller getCursor={layer.getCursor.bind(layer)} initialViewState={{longitude: -73.561036 ,latitude: 45.5126846,zoom: 15, pitch: 40, }} >
         <Map 
           mapboxAccessToken={apiAccess}
           style={{width: '100%', height: '100vh'}}
@@ -54,6 +54,7 @@ function App() {
           />
         </Source>
         </Map>
+        <StaticMap mapboxApiAccessToken={apiAccess} />
       </DeckGL>
     </Content>
     <Services />
