@@ -1,16 +1,18 @@
-import './App.css';
+import { useState } from 'react';
 import { Layout } from "antd";
-import DeckGL from '@deck.gl/react'
-import {Map, Source, Layer} from 'react-map-gl'
-import HeaderContent from './Interface/HeaderContent'
-import LayersMenu from './Interface/LayersMenu'
+import DeckGL from '@deck.gl/react';
+import {Map, Source, Layer} from 'react-map-gl';
+import HeaderContent from './Interface/HeaderContent';
+import LayersMenu from './Interface/LayersMenu';
 import Services from './Services';
-import { EditableGeoJsonLayer } from '@nebula.gl/layers';
+import {useZeleStore, usePolyStore} from './Stores'
+import { EditableGeoJsonLayer, DrawPolygonMode, ViewMode } from '@deck.gl-community/editable-layers';
+import './App.css';
 
 // Definitions 
-const { Header, Content, Sider } = Layout;
-
+const { Header, Content, Sider } = Layout
 const apiAccess = process.env.REACT_APP_ACCESS_TOKEN
+
 // Styles
 const leyoutStyle = { height: '100vh', overflow: 'hidden'}
 const headerStyle = { height:'64px', backgroundColor: 'white', display: 'flex', justyContent: "center", alignItems:"center"}
@@ -18,6 +20,13 @@ const LayersMenuStyle = { paddingInline: "1rem", paddingTop:"1rem"}
 const deckglStyle = { width: '100%', height: '100vh', position: 'relative'}
 
 function App() {
+
+  const zeleStore = useZeleStore((state)=> state.zele)
+  const setZeleState = useZeleStore((state)=> state.setZeleState)
+  const poly = usePolyStore((state)=> state.poly)
+  const setPolyState = usePolyStore((state)=> state.setPolyState)
+  const layers = [new EditableGeoJsonLayer({id: 'editable-leyer', data:poly, mode:zeleStore==="ZONE_SELECTION"? DrawPolygonMode:  ViewMode, selectedFeatureIndexes:[], onEdit: ({updatedData})=> {setPolyState(updatedData); }})]
+  
   return (
   <Layout  style={leyoutStyle}>
   <Header style={headerStyle}>
@@ -26,7 +35,7 @@ function App() {
   <Layout>
     <Sider style={LayersMenuStyle} theme="light"><LayersMenu /></Sider>
     <Content>
-      <DeckGL style={deckglStyle} controller initialViewState={{longitude: -73.561036 ,latitude: 45.5126846,zoom: 15, pitch: 40, }}>
+      <DeckGL style={deckglStyle} layers={layers} controller initialViewState={{longitude: -73.561036 ,latitude: 45.5126846,zoom: 15, pitch: 40, }}>
         <Map 
           mapboxAccessToken={apiAccess}
           style={{width: '100%', height: '100vh'}}
