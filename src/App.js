@@ -6,8 +6,11 @@ import HeaderContent from './Interface/HeaderContent';
 import LayersMenu from './Interface/LayersMenu';
 import Services from './Services';
 import {useZeleStore, usePolyStore} from './Stores'
-import {EditableGeoJsonLayer,DrawLineStringMode,DrawPolygonMode, ViewMode} from '@deck.gl-community/editable-layers';
 import './App.css';
+
+//import {EditableGeoJsonLayer,DrawLineStringMode,DrawPolygonMode, ViewMode} from '@deck.gl-community/editable-layers';
+import {HeatmapLayer} from '@deck.gl/aggregation-layers'
+
 
 // Definitions 
 const { Header, Content, Sider } = Layout
@@ -25,7 +28,13 @@ function App() {
   const setZeleState = useZeleStore((state)=> state.setZeleState)
   const poly = usePolyStore((state)=> state.poly)
   const setPolyState = usePolyStore((state)=> state.setPolyState)
-  const layer = new EditableGeoJsonLayer({id: 'editable-leyer', data:poly, mode:zeleStore==="ZONE_SELECTION"? DrawPolygonMode:  ViewMode, selectedFeatureIndexes:[], onEdit: ({updatedData})=> {setPolyState(updatedData); }})
+
+  // method 1 Can be toggled by this but toggle off does not work
+  // method 2 works perfectly
+  const layers = [
+    //new EditableGeoJsonLayer({id: 'editable-leyer', data:poly, mode:zeleStore==="ZONE_SELECTION"? DrawPolygonMode:  ViewMode, selectedFeatureIndexes:[], onEdit: ({updatedData})=> {setPolyState(updatedData); }}),
+    zeleStore==="ZONE_SELECTION"? new HeatmapLayer({id: 'HeatmapLayer',data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-bike-parking.json',aggregation: 'SUM',radiusPixels: 25, getPosition: (d) => d.COORDINATES,getWeight: (d) => d.SPACES,}): null
+  ]
 
   return (
   <Layout  style={leyoutStyle}>
@@ -35,12 +44,11 @@ function App() {
   <Layout>
     <Sider style={LayersMenuStyle} theme="light"><LayersMenu /></Sider>
     <Content>
-      <DeckGL style={deckglStyle} layers={[layer]} controller getCursor={layer.getCursor.bind(layer)} initialViewState={{longitude: -73.561036 ,latitude: 45.5126846,zoom: 15, pitch: 40, }} >
+      <DeckGL style={deckglStyle} layers={layers} controller initialViewState={{longitude: -73.561036 ,latitude: 45.5126846,zoom: 15, pitch: 40, }} >
         <Map 
           mapboxAccessToken={apiAccess}
           style={{width: '100%', height: '100vh'}}
           mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
-          minZoom={14}
           maxZoom={22}
           renderWorldCopies={false}
           antialias={true}
@@ -54,7 +62,6 @@ function App() {
           />
         </Source>
         </Map>
-        <StaticMap mapboxApiAccessToken={apiAccess} />
       </DeckGL>
     </Content>
     <Services />

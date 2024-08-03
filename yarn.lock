@@ -1359,7 +1359,7 @@
     uuid "9.0.0"
     viewport-mercator-project ">=6.2.3"
 
-"@deck.gl/aggregation-layers@9.0.25":
+"@deck.gl/aggregation-layers@9.0.25", "@deck.gl/aggregation-layers@^9.0.25":
   version "9.0.25"
   resolved "https://registry.yarnpkg.com/@deck.gl/aggregation-layers/-/aggregation-layers-9.0.25.tgz#19a467b5d0a96eedb702f8373a3ed92f4077396b"
   integrity sha512-PFTqUI6mqhYIgyrDKejkpyLRGJOrsTTcyIGs0nJhxfMfUX/j7nfY4DyRWtFRwK25CX4X1gYezLam7S1YUARiFQ==
