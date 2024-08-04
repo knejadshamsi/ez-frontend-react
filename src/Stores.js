@@ -19,7 +19,7 @@ export const useZeleStore = create((set)=>({
     setZeleState: (value)=> {set({zele:value})},
 }))
 
-export const usePolyStore = create((set)=>({
-    poly:{type: 'FeatureCollection',features: []},
-    setPolyState: (value)=> {set({type: 'FeatureCollection',features: value})},
+export const useZoneSelectionStore = create((set)=>({
+    finalArea :"",
+    setFinalArea: (value)=> {set({finalArea:value})},
 }))

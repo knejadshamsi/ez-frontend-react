@@ -1,15 +1,18 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Layout } from "antd";
 import DeckGL from 'deck.gl';
 import {Map, Source, Layer} from 'react-map-gl';
 import HeaderContent from './Interface/HeaderContent';
 import LayersMenu from './Interface/LayersMenu';
 import Services from './Services';
-import {useZeleStore, usePolyStore} from './Stores'
+import {useZeleStore, useZoneSelectionStore} from './Stores'
+import MapSelector from './Interface/MapSelector'
 import './App.css';
 
-//import {EditableGeoJsonLayer,DrawLineStringMode,DrawPolygonMode, ViewMode} from '@deck.gl-community/editable-layers';
-import {HeatmapLayer} from '@deck.gl/aggregation-layers'
+//import {HeatmapLayer} from '@deck.gl/aggregation-layers'
+import {PolygonLayer} from '@deck.gl/layers';
+import { point } from '@turf/helpers';
+import distance from '@turf/distance';
 
 
 // Definitions 
@@ -26,14 +29,37 @@ function App() {
 
   const zeleStore = useZeleStore((state)=> state.zele)
   const setZeleState = useZeleStore((state)=> state.setZeleState)
-  const poly = usePolyStore((state)=> state.poly)
-  const setPolyState = usePolyStore((state)=> state.setPolyState)
 
-  // method 1 Can be toggled by this but toggle off does not work
-  // method 2 works perfectly
+  const finalArea = useZoneSelectionStore((state)=> state.finalArea)
+  const setFinalArea = useZoneSelectionStore((state)=> state.setFinalArea)
+
+  const [selectedArea, setSelectedArea] = useState([])
+  const [firstPoint, setFirstPoint] = useState(null)
+
+  const ZoneSelection = (e,t)=>{
+    const coordinate = e.coordinate
+    if ( finalArea || !coordinate || (!firstPoint && t === "h")) return
+    if (!firstPoint) {
+      setSelectedArea([coordinate,coordinate])
+      setFirstPoint(coordinate)
+      return
+    } 
+    if (t === "h") {
+      setSelectedArea([...selectedArea.slice(0,-1), coordinate])
+    } else {
+        if (distance(point(coordinate), point(firstPoint), { units: 'meters' }) < 10) {
+          setSelectedArea([...selectedArea.slice(0,-1),firstPoint])
+          setFinalArea(selectedArea)
+          return
+        } else {
+          setSelectedArea([...selectedArea.slice(0,-1),coordinate,coordinate])
+      }
+    }
+  }
+
   const layers = [
-    //new EditableGeoJsonLayer({id: 'editable-leyer', data:poly, mode:zeleStore==="ZONE_SELECTION"? DrawPolygonMode:  ViewMode, selectedFeatureIndexes:[], onEdit: ({updatedData})=> {setPolyState(updatedData); }}),
-    //zeleStore==="ZONE_SELECTION"? new HeatmapLayer({id: 'HeatmapLayer',data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-bike-parking.json',aggregation: 'SUM',radiusPixels: 25, getPosition: (d) => d.COORDINATES,getWeight: (d) => d.SPACES,}): null
+    zeleStore==="ZONE_SELECTION"? new HeatmapLayer({id: 'HeatmapLayer',data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-bike-parking.json',aggregation: 'SUM',radiusPixels: 25, getPosition: (d) => d.COORDINATES,getWeight: (d) => d.SPACES,}): null,
+    new PolygonLayer({id: 'polygon-layer',data: [{ contour: selectedArea }], getPolygon: d => d.contour , getFillColor: [255, 0, 0, 100] })
   ]
 
   return (
@@ -44,7 +70,7 @@ function App() {
   <Layout>
     <Sider style={LayersMenuStyle} theme="light"><LayersMenu /></Sider>
     <Content>
-      <DeckGL style={deckglStyle} layers={layers} controller initialViewState={{longitude: -73.561036 ,latitude: 45.5126846,zoom: 15, pitch: 40, }} >
+      <DeckGL style={deckglStyle} layers={layers} controller initialViewState={{longitude: -73.561036 ,latitude: 45.5126846,zoom: 15, pitch: 40, }} onClick={(e)=>ZoneSelection(e,"c")} onHover={(e)=>ZoneSelection(e,"h")}>
         <Map 
           mapboxAccessToken={apiAccess}
           style={{width: '100%', height: '100vh'}}
