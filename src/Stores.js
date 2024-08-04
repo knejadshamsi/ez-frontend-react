@@ -1,5 +1,8 @@
 import { create } from 'zustand'
 
+
+//Possible value: 
+// REST, ZELE, ZELEAPI
 export const useServiceStore = create((set)=> ({
     activeService: "REST",
     setActiveService: (value)=> {set({activeService:value})},

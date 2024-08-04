@@ -33,7 +33,7 @@ function App() {
   // method 2 works perfectly
   const layers = [
     //new EditableGeoJsonLayer({id: 'editable-leyer', data:poly, mode:zeleStore==="ZONE_SELECTION"? DrawPolygonMode:  ViewMode, selectedFeatureIndexes:[], onEdit: ({updatedData})=> {setPolyState(updatedData); }}),
-    zeleStore==="ZONE_SELECTION"? new HeatmapLayer({id: 'HeatmapLayer',data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-bike-parking.json',aggregation: 'SUM',radiusPixels: 25, getPosition: (d) => d.COORDINATES,getWeight: (d) => d.SPACES,}): null
+    //zeleStore==="ZONE_SELECTION"? new HeatmapLayer({id: 'HeatmapLayer',data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-bike-parking.json',aggregation: 'SUM',radiusPixels: 25, getPosition: (d) => d.COORDINATES,getWeight: (d) => d.SPACES,}): null
   ]
 
   return (

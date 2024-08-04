@@ -16,7 +16,10 @@ export default function HeaderContent() {
             { label: 'IDF Generator', key: 'IDF-Generator'}, 
             { label: 'Single-Building Retrofit', key: 'Single-Building-Retrofit'}, 
             { label: 'Multi-Building Retrofit', key: 'Multi-Building-Retrofit'}, 
-            { label: 'ZELE Impact analysis', key: 'ZELE',  onClick: ()=> {setActiveService("ZELE")}} ]},
+            { label: 'ZELE Impact analysis', key: 'ZELE',  onClick: ()=> {setActiveService("ZELE")}},
+            { label: 'ZELE API', key: 'ZELE',  onClick: ()=> {setActiveService("ZELEAPI")}}
+          ]},
+            
         {key:'workbench', label: 'Workbench'}
       ]
     return (
