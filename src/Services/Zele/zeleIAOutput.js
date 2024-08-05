@@ -20,17 +20,6 @@ export default function ZeleIAOutput({zeleState, setZeleState}){
     },
     {
         key: '2', 
-        label: 'Accessibility', 
-        children: (
-            <ul>
-                <li>Analysis of accessibility to various locations</li>
-                <li>Metrics like average travel time to key destinations</li>
-                <li>Maps showing accessibility levels</li>
-            </ul>
-        )
-    },
-    {
-        key: '3', 
         label: 'Area and Network', 
         children: (
             <ul>
@@ -38,6 +27,17 @@ export default function ZeleIAOutput({zeleState, setZeleState}){
                 <li>Detailed information about the transportation network</li>
                 <li>Network topology, including roads, public transport routes</li>
                 <li>Visualizations of network usage and bottlenecks</li>
+            </ul>
+        )
+    },
+    {
+        key: '3', 
+        label: 'Accessibility', 
+        children: (
+            <ul>
+                <li>Analysis of accessibility to various locations</li>
+                <li>Metrics like average travel time to key destinations</li>
+                <li>Maps showing accessibility levels</li>
             </ul>
         )
     },

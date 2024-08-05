@@ -9,10 +9,11 @@ import { useZeleStore,useServiceStore, useZoneSelectionStore, useResultStore } f
 import './App.css';
 
 import { HeatmapLayer } from '@deck.gl/aggregation-layers'
-import { PolygonLayer } from '@deck.gl/layers';
+import { PolygonLayer, PathLayer } from '@deck.gl/layers';
 import { point, polygon } from '@turf/helpers';
 import distance from '@turf/distance';
 import bbox from '@turf/bbox'
+import axios from 'axios';
 
 // Definitions 
 const { Header, Content, Sider } = Layout
@@ -72,23 +73,54 @@ function App() {
       setHMData(newArea)
   }
 
+
+
+  const [llData, setLLData] = useState([])
+
+  const llFactory = async () => {
+    //const [minLng, minLat, maxLng, maxLat] = bbox(polygon([finalArea])) 
+    //const data = await axios.get(`https://api.mapbox.com/geocoding/v5/mapbox.places/street.json?bbox=${minLng},${minLat},${maxLng},${maxLat}&access_token=${apiAccess}`)
+    let output = []
+    const coords = finalArea.map(point => `${point[1]} ${ point[0] }`).join(' ')
+    const request = `[out:json];(way["highway"](poly:"${coords}"););out geom;`
+    const encodedrequest = encodeURIComponent(request)
+    const data = await axios.get(`https://overpass-api.de/api/interpreter?data=${encodedrequest}`)
+    if (data.status !== 200) return
+    const newData = data.data.elements
+    newData.forEach(parentArray => {
+      parentArray = parentArray.geometry
+      if (!Array.isArray(parentArray) || parentArray.length < 1) return;
+      let newparray = [];
+      parentArray.forEach(child => {
+        if(typeof child !== 'object') return
+        child = [child.lon, child.lat]
+        newparray.push(child);
+      });
+      output.push({"inbound": 72633,"outbound": 74735,path: newparray});
+    });
+    setLLData(output);
+    console.log(output)
+  }
+
   useEffect(()=>{
     if(zeleStore !== "WAITING_FOR_RESULT") return
     hmFactory()
+    llFactory()
   },[zeleStore])
 
   useEffect(()=>{
     if(activeService !== "ZELE") {
       setHMData([])
+      setLLData([])
     }
   },[activeService])
 
-
   // Layers
   const layers = [
-    tab === "1" ? new HeatmapLayer({id: 'HeatmapLayer',data: hmData, aggregation: 'SUM',radiusPixels: 25, getPosition: (d) => d.position, getWeight: (d) => d.weight,}): null,
     zeleStore==="ZONE_SELECTION"? new PolygonLayer({id: 'selected-layer',data: [{ contour: selectedArea }], getPolygon: d => d.contour , getFillColor: [255, 0, 0, 100] }): null,
-    finalArea && new PolygonLayer({id: 'final-selected-layer',data: [{ contour: finalArea }], getPolygon: d => d.contour , getFillColor: [255, 0, 0, 100] })
+    finalArea && new PolygonLayer({id: 'final-selected-layer',data: [{ contour: finalArea }], getPolygon: d => d.contour , getFillColor: [255, 0, 0, 100] }),
+    tab === "1" ? new HeatmapLayer({id: 'HeatmapLayer',data: hmData, aggregation: 'SUM',radiusPixels: 25, getPosition: (d) => d.position, getWeight: (d) => d.weight,}): null,
+    tab === "2" ? new PathLayer({id: 'PathLayer', data: llData, getWidth: 10, getColor: (d) => [Math.sqrt(d.inbound + d.outbound), 140, 0], getPath: (d) => d.path }): null
   ]
 
   return (
