@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState} from 'react';
 import { Layout } from "antd";
 import DeckGL from 'deck.gl';
 import {Map, Source, Layer} from 'react-map-gl';
@@ -6,10 +6,9 @@ import HeaderContent from './Interface/HeaderContent';
 import LayersMenu from './Interface/LayersMenu';
 import Services from './Services';
 import {useZeleStore, useZoneSelectionStore} from './Stores'
-import MapSelector from './Interface/MapSelector'
 import './App.css';
 
-//import {HeatmapLayer} from '@deck.gl/aggregation-layers'
+import {HeatmapLayer} from '@deck.gl/aggregation-layers'
 import {PolygonLayer} from '@deck.gl/layers';
 import { point } from '@turf/helpers';
 import distance from '@turf/distance';
@@ -28,8 +27,6 @@ const deckglStyle = { width: '100%', height: '100vh', position: 'relative'}
 function App() {
 
   const zeleStore = useZeleStore((state)=> state.zele)
-  const setZeleState = useZeleStore((state)=> state.setZeleState)
-
   const finalArea = useZoneSelectionStore((state)=> state.finalArea)
   const setFinalArea = useZoneSelectionStore((state)=> state.setFinalArea)
 
@@ -47,9 +44,10 @@ function App() {
     if (t === "h") {
       setSelectedArea([...selectedArea.slice(0,-1), coordinate])
     } else {
-        if (distance(point(coordinate), point(firstPoint), { units: 'meters' }) < 10) {
-          setSelectedArea([...selectedArea.slice(0,-1),firstPoint])
-          setFinalArea(selectedArea)
+        if (distance(point(coordinate), point(firstPoint), { units: 'meters' }) < 20) {
+          setFinalArea([...selectedArea.slice(0,-1),firstPoint])
+          setSelectedArea([])
+          setFirstPoint(null)
           return
         } else {
           setSelectedArea([...selectedArea.slice(0,-1),coordinate,coordinate])
@@ -59,7 +57,8 @@ function App() {
 
   const layers = [
     zeleStore==="ZONE_SELECTION"? new HeatmapLayer({id: 'HeatmapLayer',data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-bike-parking.json',aggregation: 'SUM',radiusPixels: 25, getPosition: (d) => d.COORDINATES,getWeight: (d) => d.SPACES,}): null,
-    new PolygonLayer({id: 'polygon-layer',data: [{ contour: selectedArea }], getPolygon: d => d.contour , getFillColor: [255, 0, 0, 100] })
+    new PolygonLayer({id: 'selected-layer',data: [{ contour: selectedArea }], getPolygon: d => d.contour , getFillColor: [255, 0, 0, 100] }),
+    finalArea && new PolygonLayer({id: 'final-selected-layer',data: [{ contour: finalArea }], getPolygon: d => d.contour , getFillColor: [255, 0, 0, 100] })
   ]
 
   return (

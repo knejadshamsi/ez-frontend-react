@@ -40,6 +40,8 @@ export default function ZeleHeader() {
       case "MAP_VIEW":
         setStepTitle("View Map");
         break;
+      default:
+        return
     }
     
   },[zeleState])

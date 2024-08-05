@@ -20,6 +20,6 @@ export const useZeleStore = create((set)=>({
 }))
 
 export const useZoneSelectionStore = create((set)=>({
-    finalArea :"",
+    finalArea : null,
     setFinalArea: (value)=> {set({finalArea:value})},
 }))

@@ -1,9 +1,9 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import { Modal } from 'antd';
 import ZeleIAInput from './zeleIAInput'
 import ZeleIAOutput from './zeleIAOutput'
 import ZeleAPI from './zeleAPI'
-import {useServiceStore, useZeleStore} from '../../Stores'
+import {useServiceStore, useZeleStore, useZoneSelectionStore} from '../../Stores'
 
 export default function ZeleIA() {
 
@@ -19,14 +19,21 @@ export default function ZeleIA() {
   const setActiveService = useServiceStore((state)=> state.setActiveService)
   const zeleState = useZeleStore((state) => state.zele)
   const setZeleState = useZeleStore((state)=> state.setZeleState)
+  const finalArea = useZoneSelectionStore((state)=> state.finalArea)
+
 
   const [disclaimerText,setDisclaimerText] = useState("")
 
   // Handlers
   const zoneHandler =() => {
-    //setZeleState("PARAMETER_SELECTION")
     setZeleState("ZONE_SELECTION")
   }
+
+  useEffect(()=> {
+    if(finalArea) {
+      setZeleState("PARAMETER_SELECTION")
+    }
+  },[finalArea])
 
   const goHandler = () => {
     let input = Object.keys(formState.outputInfo).filter(key => formState.outputInfo[key])
@@ -64,7 +71,7 @@ export default function ZeleIA() {
     By selecting various parameters, you can customize the analysis to meet your specific needs and obtain detailed insights to support sustainable urban development.
     </Modal>
     
-    <ZeleIAInput formState={formState} setFormState={setFormState} zeleState={zeleState} setZeleState={setZeleState}
+    <ZeleIAInput serviceState={serviceState} formState={formState} setFormState={setFormState} zeleState={zeleState} setZeleState={setZeleState}
       goHandler={goHandler} />
       <Modal
       open={zeleState === "LONG_WAIT_WARNING"}

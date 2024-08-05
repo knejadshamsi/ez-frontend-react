@@ -1,9 +1,12 @@
 import React, {useCallback, useState} from 'react'
-import { Button, Drawer, Divider, Radio , Checkbox, Space, Tooltip, notification, Slider, InputNumber } from 'antd';
+import { Button, Drawer, Divider, Radio , Checkbox, Space, Tooltip, Slider, InputNumber } from 'antd';
 import { LoadingOutlined, QuestionCircleOutlined } from '@ant-design/icons'
+import {useZoneSelectionStore} from '../../Stores'
 
 
-export default function ZeleIAInput({formState, setFormState, zeleState, setZeleState , goHandler}){
+export default function ZeleIAInput({serviceState, formState, setFormState, zeleState, setZeleState , goHandler}){
+
+  const setFinalArea = useZoneSelectionStore((state)=> state.setFinalArea)
 
   const labels = {
     exemptions: {
@@ -74,22 +77,12 @@ export default function ZeleIAInput({formState, setFormState, zeleState, setZele
     }
   });
 
-  const openNotificationWithIcon = (type) => {
-    notification[type]({
-      message: 'Mock-up Limitation Notice',
-      description:
-        'Area changes are disabled for the mock-up. This feature will be available in the final release.',
-        placement: 'top'
-    });
-  };
-  
-  
   return(
     <Drawer
       title="Choose Parameters"
       placement="right"
       open={zeleState==="PARAMETER_SELECTION" || zeleState==="LONG_WAIT_WARNING" || zeleState==="WAITING_FOR_RESULT"}
-      onClose={() => {setZeleState('userParameterSelection',false);setZeleState('userInactive',true)}}
+      onClose={() => {serviceState('REST');setZeleState('WELCOME');}}
       width={750}
       headerStyle={{ display: 'none' }}
       maskStyle={{ display: 'none' }}
@@ -102,7 +95,7 @@ export default function ZeleIAInput({formState, setFormState, zeleState, setZele
       <Divider orientationMargin={divderorientationMargin} orientation="left" style={dividerStyle}>AREA</Divider>
       <Space direction="horizontal" align="baseline">
       <p style={textkStyle}>Area already selected.</p>
-      <Button onClick={() => openNotificationWithIcon('info')} style={btnStyle}>Change area</Button>
+      <Button onClick={() => {setFinalArea(null);setZeleState("ZONE_SELECTION")}} style={btnStyle}>Change area</Button>
       </Space>
 
       <Divider orientationMargin={divderorientationMargin} orientation="left" style={dividerStyle}>EXEMPTIONS </Divider>
