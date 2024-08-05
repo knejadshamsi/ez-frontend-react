@@ -58,7 +58,7 @@ export default function ZeleIA() {
     setZeleState("WAITING_FOR_RESULT")
     setTimeout(()=> {
       setZeleState("RESULT_VIEW")
-    }, 5000)
+    }, 3000)
   }
     
   return(

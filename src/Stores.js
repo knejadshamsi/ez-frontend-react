@@ -23,3 +23,10 @@ export const useZoneSelectionStore = create((set)=>({
     finalArea : null,
     setFinalArea: (value)=> {set({finalArea:value})},
 }))
+
+//Possible value: 
+//
+export const useResultStore = create((set)=>({
+    tab : "1",
+    setTab: (value)=> {set({tab:value})},
+}))

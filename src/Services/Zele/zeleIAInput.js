@@ -82,7 +82,7 @@ export default function ZeleIAInput({serviceState, formState, setFormState, zele
       title="Choose Parameters"
       placement="right"
       open={zeleState==="PARAMETER_SELECTION" || zeleState==="LONG_WAIT_WARNING" || zeleState==="WAITING_FOR_RESULT"}
-      onClose={() => {serviceState('REST');setZeleState('WELCOME');}}
+      onClose={() => {serviceState('REST');setZeleState('WELCOME');setFinalArea(null);}}
       width={750}
       headerStyle={{ display: 'none' }}
       maskStyle={{ display: 'none' }}

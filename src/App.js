@@ -1,41 +1,43 @@
-import { useState} from 'react';
+import { useEffect, useState } from 'react';
 import { Layout } from "antd";
 import DeckGL from 'deck.gl';
-import {Map, Source, Layer} from 'react-map-gl';
+import { Map, Source, Layer } from 'react-map-gl';
 import HeaderContent from './Interface/HeaderContent';
 import LayersMenu from './Interface/LayersMenu';
 import Services from './Services';
-import {useZeleStore, useZoneSelectionStore} from './Stores'
+import { useZeleStore,useServiceStore, useZoneSelectionStore, useResultStore } from './Stores';
 import './App.css';
 
-import {HeatmapLayer} from '@deck.gl/aggregation-layers'
-import {PolygonLayer} from '@deck.gl/layers';
-import { point } from '@turf/helpers';
+import { HeatmapLayer } from '@deck.gl/aggregation-layers'
+import { PolygonLayer } from '@deck.gl/layers';
+import { point, polygon } from '@turf/helpers';
 import distance from '@turf/distance';
-
+import bbox from '@turf/bbox'
 
 // Definitions 
 const { Header, Content, Sider } = Layout
 const apiAccess = process.env.REACT_APP_ACCESS_TOKEN
 
 // Styles
-const leyoutStyle = { height: '100vh', overflow: 'hidden'}
-const headerStyle = { height:'64px', backgroundColor: 'white', display: 'flex', justyContent: "center", alignItems:"center"}
-const LayersMenuStyle = { paddingInline: "1rem", paddingTop:"1rem"}
-const deckglStyle = { width: '100%', height: '100vh', position: 'relative'}
+const leyoutStyle = { height: '100vh', overflow: 'hidden' }
+const headerStyle = { height:'64px', backgroundColor: 'white', display: 'flex', justyContent: "center", alignItems:"center" }
+const LayersMenuStyle = { paddingInline: "1rem", paddingTop:"1rem" }
+const deckglStyle = { width: '100%', height: '100vh', position: 'relative' }
 
 function App() {
 
   const zeleStore = useZeleStore((state)=> state.zele)
   const finalArea = useZoneSelectionStore((state)=> state.finalArea)
   const setFinalArea = useZoneSelectionStore((state)=> state.setFinalArea)
+  const activeService = useServiceStore((state)=> state.activeService)
+  const tab = useResultStore((state)=> state.tab)
 
   const [selectedArea, setSelectedArea] = useState([])
   const [firstPoint, setFirstPoint] = useState(null)
 
   const ZoneSelection = (e,t)=>{
     const coordinate = e.coordinate
-    if ( finalArea || !coordinate || (!firstPoint && t === "h")) return
+    if ( finalArea || !coordinate || (!firstPoint && t === "h") || zeleStore !== "ZONE_SELECTION") return
     if (!firstPoint) {
       setSelectedArea([coordinate,coordinate])
       setFirstPoint(coordinate)
@@ -55,9 +57,37 @@ function App() {
     }
   }
 
+  // Temporary local data gen functions
+  const MathRandom = (min, max) => Math.random() * (max - min) + min
+  const [hmData, setHMData] = useState([])
+
+  const hmFactory = () => {
+      const newArea = []
+      const [minLng, minLat, maxLng, maxLat] = bbox(polygon([finalArea])) 
+      while (newArea.length < 300) {
+        const lng = MathRandom(minLng, maxLng)
+        const lat = MathRandom(minLat, maxLat)
+        newArea.push({position:[lng, lat], weight: MathRandom(1,10),})
+      }
+      setHMData(newArea)
+  }
+
+  useEffect(()=>{
+    if(zeleStore !== "WAITING_FOR_RESULT") return
+    hmFactory()
+  },[zeleStore])
+
+  useEffect(()=>{
+    if(activeService !== "ZELE") {
+      setHMData([])
+    }
+  },[activeService])
+
+
+  // Layers
   const layers = [
-    zeleStore==="ZONE_SELECTION"? new HeatmapLayer({id: 'HeatmapLayer',data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-bike-parking.json',aggregation: 'SUM',radiusPixels: 25, getPosition: (d) => d.COORDINATES,getWeight: (d) => d.SPACES,}): null,
-    new PolygonLayer({id: 'selected-layer',data: [{ contour: selectedArea }], getPolygon: d => d.contour , getFillColor: [255, 0, 0, 100] }),
+    tab === "1" ? new HeatmapLayer({id: 'HeatmapLayer',data: hmData, aggregation: 'SUM',radiusPixels: 25, getPosition: (d) => d.position, getWeight: (d) => d.weight,}): null,
+    zeleStore==="ZONE_SELECTION"? new PolygonLayer({id: 'selected-layer',data: [{ contour: selectedArea }], getPolygon: d => d.contour , getFillColor: [255, 0, 0, 100] }): null,
     finalArea && new PolygonLayer({id: 'final-selected-layer',data: [{ contour: finalArea }], getPolygon: d => d.contour , getFillColor: [255, 0, 0, 100] })
   ]
 

@@ -2,13 +2,14 @@ import React, {useState, useEffect} from 'react'
 import { Typography,  Button} from 'antd'
 import { QuestionCircleOutlined } from '@ant-design/icons'
 import { LogoutOutlined } from '@ant-design/icons'
-import {useServiceStore, useZeleStore} from '../../Stores'
+import {useServiceStore, useZeleStore, useZoneSelectionStore} from '../../Stores'
 
 export default function ZeleHeader() {
 
   const zeleState = useZeleStore((state) => state.zele)
   const setZeleState = useZeleStore((state)=> state.setZeleState)
   const setActiveService = useServiceStore((state)=> state.setActiveService)
+  const setFinalArea = useZoneSelectionStore((state)=> state.setFinalArea)
   const [stepTitle,setStepTitle] = useState("Welcome")
   const { Title } = Typography
 
@@ -48,7 +49,8 @@ export default function ZeleHeader() {
 
   const exitHandler = ()=> {
     setZeleState("WELCOME");
-    setActiveService("REST")
+    setActiveService("REST");
+    setFinalArea(null);
   }
   
   return (

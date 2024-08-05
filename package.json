@@ -5,6 +5,7 @@
   "dependencies": {
     "@deck.gl/aggregation-layers": "^9.0.25",
     "@deck.gl/layers": "^9.0.25",
+    "@turf/bbox": "^7.0.0",
     "@turf/turf": "^7.0.0",
     "antd": "^5.19.4",
     "deck.gl": "^9.0.25",
