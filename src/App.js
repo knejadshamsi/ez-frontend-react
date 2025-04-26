@@ -10,6 +10,7 @@ import './App.css';
 
 import { HeatmapLayer } from '@deck.gl/aggregation-layers'
 import { PolygonLayer, PathLayer } from '@deck.gl/layers';
+import { ScatterplotLayer } from '@deck.gl/layers'
 import { point, polygon } from '@turf/helpers';
 import distance from '@turf/distance';
 import bbox from '@turf/bbox'
@@ -32,6 +33,7 @@ function App() {
   const setFinalArea = useZoneSelectionStore((state)=> state.setFinalArea)
   const activeService = useServiceStore((state)=> state.activeService)
   const tab = useResultStore((state)=> state.tab)
+  const setTab = useResultStore((state)=> state.setTab)
 
   const [selectedArea, setSelectedArea] = useState([])
   const [firstPoint, setFirstPoint] = useState(null)
@@ -115,18 +117,24 @@ function App() {
     }
   },[activeService])
 
+  const scTest = [[-73.57840140299794,45.50247757205444],[-73.57987765143768,45.50163751267878],[-73.57962105410682,45.501961063255564]]
+
+  const processTest = scTest
+
   // Layers
   const layers = [
     zeleStore==="ZONE_SELECTION"? new PolygonLayer({id: 'selected-layer',data: [{ contour: selectedArea }], getPolygon: d => d.contour , getFillColor: [255, 0, 0, 100] }): null,
     finalArea && new PolygonLayer({id: 'final-selected-layer',data: [{ contour: finalArea }], getPolygon: d => d.contour , getFillColor: [255, 0, 0, 100] }),
     tab === "1" ? new HeatmapLayer({id: 'HeatmapLayer',data: hmData, aggregation: 'SUM',radiusPixels: 25, getPosition: (d) => d.position, getWeight: (d) => d.weight,}): null,
-    tab === "2" ? new PathLayer({id: 'PathLayer', data: llData, getWidth: 10, getColor: (d) => [Math.sqrt(d.inbound + d.outbound), 140, 0], getPath: (d) => d.path }): null
+    tab === "2" ? new PathLayer({id: 'PathLayer', data: llData, getWidth: 10, getColor: (d) => [Math.sqrt(d.inbound + d.outbound), 140, 0], getPath: (d) => d.path }): null,
+    tab === "3" ? new ScatterplotLayer({id: 'zele-point-layer',data: processTest ,stroked: false, getPosition: (d) => d, getRadius: (d) => d = 3, getFillColor: [255, 140, 0],}): null,
   ]
 
   return (
   <Layout  style={leyoutStyle}>
   <Header style={headerStyle}>
     <HeaderContent />
+    <button onClick={()=> {setTab("3");console.log("fired")}}>PRESS</button>
   </Header>
   <Layout>
     <Sider style={LayersMenuStyle} theme="light"><LayersMenu /></Sider>
