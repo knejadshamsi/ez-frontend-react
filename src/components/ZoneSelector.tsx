@@ -2,8 +2,9 @@ import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { PolygonLayer } from '@deck.gl/layers';
 import { point } from '@turf/helpers';
 import distance from '@turf/distance';
+import { Coordinate } from '../types';
 
-const mtlAreaCoordinates = [
+const mtlAreaCoordinates: Coordinate[] = [
   [-73.61197208186829, 45.41263857780996],
   [-73.52288866657636, 45.460662325514306],
   [-73.54276354237754, 45.52113298596623],
@@ -38,18 +39,15 @@ const mtlAreaCoordinates = [
   [-73.61197208186829, 45.41263857780996],
 ];
 
-/**
- * Custom hook to manage interactive zone selection state and logic using Deck.gl layers.
- *
- * @param {object} props - The hook props.
- * @param {boolean} props.isActive - Whether the zone selection mode is active.
- * @param {function} props.onZoneComplete - Callback function when a zone is completed. Receives the polygon coordinates.
- * @param {boolean} [props.showInteractionLayer=false] - Whether to make the interaction layer visible for debugging.
- * @param {number[]} [props.interactionLayerColor=[0, 0, 0, 1]] - RGBA color for the interaction layer. Alpha is overridden if showInteractionLayer is false.
- * @param {number[]} [props.drawingFillColor=[255, 0, 0, 50]] - RGBA color for the fill of the polygon being drawn.
- * @param {number[]} [props.drawingLineColor=[255, 0, 0, 200]] - RGBA color for the line of the polygon being drawn.
- * @returns {import('@deck.gl/core').Layer[]} An array of Deck.gl layers to render.
- */
+interface ZoneSelectorProps {
+  isActive: boolean;
+  onZoneComplete: (polygon: Coordinate[]) => void;
+  showInteractionLayer?: boolean;
+  interactionLayerColor?: [number, number, number, number];
+  drawingFillColor?: [number, number, number, number];
+  drawingLineColor?: [number, number, number, number];
+}
+
 function useZoneSelector({
   isActive,
   onZoneComplete,
@@ -57,9 +55,9 @@ function useZoneSelector({
   interactionLayerColor = [0, 0, 0, 1],
   drawingFillColor = [255, 0, 0, 50],
   drawingLineColor = [255, 0, 0, 200],
-}) {
-  const [selectedArea, setSelectedArea] = useState([]);
-  const [firstPoint, setFirstPoint] = useState(null);
+}: ZoneSelectorProps) {
+  const [selectedArea, setSelectedArea] = useState<Coordinate[]>([]);
+  const [firstPoint, setFirstPoint] = useState<Coordinate | null>(null);
 
   const selectedAreaRef = useRef(selectedArea);
   const firstPointRef = useRef(firstPoint);
@@ -77,13 +75,12 @@ function useZoneSelector({
     onZoneCompleteRef.current = onZoneComplete;
   }, [onZoneComplete]);
 
-
-  const handleLayerClick = useCallback((event) => {
+  const handleLayerClick = useCallback((event: any) => {
     if (!isActive || !event || !event.coordinate) {
       return;
     }
 
-    const coordinate = event.coordinate;
+    const coordinate: Coordinate = event.coordinate;
     const currentFirstPoint = firstPointRef.current;
     const currentSelectedArea = selectedAreaRef.current;
     const clickThreshold = 0.0001;
@@ -96,6 +93,7 @@ function useZoneSelector({
       try {
         onZoneCompleteRef.current(finalPolygon);
       } catch (error) {
+        // Handle error
       }
 
       setSelectedArea([]);
@@ -107,26 +105,25 @@ function useZoneSelector({
       const basePoints = currentSelectedArea.slice(0, -1);
       setSelectedArea([...basePoints, coordinate, coordinate]);
     }
-  }, [isActive, onZoneCompleteRef, setSelectedArea, setFirstPoint]);
+  }, [isActive]);
 
-  const handleLayerHover = useCallback((event) => {
+  const handleLayerHover = useCallback((event: any) => {
     if (!isActive || !firstPoint || !event || !event.coordinate) {
       return;
     }
 
-    const coordinate = event.coordinate;
+    const coordinate: Coordinate = event.coordinate;
     setSelectedArea(prevArea => {
       if (prevArea.length < 2) return prevArea;
       return [...prevArea.slice(0, -1), coordinate];
     });
-
   }, [isActive, firstPoint]);
 
   const drawingLayer = useMemo(() => (
     isActive && selectedArea.length > 0 ? new PolygonLayer({
       id: 'zone-selector-drawing-layer',
       data: [{ contour: selectedArea }],
-      getPolygon: d => d.contour,
+      getPolygon: (d: any) => d.contour,
       getFillColor: drawingFillColor,
       getLineColor: drawingLineColor,
       getLineWidthMinPixels: 2,
@@ -135,12 +132,13 @@ function useZoneSelector({
       pickable: false,
     }) : null
   ), [isActive, selectedArea, drawingFillColor, drawingLineColor]);
+
   const interactionLayer = useMemo(() => {
     if (!isActive) {
       return null;
     }
     let alpha = showInteractionLayer ? (interactionLayerColor[3] < 5 ? 30 : interactionLayerColor[3]) : 1;
-    const effectiveInteractionColor = [
+    const effectiveInteractionColor: [number, number, number, number] = [
       interactionLayerColor[0],
       interactionLayerColor[1],
       interactionLayerColor[2],
@@ -150,7 +148,7 @@ function useZoneSelector({
     return new PolygonLayer({
       id: 'zone-selector-interaction-layer',
       data: [mtlAreaCoordinates],
-      getPolygon: d => d,
+      getPolygon: (d: any) => d,
       pickable: true,
       getFillColor: effectiveInteractionColor,
       getLineColor: effectiveInteractionColor,
@@ -158,13 +156,7 @@ function useZoneSelector({
       onClick: handleLayerClick,
       onHover: handleLayerHover,
     });
-  }, [
-    isActive,
-    handleLayerClick,
-    handleLayerHover,
-    showInteractionLayer,
-    interactionLayerColor,
-  ]);
+  }, [isActive, handleLayerClick, handleLayerHover, showInteractionLayer, interactionLayerColor]);
 
   const layers = useMemo(() => (
     [interactionLayer, drawingLayer].filter(Boolean)
