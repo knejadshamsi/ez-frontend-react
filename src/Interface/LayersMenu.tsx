@@ -1,4 +1,3 @@
-
 import { Tree } from 'antd';
 
 const treeData = [
@@ -78,14 +77,12 @@ const treeData = [
   },
 ];
 
-
 export default function LayersMenu() {
-    return(
-        <Tree
-        showLine={true}
-        treeData={treeData}
-        defaultExpandAll
+  return (
+    <Tree
+      showLine={true}
+      treeData={treeData}
+      defaultExpandAll
     />
-    )
-
+  );
 }

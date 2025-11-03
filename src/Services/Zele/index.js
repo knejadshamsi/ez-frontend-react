@@ -2,7 +2,6 @@ import React, {useState, useEffect} from 'react'
 import { Modal } from 'antd';
 import ZeleIAInput from './zeleIAInput'
 import ZeleIAOutput from './zeleIAOutput'
-import ZeleAPI from './zeleAPI'
 import {useServiceStore, useZeleStore, useZoneSelectionStore} from '../../Stores'
 
 export default function ZeleIA() {
@@ -82,8 +81,6 @@ export default function ZeleIA() {
     </Modal>
     
     <ZeleIAOutput zeleState={zeleState} setZeleState={setZeleState} />
-
-    {serviceState=== "ZELEAPI" && (<ZeleAPI />)}
    </>
   )
 }
