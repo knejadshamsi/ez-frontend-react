@@ -1,1 +1,17 @@
-/* Application styles */
+.layout {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.header {
+  height: 64px;
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.sider {
+  padding-inline: 1rem;
+  padding-top: 1rem;
+}
