@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react'
 import { Modal } from 'antd';
 import ZeleIAInput from './zeleIAInput'
 import ZeleIAOutput from './zeleIAOutput'
-import {useServiceStore, useZeleStore, useZoneSelectionStore} from '../../Stores'
+import {useServiceStore, useZeleStore, useZoneSelectionStore} from '~globalStores'
 
 export default function ZeleIA() {
 
@@ -32,7 +32,7 @@ export default function ZeleIA() {
     if(finalArea) {
       setZeleState("PARAMETER_SELECTION")
     }
-  },[finalArea])
+  },[finalArea, setZeleState])
 
   const goHandler = () => {
     let input = Object.keys(formState.outputInfo).filter(key => formState.outputInfo[key])

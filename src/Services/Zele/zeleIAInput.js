@@ -1,7 +1,7 @@
 import React, {useCallback, useState} from 'react'
 import { Button, Drawer, Divider, Radio , Checkbox, Space, Tooltip, Slider, InputNumber } from 'antd';
 import { LoadingOutlined, QuestionCircleOutlined } from '@ant-design/icons'
-import {useZoneSelectionStore} from '../../Stores'
+import {useZoneSelectionStore} from '~globalStores'
 
 
 export default function ZeleIAInput({serviceState, formState, setFormState, zeleState, setZeleState , goHandler}){
@@ -74,8 +74,11 @@ export default function ZeleIAInput({serviceState, formState, setFormState, zele
         newState = {emergencyVehicles: false,commercialVehicles: false,privateVehicles: false,electricVehicles: false,residents: false,}
         setFormState(prevState => ({ ...prevState,exemptions: newState }))
         break;
+      default:
+        // All valid cases handled above
+        break;
     }
-  });
+  }, [setFormState]);
 
   return(
     <Drawer
