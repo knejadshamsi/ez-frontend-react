@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react'
 import { Modal } from 'antd';
 import ZeleIAInput from './zeleIAInput'
 import ZeleIAOutput from './zeleIAOutput'
-import {useServiceStore, useZeleStore, useZoneSelectionStore} from '../../Stores'
+import {useServiceStore, useZeleStore, useZoneSelectionStore} from '~globalStores'
 
 export default function ZeleIA() {
 

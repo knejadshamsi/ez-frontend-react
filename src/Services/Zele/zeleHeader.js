@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react'
 import { Typography,  Button} from 'antd'
 import { QuestionCircleOutlined } from '@ant-design/icons'
 import { LogoutOutlined } from '@ant-design/icons'
-import {useServiceStore, useZeleStore, useZoneSelectionStore} from '../../Stores'
+import {useServiceStore, useZeleStore, useZoneSelectionStore} from '~globalStores'
 
 export default function ZeleHeader() {
 
