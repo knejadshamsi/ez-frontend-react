@@ -6,7 +6,7 @@ import HeaderContent from './Interface/HeaderContent';
 import LayersMenu from './Interface/LayersMenu';
 import Services from './Services';
 import useZoneSelector from './components/ZoneSelector';
-import { useZeleStore, useServiceStore, useZoneSelectionStore, useResultStore } from './Stores';
+import { useZeleStore, useServiceStore, useZoneSelectionStore, useResultStore } from '~globalStores';
 import './App.css';
 import { HeatmapLayer } from '@deck.gl/aggregation-layers';
 import { PolygonLayer, PathLayer, ScatterplotLayer } from '@deck.gl/layers';
@@ -14,14 +14,10 @@ import { polygon } from '@turf/helpers';
 import bbox from '@turf/bbox';
 import axios from 'axios';
 import { Coordinate, HeatmapDataPoint, PathLayerData } from './types';
+import { CustomNotification } from './Services/CustomNotification';
 
 const { Header, Content, Sider } = Layout;
 const apiAccess = process.env.REACT_APP_MAPBOX_TOKEN;
-
-const layoutStyle = { height: '100vh', overflow: 'hidden' };
-const headerStyle = { height: '64px', backgroundColor: 'white', display: 'flex', justifyContent: "center", alignItems: "center" };
-const LayersMenuStyle = { paddingInline: "1rem", paddingTop: "1rem" };
-const deckglStyle = { width: '100%', height: '100vh', position: 'relative' as const };
 
 function App() {
   const zeleStore = useZeleStore((state) => state.zele);
@@ -141,20 +137,21 @@ function App() {
   ].filter(Boolean);
 
   return (
-    <Layout style={layoutStyle}>
-      <Header style={headerStyle}>
+    <Layout className="layout">
+      <CustomNotification />
+      <Header className="header">
         <HeaderContent />
       </Header>
       <Layout>
-        <Sider style={LayersMenuStyle} theme="light">
+        <Sider className="sider" theme="light">
           <LayersMenu />
         </Sider>
         <Content>
           <DeckGL
             ref={deckRef}
-            style={deckglStyle}
+            style={{ width: '100%', height: '100vh', position: 'relative' }}
             layers={layers}
-            controller
+            controller={{ doubleClickZoom: false }}
             initialViewState={initialViewState as any}
             viewState={viewState as any}
             onViewStateChange={(e: any) => setViewState(e.viewState)}
