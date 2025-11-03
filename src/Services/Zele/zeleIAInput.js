@@ -1,7 +1,7 @@
 import React, {useCallback, useState} from 'react'
 import { Button, Drawer, Divider, Radio , Checkbox, Space, Tooltip, Slider, InputNumber } from 'antd';
 import { LoadingOutlined, QuestionCircleOutlined } from '@ant-design/icons'
-import {useZoneSelectionStore} from '../../Stores'
+import {useZoneSelectionStore} from '~globalStores'
 
 
 export default function ZeleIAInput({serviceState, formState, setFormState, zeleState, setZeleState , goHandler}){

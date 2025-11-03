@@ -16,6 +16,16 @@
     "allowJs": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
+    "baseUrl": "src",
+    "paths": {
+      "~/*": ["*"],
+      "~globalStores": ["globalStores"],
+      "~ez/*": ["Services/ez/*"],
+      "~store": ["Services/ez/stores"],
+      "~stores/*": ["Services/ez/stores/*"],
+      "~styles/*": ["Services/ez/styles/*"],
+      "~components/*": ["Services/ez/components/*"]
+    }
   },
   "include": ["src"],
   "exclude": ["node_modules", "node_modules/@deck.gl"]

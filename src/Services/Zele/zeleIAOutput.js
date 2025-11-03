@@ -1,6 +1,6 @@
 import React from 'react'
 import { Drawer, Tabs, Space, Button } from 'antd';
-import { useResultStore } from '../../Stores'
+import { useResultStore } from '~globalStores'
 
 export default function ZeleIAOutput({zeleState, setZeleState}){
 

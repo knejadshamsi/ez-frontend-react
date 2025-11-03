@@ -1,9 +1,7 @@
-// Geospatial types
-export type Coordinate = [number, number]; // [lng, lat]
+export type Coordinate = [number, number];
 export type Polygon = Coordinate[];
 
-// Store types
-export type ServiceType = "REST" | "ZELE";
+export type ServiceType = "REST" | "ZELE" | "EZ";
 
 export type ZeleStateType =
   | "WELCOME"
@@ -15,7 +13,6 @@ export type ZeleStateType =
   | "RESULT_VIEW"
   | "MAP_VIEW";
 
-// Layer data types
 export interface HeatmapDataPoint {
   position: Coordinate;
   weight: number;
