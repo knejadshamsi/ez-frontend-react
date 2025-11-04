@@ -1,9 +1,14 @@
+import { useServiceStore } from '~globalStores';
 import ZeleIA from './Zele';
+import { EzService } from './ez';
 
 export default function Services() {
+  const activeService = useServiceStore((state) => state.activeService);
+
   return (
     <>
-      <ZeleIA />
+      {activeService === "ZELE" && <ZeleIA />}
+      {activeService === "EZ" && <EzService />}
     </>
   );
 }
