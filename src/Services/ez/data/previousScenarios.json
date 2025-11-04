@@ -1,0 +1,12 @@
+[
+  {
+    "requestId": "SC001",
+    "name": "Downtown Montreal LEZ",
+    "description": "Low emission zone analysis for downtown Montreal area"
+  },
+  {
+    "requestId": "SC002",
+    "name": "Old Port ZEZ",
+    "description": "Zero emission zone impact study for Old Port district"
+  }
+]
