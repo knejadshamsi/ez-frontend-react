@@ -1,14 +1,33 @@
 import { Menu, Button } from "antd";
-import { useServiceStore } from '../Stores';
+import { useServiceStore } from '~globalStores';
+import { checkBackendHealth } from '../Services/ez/api/healthCheck';
+import { useNotificationStore } from '../Services/CustomNotification';
 import ZeleHeader from '../Services/Zele/zeleHeader';
+import EzHeader from '../Services/ez/header';
 
 export default function HeaderContent() {
 
   const serviceState = useServiceStore((state) => state.activeService);
   const setActiveService = useServiceStore((state) => state.setActiveService);
+  const setNotification = useNotificationStore((state) => state.setNotification);
 
-  const menuStyle = { flexGrow: '1', border: 'none', userSelect: 'none' as const };
-  const buttonStyle = { margin: '0 20px 0 0' };
+  const handleEzClick = () => {
+    
+    setActiveService("EZ");
+
+    if (process.env.REACT_APP_EZ_BACKEND_URL) {
+      const healthEndpoint = `${process.env.REACT_APP_EZ_BACKEND_URL}/alive`;
+
+      checkBackendHealth(healthEndpoint).then((isAlive) => {
+        if (!isAlive) {
+          setNotification(
+            'Backend connection failed. Switched to DEMO MODE.',
+            'warning'
+          );
+        }
+      });
+    }
+  };
 
   const menuItems = [
     { key: 'layers', label: 'Layers' },
@@ -20,7 +39,8 @@ export default function HeaderContent() {
         { label: 'IDF Generator', key: 'IDF-Generator' },
         { label: 'Single-Building Retrofit', key: 'Single-Building-Retrofit' },
         { label: 'Multi-Building Retrofit', key: 'Multi-Building-Retrofit' },
-        { label: 'ZELE Impact analysis', key: 'ZELE', onClick: () => { setActiveService("ZELE") } }
+        { label: 'ZELE Impact analysis', key: 'ZELE', onClick: () => { setActiveService("ZELE") } },
+        { label: 'EZ', key: 'EZ', onClick: handleEzClick }
       ]
     },
     { key: 'workbench', label: 'Workbench' }
@@ -30,11 +50,12 @@ export default function HeaderContent() {
     <>
       {serviceState === "REST" && (
         <>
-          <Menu mode="horizontal" items={menuItems} style={menuStyle} />
-          <Button style={buttonStyle}>En</Button>
+          <Menu mode="horizontal" items={menuItems} className="headerMenu" />
+          <Button className="headerButton">En</Button>
         </>
       )}
       {serviceState === "ZELE" && (<ZeleHeader />)}
+      {serviceState === "EZ" && (<EzHeader />)}
     </>
   );
 }

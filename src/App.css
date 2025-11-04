@@ -15,3 +15,13 @@
   padding-inline: 1rem;
   padding-top: 1rem;
 }
+
+.headerMenu {
+  flex-grow: 1;
+  border: none;
+  user-select: none;
+}
+
+.headerButton {
+  margin: 0 20px 0 0;
+}
