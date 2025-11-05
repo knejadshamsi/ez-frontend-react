@@ -1,0 +1,90 @@
+.backButtonContainer {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.backButton {
+  display: inline-flex !important;
+  align-items: center;
+  font-size: 12px !important;
+  font-weight: 500;
+  color: #1890ff;
+  padding: 0 !important;
+  height: auto;
+
+  &:hover {
+    color: #40a9ff;
+  }
+
+  :global(.anticon) {
+    font-size: 16px;
+  }
+}
+
+.buttonContainer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0;
+  background-color: white;
+}
+
+.simulationButton {
+  width: 100%;
+  height: 48px;
+  font-size: 1rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 0;
+  z-index: 20;
+}
+
+.buttonText {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.scenarioTitleContainer {
+  display: flex;
+  align-items: center;
+  padding-top:10px;
+}
+
+.scenarioTitleDisplay {
+  display: flex;
+  align-items: center;
+  flex: 1;
+
+  h4 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  button {
+    margin-left: 5px;
+    padding: 4px;
+  }
+}
+
+.scenarioTitleInput {
+  margin: 0;
+  margin-right: 10px;
+  flex: 0.8;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.editIcon {
+  color: darkgray !important;
+  background: none !important;
+  margin-top: 5px;
+}
