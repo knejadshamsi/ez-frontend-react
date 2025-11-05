@@ -4,6 +4,7 @@ import { useServiceStore } from '~globalStores';
 import { useEZServiceStore } from '~store';
 
 import { WelcomeView } from '~components/WelcomeView';
+import { ParameterSelectionView } from './input/ParameterSelectionView';
 
 import styles from '~styles/index.module.less';
 
@@ -29,6 +30,7 @@ const EzService = () => {
     >
       {{
         WELCOME: <WelcomeView />,
+        PARAMETER_SELECTION: <ParameterSelectionView />,
       }[ezState]}
     </Drawer>
   );
