@@ -1,0 +1,262 @@
+.zoneSettingContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sectionContainer {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+}
+
+.sectionHeader {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.zoneBoundariesGrid {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  padding: 5px;
+
+  &> :first-child {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  &> :last-child{
+    display: grid;
+    place-items: center;
+  }
+}
+
+.boundariesText {
+  color: #484848;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.teleportContainer {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.journeyButtonGroup {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.journeyButton {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 42px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  outline: none;
+  background: #fff;
+
+  &:hover:not(.selected) {
+    border-color: #40a9ff;
+    color: #40a9ff;
+    background: #f0f7ff;
+  }
+
+  &.selected {
+    font-weight: 600;
+    border-width: 1.5px;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+
+  strong {
+    font-size: 14px;
+    line-height: 1;
+  }
+}
+
+.btn {
+  min-width: 120px;
+}
+
+.policyGroup {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.policyButton {
+  flex: 0 0 48%;
+  height: 150px !important;
+  min-height: 150px;
+  padding: 16px 24px;
+  white-space: normal;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+
+  &.ant-radio-button-wrapper-checked {
+    color: #FFFFFF !important;
+
+    .radioDescription {
+      color: #FFFFFF !important;
+    }
+  }
+}
+
+.radioDescription {
+  font-size: 0.9rem;
+  margin-top: 4px;
+  font-weight: normal;
+}
+
+.settingsButtonWrapper {
+  text-align: center;
+  margin-top: 16px;
+  width: 100%;
+}
+
+.settingsButton {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 15px;
+  width: auto !important;
+  min-width: unset !important;
+  max-width: fit-content;
+
+  :global {
+    .anticon {
+      margin-right: 0;
+    }
+  }
+}
+
+.vehicleTypeContainer {
+  background-color: #f9f9f9;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.vehicleTypeHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.deleteButton {
+  color: red !important;
+}
+
+.tierSelection {
+  margin-bottom: 16px;
+
+  :global(.ant-radio-group) {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+  }
+}
+
+.tierButton {
+  width: 33.33% !important;
+  min-height: 80px !important;
+  display: flex;
+  flex-direction: column !important;
+  align-items: center;
+  justify-content: center;
+  padding: 8px !important;
+  text-align: center;
+
+  strong {
+    margin-bottom: 4px;
+  }
+}
+
+.policyValues {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.policyInput {
+  width: 100%;
+}
+
+.timeInputs {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.timeContainer {
+  flex: 1;
+
+  div:first-child {
+    margin-bottom: 8px;
+    color: #666;
+  }
+}
+
+.addHoursButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 8px;
+
+  :global(.anticon) {
+    margin-right: 8px;
+  }
+}
+
+.addVehicleButton {
+  width: 100%;
+  margin-top: 16px;
+}
+
+.schedulerContainer {
+  width: 100%;
+  max-width: 650px;
+}
+
+.explanation {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.svgGrid {
+  width: 100%;
+  max-width: 650px;
+  overflow-x: hidden;
+  overflow-y: visible;
+  border-radius: 4px;
+}
