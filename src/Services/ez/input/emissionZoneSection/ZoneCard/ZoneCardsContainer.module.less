@@ -1,0 +1,99 @@
+.container {
+  position: relative;
+  width: 100%;
+  padding: 0;
+  box-sizing: border-box;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.addMoreButton {
+  width: 100%;
+  margin: 24px 0 0 0;
+  height: 40px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.scrollContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  gap: 16px;
+  padding: 0;
+  margin: 0;
+  padding: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.navigationButton {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: white;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-size: 12px;
+}
+
+.navigationButton:hover {
+  background-color: #f5f5f5;
+}
+
+.navigationButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.prevButton {
+  left: 0;
+}
+
+.nextButton {
+  right: 0;
+}
+
+.dotsContainer {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #ddd;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.dotActive {
+  background-color: #2196f3;
+}
