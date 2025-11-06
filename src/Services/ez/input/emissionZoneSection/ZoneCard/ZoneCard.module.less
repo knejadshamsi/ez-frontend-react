@@ -1,0 +1,151 @@
+.cardContainer {
+  width: auto;
+  min-width: 180px;
+  height: 48px;
+  border-radius: 8px;
+  padding: 8px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.cardContainer:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.cardContainer.selected {
+  height: 64px;
+  outline: 2px solid #2196f3;
+  outline-offset: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  animation: zoneCardActivate 0.3s ease-out;
+}
+
+@keyframes zoneCardActivate {
+  0% {
+    transform: scale(0.98);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-right: 20px;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.titleRowSelected {
+  justify-content: center;
+}
+
+.dragHandle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  color: #888;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.dragHandle:hover {
+  color: #333;
+}
+
+.zoneName {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.zoneNameSelected {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.hiddenIcon {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f5222d;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 16px;
+  transition: all 0.2s ease-in-out;
+}
+
+.hiddenIcon:hover {
+  transform: scale(1.1);
+}
+
+.actionToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 24px;
+  padding-top: 4px;
+  flex-shrink: 0;
+}
+
+.toolbarIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  font-size: 12px;
+  color: #666;
+  min-width: 20px;
+  height: 20px;
+}
+
+.toolbarIcon:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #333;
+  transform: scale(1.1);
+}
+
+.toolbarIcon:active {
+  transform: scale(0.95);
+}
+
+.dragging {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.colorTrigger {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+.colorTrigger:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
+}
