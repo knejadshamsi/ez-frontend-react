@@ -1,0 +1,64 @@
+import { type ReactElement } from 'react'
+import { DeleteOutlined } from '@ant-design/icons'
+import { ColorPicker } from 'antd'
+import { useAPIPayloadStore } from '~store'
+import { colorShader } from '~ez/utils/colorUtils'
+import selectorStyles from '~ez/styles/simulationAreaSelector.module.less'
+import type { CustomSimulationArea } from '~ez/stores/types'
+import type { AreaColorPreset } from './types'
+
+const DEFAULT_CUSTOM_AREA_COLOR = '#00BCD4'
+
+const COLOR_PRESETS: AreaColorPreset[] = [
+  {
+    label: 'Recommended',
+    colors: [
+      '#00BCD4',
+      '#26A69A',
+      '#00ACC1',
+      '#0097A7',
+      '#4DD0E1',
+      '#80DEEA',
+    ],
+  },
+]
+
+const DrawAreaList = (): ReactElement => {
+  const customSimulationAreas = useAPIPayloadStore((state) => state.payload.customSimulationAreas)
+  const removeCustomSimulationArea = useAPIPayloadStore((state) => state.removeCustomSimulationArea)
+  const updateCustomSimulationArea = useAPIPayloadStore((state) => state.updateCustomSimulationArea)
+
+  return (
+    <div className={selectorStyles.drawAreaContainer}>
+      {customSimulationAreas.length === 0 ? (
+        <div className={selectorStyles.emptyStateMessage}>No custom areas added yet</div>
+      ) : (
+        customSimulationAreas.map((area: CustomSimulationArea) => (
+          <div
+            key={area.id}
+            className={selectorStyles.drawAreaCard}
+            style={{
+              background: `linear-gradient(120deg, ${colorShader(DEFAULT_CUSTOM_AREA_COLOR, 1.85)}, ${colorShader(area.color, 1.85)})`,
+              border: `2px solid ${colorShader(area.color, 1.75)}`,
+            }}
+          >
+            <div className={selectorStyles.drawAreaNameLabel}>{area.name}</div>
+            <ColorPicker
+              value={area.color}
+              onChange={(color) => updateCustomSimulationArea(area.id, { color: color.toHexString() })}
+              presets={COLOR_PRESETS}
+            >
+              <div className={selectorStyles.colorPickerDot} style={{ backgroundColor: area.color }} />
+            </ColorPicker>
+            <DeleteOutlined
+              onClick={() => removeCustomSimulationArea(area.id)}
+              style={{ cursor: 'pointer', color: 'red' }}
+            />
+          </div>
+        ))
+      )}
+    </div>
+  )
+}
+
+export { DrawAreaList }
