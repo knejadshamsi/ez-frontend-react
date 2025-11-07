@@ -16,6 +16,7 @@ export interface EZSessionStore {
   zones: { [zoneId: string]: ZoneSessionData };
 
   activeZone: string | null;
+  activeCustomArea: string | null;
   colorPalette: string[];
 
   setScenarioTitle: (title: string) => void;
@@ -25,6 +26,7 @@ export interface EZSessionStore {
   setZoneData: (zoneId: string, data: Partial<ZoneSessionData>) => void;
   removeZone: (zoneId: string) => void;
   setActiveZone: (zoneId: string | null) => void;
+  setActiveCustomArea: (areaId: string | null) => void;
   nextAvailableColor: () => string;
 
   reset: () => void;
@@ -59,6 +61,7 @@ const createInitialState = () => ({
     [DEFAULT_ZONE_ID]: DEFAULT_ZONE_SESSION_DATA
   },
   activeZone: DEFAULT_ZONE_ID,
+  activeCustomArea: null as string | null,
   colorPalette: [...COLOR_PALETTE],
 });
 
@@ -106,6 +109,9 @@ export const useEZSessionStore = create<EZSessionStore>((set, get) => ({
   setActiveZone: (activeZone: string | null) =>
     set({ activeZone }),
 
+  setActiveCustomArea: (activeCustomArea: string | null) =>
+    set({ activeCustomArea }),
+
   nextAvailableColor: () => {
     const state = get();
     const randomIndex = Math.floor(Math.random() * state.colorPalette.length);
@@ -116,4 +122,3 @@ export const useEZSessionStore = create<EZSessionStore>((set, get) => ({
     set(createInitialState());
   },
 }));
-

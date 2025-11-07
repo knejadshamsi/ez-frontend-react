@@ -27,8 +27,24 @@ export interface Zone {
   trip: TripType[];          // Trip types: ['start'] | ['end'] | ['pass'] | combinations
   policies: Policy[];        // Restriction policies (can have multiple)
 }
+
+export interface CustomSimulationArea {
+  id: string;
+  coords: Coordinate[][] | null;
+  name: string;
+  color: string;
+}
+export interface ScaledSimulationArea {
+  id: string;
+  zoneId: string;
+  coords: Coordinate[][];
+  scale: [number, string];
+  color: string;
+}
 export interface APIPayload {
   zones: Zone[];
+  customSimulationAreas: CustomSimulationArea[];
+  scaledSimulationAreas: ScaledSimulationArea[];
 }
 
 // ============= EZ SERVICE STORE INTERFACE =============
@@ -49,6 +65,16 @@ export interface APIPayloadStore {
   duplicateZone: (zoneId: string) => void;
   updateZone: (zoneId: string, data: Partial<Zone>) => void;
   reorderZones: (activeId: string, overId: string) => void;
+
+  addCustomSimulationArea: (name: string, color: string) => string;
+  updateCustomSimulationArea: (areaId: string, data: Partial<CustomSimulationArea>) => void;
+  removeCustomSimulationArea: (areaId: string) => void;
+
+  addScaledSimulationArea: (zoneId: string, coords: Coordinate[][], scale: [number, string], color: string) => string;
+  updateScaledSimulationArea: (areaId: string, data: Partial<ScaledSimulationArea>) => void;
+  removeScaledSimulationArea: (areaId: string) => void;
+  getScaledAreaByZoneId: (zoneId: string) => ScaledSimulationArea | undefined;
+  upsertScaledSimulationArea: (zoneId: string, coords: Coordinate[][], scale: [number, string], color: string) => string;
 
   setZones: (zones: Zone[]) => void;
   reset: () => void;

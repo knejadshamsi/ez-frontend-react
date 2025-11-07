@@ -7,6 +7,8 @@ import {
   APIPayload,
   Zone,
   Coordinate,
+  CustomSimulationArea,
+  ScaledSimulationArea,
   DEFAULT_ZONE_ID
 } from './types';
 import { useEZSessionStore } from './session';
@@ -18,7 +20,9 @@ const createInitialPayload = (): APIPayload => ({
     coords: null,
     trip: ['start'],
     policies: []
-  }]
+  }],
+  customSimulationAreas: [],
+  scaledSimulationAreas: []
 });
 
 // ============= EZ SERVICE STATE STORE =============
@@ -163,7 +167,7 @@ export const useAPIPayloadStore = create<APIPayloadStore>((set, get) => ({
         color: sessionData.color,
         hidden: sessionData.hidden,
         description: sessionData.description,
-        scale: [...sessionData.scale] as [number, string] // Deep clone
+        scale: [...sessionData.scale] as [number, string]
       });
     }
   },
@@ -200,6 +204,135 @@ export const useAPIPayloadStore = create<APIPayloadStore>((set, get) => ({
         }
       };
     });
+  },
+
+  addCustomSimulationArea: (name: string, color: string): string => {
+    const areaId = uuidv4();
+
+    set((state) => ({
+      payload: {
+        ...state.payload,
+        customSimulationAreas: [
+          ...state.payload.customSimulationAreas,
+          {
+            id: areaId,
+            coords: null,
+            name,
+            color
+          }
+        ]
+      }
+    }));
+
+    return areaId;
+  },
+
+  updateCustomSimulationArea: (areaId: string, data: Partial<CustomSimulationArea>) => {
+    set((state) => ({
+      payload: {
+        ...state.payload,
+        customSimulationAreas: state.payload.customSimulationAreas.map(area =>
+          area.id === areaId ? { ...area, ...data } : area
+        )
+      }
+    }));
+  },
+
+  removeCustomSimulationArea: (areaId: string) => {
+    set((state) => ({
+      payload: {
+        ...state.payload,
+        customSimulationAreas: state.payload.customSimulationAreas.filter(
+          area => area.id !== areaId
+        )
+      }
+    }));
+  },
+
+  addScaledSimulationArea: (zoneId: string, coords: Coordinate[][], scale: [number, string], color: string): string => {
+    const areaId = uuidv4();
+
+    set((state) => ({
+      payload: {
+        ...state.payload,
+        scaledSimulationAreas: [
+          ...state.payload.scaledSimulationAreas,
+          {
+            id: areaId,
+            zoneId,
+            coords,
+            scale,
+            color
+          }
+        ]
+      }
+    }));
+
+    return areaId;
+  },
+
+  updateScaledSimulationArea: (areaId: string, data: Partial<ScaledSimulationArea>) => {
+    set((state) => ({
+      payload: {
+        ...state.payload,
+        scaledSimulationAreas: state.payload.scaledSimulationAreas.map(area =>
+          area.id === areaId ? { ...area, ...data } : area
+        )
+      }
+    }));
+  },
+
+  removeScaledSimulationArea: (areaId: string) => {
+    set((state) => ({
+      payload: {
+        ...state.payload,
+        scaledSimulationAreas: state.payload.scaledSimulationAreas.filter(
+          area => area.id !== areaId
+        )
+      }
+    }));
+  },
+
+  getScaledAreaByZoneId: (zoneId: string): ScaledSimulationArea | undefined => {
+    const state = get();
+    return state.payload.scaledSimulationAreas.find(area => area.zoneId === zoneId);
+  },
+
+  upsertScaledSimulationArea: (zoneId: string, coords: Coordinate[][], scale: [number, string], color: string): string => {
+    const state = get();
+    const existingArea = state.payload.scaledSimulationAreas.find(area => area.zoneId === zoneId);
+
+    if (existingArea) {
+      set((state) => ({
+        payload: {
+          ...state.payload,
+          scaledSimulationAreas: state.payload.scaledSimulationAreas.map(area =>
+            area.zoneId === zoneId
+              ? { ...area, coords, scale, color }
+              : area
+          )
+        }
+      }));
+      return existingArea.id;
+    } else {
+      const areaId = uuidv4();
+      set((state) => ({
+        payload: {
+          ...state.payload,
+          scaledSimulationAreas: [
+            ...state.payload.scaledSimulationAreas,
+            {
+              id: areaId,
+              zoneId,
+              coords,
+              scale,
+              color
+            }
+          ]
+        }
+      }));
+      return areaId;
+    }
   },
 
   setZones: (zones: Zone[]) =>
