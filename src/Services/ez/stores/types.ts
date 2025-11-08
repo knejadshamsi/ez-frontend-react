@@ -28,6 +28,15 @@ export interface Zone {
   policies: Policy[];        // Restriction policies (can have multiple)
 }
 
+export interface SimulationOptions {
+  iterations: number;
+  percentage: number;
+}
+export interface CarDistribution {
+  ev: number;
+  car: number;
+  highEmission: number;
+}
 export interface CustomSimulationArea {
   id: string;
   coords: Coordinate[][] | null;
@@ -45,6 +54,8 @@ export interface APIPayload {
   zones: Zone[];
   customSimulationAreas: CustomSimulationArea[];
   scaledSimulationAreas: ScaledSimulationArea[];
+  simulationOptions: SimulationOptions;
+  carDistribution: CarDistribution;
 }
 
 // ============= EZ SERVICE STORE INTERFACE =============
@@ -77,5 +88,7 @@ export interface APIPayloadStore {
   upsertScaledSimulationArea: (zoneId: string, coords: Coordinate[][], scale: [number, string], color: string) => string;
 
   setZones: (zones: Zone[]) => void;
+  setSimulationOptions: (options: SimulationOptions) => void;
+  setCarDistribution: (distribution: CarDistribution) => void;
   reset: () => void;
 }
