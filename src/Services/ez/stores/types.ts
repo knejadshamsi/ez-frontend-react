@@ -46,6 +46,14 @@ export interface CarDistribution {
   car: number;
   highEmission: number;
 }
+export interface ModeUtilities {
+  walk: number;
+  bike: number;
+  car: number;
+  ev: number;
+  subway: number;
+  bus: number;
+}
 export interface CustomSimulationArea {
   id: string;
   coords: Coordinate[][] | null;
@@ -66,6 +74,7 @@ export interface APIPayload {
   sources: Sources;
   simulationOptions: SimulationOptions;
   carDistribution: CarDistribution;
+  modeUtilities: ModeUtilities;
 }
 
 // ============= EZ SERVICE STORE INTERFACE =============
@@ -101,5 +110,6 @@ export interface APIPayloadStore {
   setSources: (sources: Sources) => void;
   setSimulationOptions: (options: SimulationOptions) => void;
   setCarDistribution: (distribution: CarDistribution) => void;
+  setModeUtilities: (utilities: ModeUtilities) => void;
   reset: () => void;
 }
