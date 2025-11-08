@@ -10,6 +10,7 @@ import {
   Sources,
   SimulationOptions,
   CarDistribution,
+  ModeUtilities,
   CustomSimulationArea,
   ScaledSimulationArea,
   DEFAULT_ZONE_ID
@@ -48,6 +49,14 @@ const createInitialPayload = (): APIPayload => ({
     ev: 10,
     car: 85,
     highEmission: 5
+  },
+  modeUtilities: {
+    walk: 0,
+    bike: 0,
+    car: 0,
+    ev: 0,
+    subway: 0,
+    bus: 0
   }
 });
 
@@ -379,6 +388,11 @@ export const useAPIPayloadStore = create<APIPayloadStore>((set, get) => ({
   setCarDistribution: (carDistribution: CarDistribution) =>
     set((state) => ({
       payload: { ...state.payload, carDistribution }
+    })),
+
+  setModeUtilities: (modeUtilities: ModeUtilities) =>
+    set((state) => ({
+      payload: { ...state.payload, modeUtilities }
     })),
 
   reset: () =>

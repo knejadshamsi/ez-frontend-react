@@ -1,6 +1,7 @@
 import { Divider } from 'antd'
 import BasicSettingsSection from './basicSettings'
 import SourcesSection from './sources'
+import ModeUtilityAdjustments from './ModeUtilityAdjustments'
 
 import styles from './simulationOptions.module.less'
 
@@ -27,6 +28,14 @@ const SimulationOptionsSection = () => {
               Select datasets for the simulation
             </div>
             <SourcesSection />
+          </div>
+
+          <div className={styles.subsectionContainer}>
+            <span className={styles.sectionHeader}><strong>ATTRACTIVENESS</strong></span>
+            <div className={styles.descriptionText}>
+              Left-click for positive values (more attractive), right-click for negative values (less attractive)
+            </div>
+            <ModeUtilityAdjustments />
           </div>
         </div>
       </div>
