@@ -125,9 +125,46 @@
   font-size: 13px;
 }
 
-.sourceSelect {
-  width: 100%;
+.cardsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
+
+.cardContainer {
+  flex: 1 1 200px;
+  min-width: 200px;
+  max-width: calc(50% - 5px);
+  border: 1px solid gray;
+  border-radius: 3px;
+  padding: 8px 10px;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+  height: 36px;
+  transition: background 0.7s ease-in-out, border-color 0.7s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.name {
+  font-size: 13px;
+  font-weight: 600;
+  color: inherit;
+  margin: 0;
+  flex: 1;
+}
+
+.utilityValue {
+  font-size: 13px;
+  font-weight: 600;
+  color: inherit;
+  transition: color 0.3s ease-in-out;
+  margin-left: 8px;
+}
+
 .divider {
   font-size: 0.9rem;
   font-weight: 700;
