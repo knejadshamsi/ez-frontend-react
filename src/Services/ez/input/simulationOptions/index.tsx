@@ -1,5 +1,6 @@
 import { Divider } from 'antd'
 import BasicSettingsSection from './basicSettings'
+import SourcesSection from './sources'
 
 import styles from './simulationOptions.module.less'
 
@@ -18,6 +19,14 @@ const SimulationOptionsSection = () => {
               Configure simulation iterations and population coverage
             </div>
             <BasicSettingsSection />
+          </div>
+
+          <div className={styles.subsectionContainer}>
+            <span className={styles.sectionHeader}><strong>DATA SOURCES</strong></span>
+            <div className={styles.descriptionText}>
+              Select datasets for the simulation
+            </div>
+            <SourcesSection />
           </div>
         </div>
       </div>

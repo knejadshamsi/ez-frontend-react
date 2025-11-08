@@ -7,6 +7,7 @@ import {
   APIPayload,
   Zone,
   Coordinate,
+  Sources,
   SimulationOptions,
   CarDistribution,
   CustomSimulationArea,
@@ -25,6 +26,20 @@ const createInitialPayload = (): APIPayload => ({
   }],
   customSimulationAreas: [],
   scaledSimulationAreas: [],
+  sources: {
+    population: {
+      year: 2024,
+      name: 'telus-12-2024'
+    },
+    network: {
+      year: 2024,
+      name: 'osm-2024'
+    },
+    publicTransport: {
+      year: 2024,
+      name: 'gtfs-2024'
+    }
+  },
   simulationOptions: {
     iterations: 5,
     percentage: 5
@@ -349,6 +364,11 @@ export const useAPIPayloadStore = create<APIPayloadStore>((set, get) => ({
   setZones: (zones: Zone[]) =>
     set((state) => ({
       payload: { ...state.payload, zones }
+    })),
+
+  setSources: (sources: Sources) =>
+    set((state) => ({
+      payload: { ...state.payload, sources }
     })),
 
   setSimulationOptions: (simulationOptions: SimulationOptions) =>
