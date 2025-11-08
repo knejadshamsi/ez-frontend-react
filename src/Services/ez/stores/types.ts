@@ -28,6 +28,15 @@ export interface Zone {
   policies: Policy[];        // Restriction policies (can have multiple)
 }
 
+export interface SourceDetails {
+  year: number;
+  name: string;
+}
+export interface Sources {
+  population: SourceDetails;
+  network: SourceDetails;
+  publicTransport: SourceDetails;
+}
 export interface SimulationOptions {
   iterations: number;
   percentage: number;
@@ -54,6 +63,7 @@ export interface APIPayload {
   zones: Zone[];
   customSimulationAreas: CustomSimulationArea[];
   scaledSimulationAreas: ScaledSimulationArea[];
+  sources: Sources;
   simulationOptions: SimulationOptions;
   carDistribution: CarDistribution;
 }
@@ -88,6 +98,7 @@ export interface APIPayloadStore {
   upsertScaledSimulationArea: (zoneId: string, coords: Coordinate[][], scale: [number, string], color: string) => string;
 
   setZones: (zones: Zone[]) => void;
+  setSources: (sources: Sources) => void;
   setSimulationOptions: (options: SimulationOptions) => void;
   setCarDistribution: (distribution: CarDistribution) => void;
   reset: () => void;
