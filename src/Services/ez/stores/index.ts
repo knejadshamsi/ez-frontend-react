@@ -7,6 +7,8 @@ import {
   APIPayload,
   Zone,
   Coordinate,
+  SimulationOptions,
+  CarDistribution,
   CustomSimulationArea,
   ScaledSimulationArea,
   DEFAULT_ZONE_ID
@@ -22,7 +24,16 @@ const createInitialPayload = (): APIPayload => ({
     policies: []
   }],
   customSimulationAreas: [],
-  scaledSimulationAreas: []
+  scaledSimulationAreas: [],
+  simulationOptions: {
+    iterations: 5,
+    percentage: 5
+  },
+  carDistribution: {
+    ev: 10,
+    car: 85,
+    highEmission: 5
+  }
 });
 
 // ============= EZ SERVICE STATE STORE =============
@@ -338,6 +349,16 @@ export const useAPIPayloadStore = create<APIPayloadStore>((set, get) => ({
   setZones: (zones: Zone[]) =>
     set((state) => ({
       payload: { ...state.payload, zones }
+    })),
+
+  setSimulationOptions: (simulationOptions: SimulationOptions) =>
+    set((state) => ({
+      payload: { ...state.payload, simulationOptions }
+    })),
+
+  setCarDistribution: (carDistribution: CarDistribution) =>
+    set((state) => ({
+      payload: { ...state.payload, carDistribution }
     })),
 
   reset: () =>
