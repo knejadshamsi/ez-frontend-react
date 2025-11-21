@@ -142,3 +142,50 @@ export interface EZTripLegsTableConfig {
     isSortable?: boolean;
   }[];
 }
+
+// === MAP VISUALIZATION TYPES ===
+
+/* Point data for heatmap/hexagon visualization */
+export interface MapPointData {
+  position: [number, number]; // [longitude, latitude]
+  weight: number; // Weight/intensity value for aggregation
+}
+
+/* Path data for trip leg visualization */
+export interface MapPathData {
+  id: string;
+  path: [number, number][]; // Array of [longitude, latitude] coordinates
+  co2Delta: number; // CO2 delta for coloring (negative = reduction)
+  timeDelta: number; // Time delta in minutes
+  impact: string;
+}
+
+/* Emissions map data organized by pollutant type */
+export interface EmissionsMapData {
+  CO2: MapPointData[];
+  NOx: MapPointData[];
+  'PM2.5': MapPointData[];
+  PM10: MapPointData[];
+}
+
+/* People response map data organized by response type and view */
+export interface PeopleResponseMapData {
+  origin: {
+    paidPenalty: MapPointData[];
+    rerouted: MapPointData[];
+    switchedToBus: MapPointData[];
+    switchedToSubway: MapPointData[];
+    switchedToWalking: MapPointData[];
+    switchedToBiking: MapPointData[];
+    cancelledTrip: MapPointData[];
+  };
+  destination: {
+    paidPenalty: MapPointData[];
+    rerouted: MapPointData[];
+    switchedToBus: MapPointData[];
+    switchedToSubway: MapPointData[];
+    switchedToWalking: MapPointData[];
+    switchedToBiking: MapPointData[];
+    cancelledTrip: MapPointData[];
+  };
+}
