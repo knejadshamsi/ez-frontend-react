@@ -5,10 +5,12 @@ import {
   useEZOutputTripLegsStore,
   useEZOutputMapReadyStore,
 } from './stores';
-import { useEZOutputMapStore } from '../outputMap';
+import { useEZOutputMapStore } from './map';
 
 export type * from './types';
 export * from './stores';
+export * from './map';
+export * from './utils';
 
 /* Reset all output stores to initial state */
 export const resetAllEZOutputStores = (): void => {
