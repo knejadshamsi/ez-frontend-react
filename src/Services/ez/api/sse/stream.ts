@@ -1,0 +1,147 @@
+import { resetAllEZOutputStores } from '~stores/output';
+import type { SSEMessage, SimulationStreamConfig } from './types';
+import { handleSSEMessage } from './handlers';
+
+// Starts an SSE simulation stream with lifecycle management
+export function startSimulationStream(config: SimulationStreamConfig): () => void {
+  const {
+    endpoint,
+    payload,
+    connectionTimeout = 30000,
+    heartbeatTimeout = 35000,
+  } = config;
+
+  resetAllEZOutputStores();
+
+  let abortController: AbortController | null = new AbortController();
+  let heartbeatTimeoutId: NodeJS.Timeout | null = null;
+  let connectionTimeoutId: NodeJS.Timeout | null = null;
+
+  const resetHeartbeatTimer = () => {
+    if (heartbeatTimeoutId) {
+      clearTimeout(heartbeatTimeoutId);
+    }
+    heartbeatTimeoutId = setTimeout(() => {
+      console.error('[SSE] Heartbeat timeout - connection lost');
+      config.onError?.({
+        code: 'HEARTBEAT_TIMEOUT',
+        message: 'Connection lost - no heartbeat received',
+      });
+      cleanup();
+    }, heartbeatTimeout);
+  };
+
+  const cleanup = () => {
+    if (heartbeatTimeoutId) {
+      clearTimeout(heartbeatTimeoutId);
+      heartbeatTimeoutId = null;
+    }
+    if (connectionTimeoutId) {
+      clearTimeout(connectionTimeoutId);
+      connectionTimeoutId = null;
+    }
+    if (abortController) {
+      abortController.abort();
+      abortController = null;
+    }
+  };
+
+  connectionTimeoutId = setTimeout(() => {
+    console.error('[SSE] Connection timeout');
+    config.onError?.({
+      code: 'CONNECTION_TIMEOUT',
+      message: 'Failed to connect to simulation server',
+    });
+    cleanup();
+  }, connectionTimeout);
+
+  fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'text/event-stream',
+    },
+    body: JSON.stringify(payload),
+    signal: abortController.signal,
+  })
+    .then(async (response) => {
+      if (connectionTimeoutId) {
+        clearTimeout(connectionTimeoutId);
+        connectionTimeoutId = null;
+      }
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      if (!response.body) {
+        throw new Error('Response body is null');
+      }
+
+      resetHeartbeatTimer();
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+
+        if (done) {
+          console.log('[SSE] Stream ended');
+          break;
+        }
+
+        buffer += decoder.decode(value, { stream: true });
+
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const jsonStr = line.slice(6);
+              const message: SSEMessage = JSON.parse(jsonStr);
+
+              resetHeartbeatTimer();
+
+              handleSSEMessage(message, config);
+            } catch (parseError) {
+              console.error('[SSE] Failed to parse message:', line, parseError);
+            }
+          }
+        }
+      }
+
+      cleanup();
+    })
+    .catch((error) => {
+      if (error.name === 'AbortError') {
+        console.log('[SSE] Stream aborted');
+      } else {
+        console.error('[SSE] Stream error:', error);
+        config.onError?.({
+          code: 'STREAM_ERROR',
+          message: error.message || 'Stream connection failed',
+        });
+      }
+      cleanup();
+    });
+
+  return cleanup;
+}
+
+export async function cancelSimulation(
+  endpoint: string,
+  requestId: string
+): Promise<boolean> {
+  try {
+    const response = await fetch(`${endpoint}/${requestId}/cancel`, {
+      method: 'POST',
+    });
+    return response.ok;
+  } catch (error) {
+    console.error('[SSE] Failed to cancel simulation:', error);
+    return false;
+  }
+}
