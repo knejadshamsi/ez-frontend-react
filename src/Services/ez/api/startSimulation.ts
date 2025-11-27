@@ -1,13 +1,14 @@
 import { useEZServiceStore, useAPIPayloadStore } from '~store';
 import { useEZSessionStore } from '~stores/session';
 import { createAPIRequest } from './apiRequestFactory';
-import { startSimulationStream } from './simulationStream';
+import { startSimulationStream } from './sse';
 import { getBackendUrl, isBackendConfigured } from './config';
 import {
   showProgress,
   showProgressError,
   decodeProgressAlert,
 } from '../progress';
+import { loadDemoData } from '../output/demo';
 
 type EZServiceState = 'WELCOME' | 'PARAMETER_SELECTION' | 'EMISSION_ZONE_SELECTION' |
   'SIMULATION_AREA_SELECTION' | 'WAITING_FOR_RESULT' | 'RESULT_VIEW';
@@ -61,10 +62,14 @@ const runDemoSimulation = (setState: (state: EZServiceState) => void): (() => vo
     timeoutIds.push(id);
   });
 
-  const transitionId = setTimeout(() => {
-    setState('RESULT_VIEW');
+  const dataLoadId = setTimeout(() => {
+    loadDemoData();
+    const transitionId = setTimeout(() => {
+      setState('RESULT_VIEW');
+    }, 2000);
+    timeoutIds.push(transitionId);
   }, 8000);
-  timeoutIds.push(transitionId);
+  timeoutIds.push(dataLoadId);
 
   return () => {
     timeoutIds.forEach(id => clearTimeout(id));
