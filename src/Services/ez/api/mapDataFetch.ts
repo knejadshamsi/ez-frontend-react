@@ -2,6 +2,7 @@ import axios from 'axios';
 import { useEZSessionStore } from '~stores/session';
 import { useEZOutputMapStore } from '~stores/output';
 import { getBackendUrl } from './config';
+import { loadDemoMapData } from '../output/demoMapData';
 
 type MapType = 'emissions' | 'peopleResponse' | 'tripLegs';
 
@@ -70,5 +71,10 @@ export const fetchMapData = async (
   mapType: 'emissions' | 'peopleResponse' | 'tripLegs',
   isDemoMode: boolean
 ): Promise<void> => {
+  if (isDemoMode) {
+    loadDemoMapData(mapType);
+    return;
+  }
+
   await fetchMapDataInternal(mapType);
 };
