@@ -1,3 +1,4 @@
+import { Divider } from 'antd';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -11,6 +12,7 @@ import {
 import outputStyles from './Output.module.less';
 import { useDemoDataLoader } from './demo';
 import { Overview } from './Overview';
+import * as Emissions from './emissions';
 
 ChartJS.register(
   CategoryScale,
@@ -31,6 +33,13 @@ export const OutputView = () => {
   return (
     <div className={outputStyles.contentWrapper}>
       <Overview />
+
+      <Divider orientation="left">
+        <span className={outputStyles.sectionTitle}>1. Emissions and Comparisons</span>
+      </Divider>
+
+      <Emissions.Paragraph1 />
+      <Emissions.BarChart />
     </div>
   );
 };
