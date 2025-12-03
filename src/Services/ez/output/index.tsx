@@ -38,6 +38,8 @@ export const OutputView = () => {
       <Emissions.Paragraph1 />
       <Emissions.BarChart />
       <Emissions.Map />
+      <Emissions.Paragraph2 />
+      <Emissions.VehicleFleetChart />
     </div>
   );
 };
