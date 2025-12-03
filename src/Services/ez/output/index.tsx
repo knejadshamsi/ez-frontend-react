@@ -24,10 +24,7 @@ ChartJS.register(
   Legend
 );
 
-// ====> OUTPUT CONTENT <====
-
 export const OutputView = () => {
-  // Load demo data when in demo mode (backend not available)
   useDemoDataLoader();
 
   return (
@@ -40,6 +37,7 @@ export const OutputView = () => {
 
       <Emissions.Paragraph1 />
       <Emissions.BarChart />
+      <Emissions.Map />
     </div>
   );
 };

@@ -5,6 +5,7 @@ import { useEZServiceStore } from '~store';
 
 import { WelcomeView } from '~components/WelcomeView';
 import { ParameterSelectionView } from './input/ParameterSelectionView';
+import { OutputView } from './output';
 import { Progress } from './progress';
 
 import styles from '~styles/index.module.less';
@@ -25,13 +26,14 @@ const EzService = () => {
         closable={false}
         classNames={{
           wrapper: styles.drawerWrapper,
-          content: styles.drawerContent,
+          content: ezState === 'RESULT_VIEW' ? styles.drawerContentWithGradient : styles.drawerContent,
           body: styles.drawerBody
         }}
       >
         {{
           WELCOME: <WelcomeView />,
           PARAMETER_SELECTION: <ParameterSelectionView />,
+          RESULT_VIEW: <OutputView />,
         }[ezState]}
       </Drawer>
       <Progress />
