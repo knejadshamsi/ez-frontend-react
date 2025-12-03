@@ -16,8 +16,15 @@
   box-shadow: 3px 3px 10px #777;
 }
 
-.outputGradient {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.drawerContentWithGradient {
+  box-shadow: 3px 3px 10px #777;
+  background: linear-gradient(
+    to bottom,
+    #f0f9f0 0%,
+    #e8f4f8 33%,
+    #f3e8f8 66%,
+    #faf4ff 100%
+  ) !important;
 }
 
 .drawerBody {
@@ -25,4 +32,5 @@
   flex-direction: column;
   gap: 0.25rem;
   padding: 0;
+  height: 100%;
 }
