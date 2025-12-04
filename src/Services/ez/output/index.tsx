@@ -47,7 +47,8 @@ export const OutputView = () => {
       </Divider>
 
       <PeopleResponse.Paragraph1 />
-      <PeopleResponse.ResponseBreakdownChart />
+      <PeopleResponse.ResponseBreakdown />
+      <PeopleResponse.Map />
     </div>
   );
 };
