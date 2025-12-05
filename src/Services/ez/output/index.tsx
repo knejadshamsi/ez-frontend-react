@@ -58,6 +58,7 @@ export const OutputView = () => {
       </Divider>
 
       <TripLegs.Map />
+      <TripLegs.Table />
     </div>
   );
 };
