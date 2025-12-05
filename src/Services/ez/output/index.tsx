@@ -49,6 +49,8 @@ export const OutputView = () => {
       <PeopleResponse.Paragraph1 />
       <PeopleResponse.ResponseBreakdown />
       <PeopleResponse.Map />
+      <PeopleResponse.Paragraph2 />
+      <PeopleResponse.TimeImpactChart />
     </div>
   );
 };
