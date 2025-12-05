@@ -14,6 +14,7 @@ import { useDemoDataLoader } from './demo';
 import { Overview } from './Overview';
 import * as Emissions from './emissions';
 import * as PeopleResponse from './peopleResponse';
+import * as TripLegs from './tripLegs';
 
 ChartJS.register(
   CategoryScale,
@@ -50,7 +51,13 @@ export const OutputView = () => {
       <PeopleResponse.ResponseBreakdown />
       <PeopleResponse.Map />
       <PeopleResponse.Paragraph2 />
-      <PeopleResponse.TimeImpactChart />
+      <PeopleResponse.TimeImpact />
+
+      <Divider orientation="left">
+        <span className={outputStyles.sectionTitle}>3. Leg Performance</span>
+      </Divider>
+
+      <TripLegs.Map />
     </div>
   );
 };
