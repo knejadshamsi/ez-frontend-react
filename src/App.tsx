@@ -6,6 +6,7 @@ import HeaderContent from './Interface/HeaderContent';
 import LayersMenu from './Interface/LayersMenu';
 import Services from './Services';
 import useZoneSelector from './components/ZoneSelector';
+import { useLayers as useEZLayers } from './Services/ez/useLayers';
 import { useZeleStore, useServiceStore, useZoneSelectionStore, useResultStore } from '~globalStores';
 import './App.css';
 import { HeatmapLayer } from '@deck.gl/aggregation-layers';
@@ -40,10 +41,12 @@ function App() {
     onZoneComplete: handleZoneComplete,
   });
 
+  const ezLayers = useEZLayers();
+
   const MathRandom = (min: number, max: number) => Math.random() * (max - min) + min;
   const [hmData, setHMData] = useState<HeatmapDataPoint[]>([]);
 
-  const hmFactory = () => {
+  const hmFactory = useCallback(() => {
     if (!finalArea) return;
     const newArea: HeatmapDataPoint[] = [];
     const [minLng, minLat, maxLng, maxLat] = bbox(polygon([finalArea]));
@@ -53,11 +56,11 @@ function App() {
       newArea.push({ position: [lng, lat], weight: MathRandom(1, 10) });
     }
     setHMData(newArea);
-  };
+  }, [finalArea]);
 
   const [llData, setLLData] = useState<PathLayerData[]>([]);
 
-  const llFactory = async () => {
+  const llFactory = useCallback(async () => {
     if (!finalArea) return;
     let output: PathLayerData[] = [];
     const coords = finalArea.map(point => `${point[1]} ${point[0]}`).join(' ');
@@ -78,13 +81,13 @@ function App() {
     });
     setLLData(output);
     console.log(output);
-  };
+  }, [finalArea]);
 
   useEffect(() => {
     if (zeleStore !== "WAITING_FOR_RESULT") return;
     hmFactory();
     llFactory();
-  }, [zeleStore]);
+  }, [zeleStore, hmFactory, llFactory]);
 
   useEffect(() => {
     if (activeService !== "ZELE") {
@@ -101,6 +104,7 @@ function App() {
 
   const layers = [
     ...zoneSelectorLayers,
+    ...ezLayers,
     finalArea && new PolygonLayer({
       id: 'final-selected-layer',
       data: [{ contour: finalArea }],
