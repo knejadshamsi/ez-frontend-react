@@ -6,6 +6,7 @@ import HeaderContent from './Interface/HeaderContent';
 import LayersMenu from './Interface/LayersMenu';
 import Services from './Services';
 import useZoneSelector from './components/ZoneSelector';
+import { useLayers as useEZLayers } from './Services/ez/useLayers';
 import { useZeleStore, useServiceStore, useZoneSelectionStore, useResultStore } from '~globalStores';
 import './App.css';
 import { HeatmapLayer } from '@deck.gl/aggregation-layers';
@@ -39,6 +40,8 @@ function App() {
     isActive: zeleStore === "ZONE_SELECTION" && !finalArea,
     onZoneComplete: handleZoneComplete,
   });
+
+  const ezLayers = useEZLayers();
 
   const MathRandom = (min: number, max: number) => Math.random() * (max - min) + min;
   const [hmData, setHMData] = useState<HeatmapDataPoint[]>([]);
@@ -101,6 +104,7 @@ function App() {
 
   const layers = [
     ...zoneSelectorLayers,
+    ...ezLayers,
     finalArea && new PolygonLayer({
       id: 'final-selected-layer',
       data: [{ contour: finalArea }],
