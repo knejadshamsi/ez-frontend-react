@@ -34,6 +34,7 @@ const createInitialState = () => ({
   activeCustomArea: null as string | null,
   colorPalette: [...COLOR_PALETTE],
   sseCleanup: null as (() => void) | null,
+  isNewSimulation: true,
 });
 
 export const useEZSessionStore = create<EZSessionStore>((set, get) => ({
@@ -99,6 +100,9 @@ export const useEZSessionStore = create<EZSessionStore>((set, get) => ({
       set({ sseCleanup: null });
     }
   },
+
+  setIsNewSimulation: (isNewSimulation: boolean) =>
+    set({ isNewSimulation }),
 
   reset: () => {
     set(createInitialState());

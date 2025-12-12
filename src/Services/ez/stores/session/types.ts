@@ -19,6 +19,7 @@ export interface EZSessionStore {
   activeCustomArea: string | null;
   colorPalette: string[];
   sseCleanup: (() => void) | null;
+  isNewSimulation: boolean;
 
   setScenarioTitle: (title: string) => void;
   setScenarioDescription: (description: string) => void;
@@ -31,6 +32,7 @@ export interface EZSessionStore {
   nextAvailableColor: () => string;
   setSseCleanup: (cleanup: (() => void) | null) => void;
   abortSseStream: () => void;
+  setIsNewSimulation: (value: boolean) => void;
   reset: () => void;
 }
 
