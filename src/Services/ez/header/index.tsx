@@ -4,6 +4,7 @@ import { QuestionCircleOutlined, LogoutOutlined } from '@ant-design/icons';
 import { useServiceStore } from '~globalStores';
 import { useEZSessionStore } from '~stores/session';
 import { useEZServiceStore } from '~store';
+import { resetAllEZOutputStores } from '~stores/output';
 import styles from './header.module.less';
 
 const { Title } = Typography;
@@ -33,8 +34,8 @@ export default function EzHeader() {
       case 'SIMULATION_AREA_SELECTION':
         setStepTitle('Simulation Area Selection');
         break;
-      case 'WAITING_FOR_RESULT':
-        setStepTitle('Processing Simulation');
+      case 'AWAIT_RESULTS':
+        setStepTitle('Processing');
         break;
       case 'RESULT_VIEW':
         setStepTitle('View Results');
@@ -48,6 +49,7 @@ export default function EzHeader() {
     setState('WELCOME');
     setScenarioTitle('New Scenario');
     setRequestId('');
+    resetAllEZOutputStores();
     resetService();
   };
 

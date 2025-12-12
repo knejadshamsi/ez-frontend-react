@@ -1,6 +1,8 @@
 import { Space, Button, Input, Typography } from 'antd'
 import { useEZSessionStore } from '~stores/session'
 import { useEZServiceStore } from '~store'
+import { loadScenario } from '~ez/api/startSimulation'
+import { useNotificationStore } from '~/Services/CustomNotification'
 import previousScenarios from '~ez/data/previousScenarios.json'
 import styles from '~ez/styles/WelcomeView.module.less'
 
@@ -11,21 +13,31 @@ export const WelcomeView = () => {
   const requestId = useEZSessionStore((state) => state.requestId)
   const setRequestId = useEZSessionStore((state) => state.setRequestId)
   const setState = useEZServiceStore((state) => state.setState)
+  const setNotification = useNotificationStore((state) => state.setNotification)
 
   //====> CLICK HANDLING <====
 
-  const handleViewScenario = (scenarioRequestId) => {
-    // TODO: Implement backend fetch for viewing previous scenarios
+  const handleViewScenario = async (scenarioRequestId: string) => {
+    if (!scenarioRequestId || scenarioRequestId.trim() === '') {
+      setNotification('Invalid scenario ID', 'error')
+      return
+    }
+
     setRequestId(scenarioRequestId)
-    setState('WAITING_FOR_RESULT')
+    await loadScenario(scenarioRequestId, setState)
   }
 
   const handleCreateScenario = () => {
     setState('PARAMETER_SELECTION')
   }
 
-  const handleViewPreviousScenario = () => {
-    setState('WAITING_FOR_RESULT')
+  const handleViewPreviousScenario = async () => {
+    if (!requestId || requestId.trim() === '') {
+      setNotification('Please enter a valid scenario ID', 'error')
+      return
+    }
+
+    await loadScenario(requestId, setState)
   }
 
 

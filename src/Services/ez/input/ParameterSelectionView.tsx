@@ -4,23 +4,27 @@ import { useEZSessionStore } from '~stores/session'
 import { useAPIPayloadStore, useEZServiceStore } from '~store'
 
 import { InputContainer } from './inputContainer'
-import { createAPIRequest, validateAPIRequest } from '../api/apiRequestFactory'
+import { createAPIRequest, validateAPIRequest } from '~ez/api/apiRequestFactory'
 
-import { startSimulation } from '../api/startSimulation'
+import { startSimulation } from '~ez/api/startSimulation'
 import { useNotificationStore } from '~/Services/CustomNotification'
+import { hasOutputData } from '~stores/output'
 
-import { Button, Input } from 'antd'
-import { ArrowLeftOutlined, SendOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons'
+import { Button, Input, Modal } from 'antd'
+import { ArrowLeftOutlined, SendOutlined, EditOutlined, SaveOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
 
 import styles from './ParameterSelectionView.module.less'
 
 const MAX_NAME_LENGTH = 50;
 
 export const ParameterSelectionView = () => {
+  const [modal, contextHolder] = Modal.useModal();
   const setState = useEZServiceStore((state) => state.setState)
+  const isEzBackendAlive = useEZServiceStore((state) => state.isEzBackendAlive)
   const scenarioTitle = useEZSessionStore((state) => state.scenarioTitle)
   const scenarioDescription = useEZSessionStore((state) => state.scenarioDescription)
   const setScenarioTitle = useEZSessionStore((state) => state.setScenarioTitle)
+  const setIsNewSimulation = useEZSessionStore((state) => state.setIsNewSimulation)
 
   const apiPayload = useAPIPayloadStore(state => state.payload)
 
@@ -29,33 +33,69 @@ export const ParameterSelectionView = () => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState(scenarioTitle);
 
-  // Sync editedTitle with scenarioTitle when scenarioTitle changes externally
   useEffect(() => {
     setEditedTitle(scenarioTitle);
   }, [scenarioTitle]);
 
   const handleStartSimulation = () => {
-    // Create API request from payload
-    const apiRequest = createAPIRequest(
-      apiPayload,
-      scenarioTitle,
-      scenarioDescription
-    );
-
-    // Validate the request
+    const apiRequest = createAPIRequest(apiPayload, scenarioTitle, scenarioDescription);
     const validation = validateAPIRequest(apiRequest);
+
     if (!validation.isValid) {
       setNotification(validation.error, 'error');
       return;
     }
 
-    // Validation passed - change state and start simulation
-    setState('WAITING_FOR_RESULT');
-    startSimulation(setState);
+    const outputExists = hasOutputData();
+
+    if (isEzBackendAlive) {
+      if (outputExists) {
+        const instance = modal.confirm({
+          title: 'Previous Results Found',
+          icon: <ExclamationCircleOutlined />,
+          content: 'You have previous simulation results. Do you want to return to them or start a new simulation?',
+          okText: 'Start New Simulation',
+          cancelText: 'Cancel',
+          onOk() {
+            setIsNewSimulation(true);
+            setState('AWAIT_RESULTS');
+            startSimulation(setState);
+          },
+          footer: (_, { OkBtn, CancelBtn }) => (
+            <>
+              <CancelBtn />
+              <Button
+                type="primary"
+                onClick={() => {
+                  setState('RESULT_VIEW');
+                  instance.destroy();
+                }}
+              >
+                Return to Output
+              </Button>
+              <OkBtn />
+            </>
+          ),
+        });
+      } else {
+        setIsNewSimulation(true);
+        setState('AWAIT_RESULTS');
+        startSimulation(setState);
+      }
+    } else {
+      if (outputExists) {
+        setState('RESULT_VIEW');
+      } else {
+        setIsNewSimulation(true);
+        setState('AWAIT_RESULTS');
+        startSimulation(setState);
+      }
+    }
   }
 
   return (
     <>
+      {contextHolder}
       <div className={styles.backButtonContainer}>
           <Button type="link" onClick={() => setState('WELCOME')} className={styles.backButton}>
             <ArrowLeftOutlined style={{fontSize: '12px'}} />

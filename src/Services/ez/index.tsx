@@ -18,7 +18,7 @@ const EzService = () => {
   return (
     <>
       <Drawer
-        open={activeService === 'EZ' && !['EMISSION_ZONE_SELECTION', 'SIMULATION_AREA_SELECTION', 'WAITING_FOR_RESULT'].includes(ezState)}
+        open={activeService === 'EZ' && !['EMISSION_ZONE_SELECTION', 'SIMULATION_AREA_SELECTION', 'AWAIT_RESULTS'].includes(ezState)}
         mask={false}
         width={730}
         placement="right"
