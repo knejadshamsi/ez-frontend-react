@@ -10,6 +10,8 @@ import {
   decodeProgressAlert,
 } from '../progress';
 import { loadDemoData } from '../output/demo';
+import { fetchScenarioInput } from './fetchScenarioInput';
+import { useNotificationStore } from '~/Services/CustomNotification';
 
 export const startSimulation = async (setState: (state: EZStateType) => void): Promise<void> => {
   const isEzBackendAlive = useEZServiceStore.getState().isEzBackendAlive;
@@ -124,4 +126,98 @@ const runRealSimulation = (setState: (state: EZStateType) => void): void => {
 
   setSseCleanup(cleanup);
   console.log('[SSE] Stream started, cleanup function stored');
+};
+
+export const loadScenario = async (
+  requestId: string,
+  setState: (state: EZStateType) => void
+): Promise<void> => {
+  const isEzBackendAlive = useEZServiceStore.getState().isEzBackendAlive;
+  const setIsNewSimulation = useEZSessionStore.getState().setIsNewSimulation;
+  const setSseCleanup = useEZSessionStore.getState().setSseCleanup;
+  const setNotification = useNotificationStore.getState().setNotification;
+
+  setIsNewSimulation(false);
+  setState('AWAIT_RESULTS');
+
+  if (!isEzBackendAlive) {
+    const cleanup = runDemoScenarioLoad(setState);
+    setSseCleanup(cleanup);
+    return;
+  }
+
+  try {
+    await fetchScenarioInput(requestId);
+  } catch (error) {
+    setNotification('Failed to load scenario input data', 'error');
+    console.error('[Load Scenario] Input fetch failed:', error);
+  }
+
+  runRealScenarioLoad(requestId, setState);
+};
+
+const runDemoScenarioLoad = (setState: (state: EZStateType) => void): (() => void) => {
+  console.log('[DEMO MODE] Loading demo scenario');
+
+  showProgress();
+
+  const timeoutIds: NodeJS.Timeout[] = [];
+
+  const dataLoadId = setTimeout(() => {
+    loadDemoData();
+    loadDemoInputData();
+  }, 1000);
+
+  timeoutIds.push(dataLoadId);
+
+  return () => {
+    timeoutIds.forEach(id => clearTimeout(id));
+  };
+};
+
+const runRealScenarioLoad = (
+  requestId: string,
+  setState: (state: EZStateType) => void
+): void => {
+  const setSseCleanup = useEZSessionStore.getState().setSseCleanup;
+  const setNotification = useNotificationStore.getState().setNotification;
+  const backendUrl = getBackendUrl();
+
+  console.log('[REAL BACKEND] Loading scenario output data:', requestId);
+
+  showProgress();
+
+  const cleanup = startSimulationStream({
+    endpoint: `${backendUrl}/api/ez/scenario/${requestId}`,
+    payload: null,
+    method: 'GET',
+
+    onStarted: (returnedRequestId: string) => {
+      console.log('[SSE] Scenario output stream started:', returnedRequestId);
+    },
+
+    onComplete: () => {
+      console.log('[SSE] Scenario output stream completed');
+      setSseCleanup(null);
+      setTimeout(() => {
+        setState('RESULT_VIEW');
+      }, 500);
+    },
+
+    onError: (error) => {
+      console.error('[SSE] Scenario load error:', error);
+      setSseCleanup(null);
+      showProgressError(error.message || 'Failed to load scenario');
+      setNotification('Failed to load scenario results', 'error');
+    },
+  });
+
+  setSseCleanup(cleanup);
+};
+
+const loadDemoInputData = (): void => {
+  const sessionStore = useEZSessionStore.getState();
+
+  sessionStore.setScenarioTitle('Demo Scenario');
+  sessionStore.setScenarioDescription('This is a demo scenario');
 };

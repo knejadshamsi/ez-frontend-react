@@ -143,7 +143,8 @@ export interface SimulationError {
 // Configuration for SSE stream connection
 export interface SimulationStreamConfig {
   endpoint: string;
-  payload: Record<string, unknown>;
+  payload: Record<string, unknown> | null;
+  method?: 'POST' | 'GET';
   connectionTimeout?: number;
   heartbeatTimeout?: number;
   onStarted?: (requestId: string) => void;

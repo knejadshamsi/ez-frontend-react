@@ -7,7 +7,7 @@ export type EZStateType =
   | "PARAMETER_SELECTION"
   | "EMISSION_ZONE_SELECTION"
   | "SIMULATION_AREA_SELECTION"
-  | "WAITING_FOR_RESULT"
+  | "AWAIT_RESULTS"
   | "RESULT_VIEW";
 
 // ============= API PAYLOAD TYPES =============
@@ -75,6 +75,20 @@ export interface APIPayload {
   simulationOptions: SimulationOptions;
   carDistribution: CarDistribution;
   modeUtilities: ModeUtilities;
+}
+
+// ============= FULL INPUT PAYLOAD (FOR LOADING SCENARIOS) =============
+export interface FullInputPayload {
+  scenarioTitle: string;
+  scenarioDescription: string;
+  zones: Zone[];
+  customSimulationAreas: CustomSimulationArea[];
+  scaledSimulationAreas: ScaledSimulationArea[];
+  sources: Sources;
+  simulationOptions: SimulationOptions;
+  carDistribution: CarDistribution;
+  modeUtilities: ModeUtilities;
+  zoneSessionData?: { [zoneId: string]: { name: string; color: string; hidden: boolean; description?: string; scale: [number, string] } };
 }
 
 // ============= EZ SERVICE STORE INTERFACE =============

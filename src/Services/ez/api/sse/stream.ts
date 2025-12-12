@@ -7,6 +7,7 @@ export function startSimulationStream(config: SimulationStreamConfig): () => voi
   const {
     endpoint,
     payload,
+    method = 'POST',
     connectionTimeout = 30000,
     heartbeatTimeout = 35000,
   } = config;
@@ -55,15 +56,22 @@ export function startSimulationStream(config: SimulationStreamConfig): () => voi
     cleanup();
   }, connectionTimeout);
 
-  fetch(endpoint, {
-    method: 'POST',
-    headers: {
+  const fetchOptions: RequestInit = {
+    method,
+    headers: method === 'POST' ? {
       'Content-Type': 'application/json',
       'Accept': 'text/event-stream',
+    } : {
+      'Accept': 'text/event-stream',
     },
-    body: JSON.stringify(payload),
     signal: abortController.signal,
-  })
+  };
+
+  if (method === 'POST' && payload) {
+    fetchOptions.body = JSON.stringify(payload);
+  }
+
+  fetch(endpoint, fetchOptions)
     .then(async (response) => {
       if (connectionTimeoutId) {
         clearTimeout(connectionTimeoutId);
