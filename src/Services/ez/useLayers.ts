@@ -3,6 +3,7 @@ import { useServiceStore } from '~globalStores';
 import { useEZServiceStore, useAPIPayloadStore, useDrawToolStore } from '~store';
 import { useEZSessionStore, useEZOutputFiltersStore } from '~stores/session';
 import { useEZOutputMapStore, getEmissionsPointsForPollutant, getPeopleResponsePoints } from '~stores/output';
+import { useNotificationStore } from '~/Services/CustomNotification';
 import { createEditableZoneLayer } from './factories/createEditableZoneLayer';
 import { createEditableSimulationAreaLayer } from './factories/createEditableSimulationAreaLayer';
 import { createZoneDisplayLayer } from './factories/createZoneDisplayLayer';
@@ -11,6 +12,7 @@ import { createEmissionsHeatmapLayer } from './factories/createEmissionsHeatmapL
 import { createEmissionsHexagonLayer } from './factories/createEmissionsHexagonLayer';
 import { createPeopleResponseGridLayerForType } from './factories/createPeopleResponseGridLayer';
 import { createTripLegsPathLayer } from './factories/createTripLegsPathLayer';
+import { validatePolygon } from './utils/polygonValidation';
 
 export function useLayers() {
   const activeService = useServiceStore((state) => state.activeService);
@@ -82,6 +84,32 @@ export function useLayers() {
             coords
           });
 
+          // Validate the polygon
+          const validation = validatePolygon(coords);
+
+          if (!validation.isValid) {
+            // Show error notification
+            const setNotification = useNotificationStore.getState().setNotification;
+            setNotification(validation.error!, 'error');
+
+            // Clear the invalid polygon from display
+            setDrawToolGeoJson({
+              type: 'FeatureCollection',
+              features: []
+            });
+
+            // Keep user in drawing mode (don't transition to PARAMETER_SELECTION)
+            console.log('[Editable Layer] Polygon validation failed:', validation.error);
+            return;
+          }
+
+          // Validation passed - proceed with normal flow
+          console.log('[Editable Layer] Polygon valid!', {
+            rings: coords.length,
+            outerRingPoints: coords[0].length,
+            areaKm2: validation.areaInSqKm
+          });
+
           updateZone(activeZone, { coords });
           setState('PARAMETER_SELECTION');
 
@@ -118,6 +146,32 @@ export function useLayers() {
             rings: coords.length,
             outerRingPoints: coords[0].length,
             coords
+          });
+
+          // Validate the polygon (use simulation area constraints: 1-6 km²)
+          const validation = validatePolygon(coords, true);
+
+          if (!validation.isValid) {
+            // Show error notification
+            const setNotification = useNotificationStore.getState().setNotification;
+            setNotification(validation.error!, 'error');
+
+            // Clear the invalid polygon from display
+            setDrawToolGeoJson({
+              type: 'FeatureCollection',
+              features: []
+            });
+
+            // Keep user in drawing mode
+            console.log('[Simulation Area Layer] Polygon validation failed:', validation.error);
+            return;
+          }
+
+          // Validation passed - proceed
+          console.log('[Simulation Area Layer] Polygon valid!', {
+            rings: coords.length,
+            outerRingPoints: coords[0].length,
+            areaKm2: validation.areaInSqKm
           });
 
           updateCustomSimulationArea(activeCustomArea, { coords });
