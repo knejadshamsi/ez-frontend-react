@@ -1,0 +1,73 @@
+.drawingControlsPanel {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  width: 380px;
+  background: #fff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.instructionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px 20px 0 20px;
+}
+
+.instructions {
+  width: 100%;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.layersContainer {
+  padding: 0 20px 20px 20px;
+}
+
+.layerGroup {
+  margin-bottom: 16px;
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.groupHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #fafafa;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.groupTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  letter-spacing: 0.5px;
+}
+
+.groupItems {
+  padding: 8px 12px;
+}
+
+.layerItem {
+  padding: 6px 0;
+}

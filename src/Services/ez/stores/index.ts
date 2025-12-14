@@ -398,3 +398,6 @@ export const useAPIPayloadStore = create<APIPayloadStore>((set, get) => ({
   reset: () =>
     set({ payload: createInitialPayload() })
 }));
+
+// ============= DRAWING STATE STORE =============
+export { useDrawingStateStore } from './drawingState';

@@ -1,6 +1,6 @@
 import { useEffect, useCallback } from 'react';
 import { useServiceStore } from '~globalStores';
-import { useEZServiceStore, useAPIPayloadStore, useDrawToolStore } from '~store';
+import { useEZServiceStore, useAPIPayloadStore, useDrawToolStore, useDrawingStateStore } from '~store';
 import { useEZSessionStore, useEZOutputFiltersStore } from '~stores/session';
 import { useEZOutputMapStore, getEmissionsPointsForPollutant, getPeopleResponsePoints } from '~stores/output';
 import { useNotificationStore } from '~/Services/CustomNotification';
@@ -46,6 +46,14 @@ export function useLayers() {
   const selectedBehavioralResponseType = useEZOutputFiltersStore((state) => state.selectedBehavioralResponseType);
   const visibleTripLegIds = useEZOutputFiltersStore((state) => state.visibleTripLegIds);
 
+  // Drawing state
+  const visibleZoneIds = useDrawingStateStore((state) => state.visibleZoneIds);
+  const visibleAreaIds = useDrawingStateStore((state) => state.visibleAreaIds);
+  const hideAllZones = useDrawingStateStore((state) => state.hideAllZones);
+  const hideAllAreas = useDrawingStateStore((state) => state.hideAllAreas);
+  const setOtherLayersExpanded = useDrawingStateStore((state) => state.setOtherLayersExpanded);
+  const resetDrawingState = useDrawingStateStore((state) => state.reset);
+
   // Reset drawToolGeoJson when entering drawing mode
   useEffect(() => {
     if ((ezState === 'EMISSION_ZONE_SELECTION' || ezState === 'SIMULATION_AREA_SELECTION') && activeService === 'EZ') {
@@ -56,6 +64,16 @@ export function useLayers() {
       });
     }
   }, [ezState, activeService, setDrawToolGeoJson]);
+
+  // Initialize layer visibility when entering drawing mode
+  useEffect(() => {
+    if ((ezState === 'EMISSION_ZONE_SELECTION' || ezState === 'SIMULATION_AREA_SELECTION') && activeService === 'EZ') {
+      console.log('[useLayers] Entering drawing mode - hiding all layers');
+      hideAllZones();
+      hideAllAreas();
+      setOtherLayersExpanded(false);
+    }
+  }, [ezState, activeService, hideAllZones, hideAllAreas, setOtherLayersExpanded]);
 
   // Edit handler for emission zones
   const handleEdit = useCallback(({ updatedData, editType, editContext }: any) => {
@@ -113,13 +131,16 @@ export function useLayers() {
           updateZone(activeZone, { coords });
           setState('PARAMETER_SELECTION');
 
+          // Clear drawing state after successful save
+          resetDrawingState();
+
           console.log('[Editable Layer] Zone saved! Switched to PARAMETER_SELECTION');
         } else {
           console.warn('[Editable Layer] Polygon incomplete - need at least 3 points');
         }
       }
     }
-  }, [activeZone, updateZone, setState, setDrawToolGeoJson]);
+  }, [activeZone, updateZone, setState, setDrawToolGeoJson, resetDrawingState]);
 
   // Edit handler for simulation areas
   const handleSimulationAreaEdit = useCallback(({ updatedData, editType, editContext }: any) => {
@@ -182,13 +203,16 @@ export function useLayers() {
           });
           setState('PARAMETER_SELECTION');
 
+          // Clear drawing state after successful save
+          resetDrawingState();
+
           console.log('[Simulation Area Layer] Custom area saved! Switched to PARAMETER_SELECTION');
         } else {
           console.warn('[Simulation Area Layer] Polygon incomplete - need at least 3 points');
         }
       }
     }
-  }, [activeCustomArea, updateCustomSimulationArea, setState, setDrawToolGeoJson]);
+  }, [activeCustomArea, updateCustomSimulationArea, setState, setDrawToolGeoJson, resetDrawingState]);
 
   // Create input layers
   const editableLayer = ezState === 'EMISSION_ZONE_SELECTION' && activeService === 'EZ'
@@ -240,6 +264,71 @@ export function useLayers() {
       })
     : null;
 
+  const createDrawingModeDisplayLayers = (
+    mode: 'zone' | 'area',
+    activeZone: string | null,
+    activeArea: string | null
+  ) => {
+    const filteredZones = apiZones.filter(zone => {
+      if (mode === 'zone' && zone.id === activeZone) return false;
+      if (!zone.coords) return false;
+      const sessionData = sessionZones[zone.id];
+      if (!sessionData || sessionData.hidden) return false;
+      return visibleZoneIds.has(zone.id);
+    });
+
+    const filteredCustomAreas = customSimulationAreas.filter(area => {
+      if (mode === 'area' && area.id === activeArea) return false;
+      if (!area.coords) return false;
+      return visibleAreaIds.has(area.id);
+    });
+
+    const filteredScaledAreas = scaledSimulationAreas.filter(area => {
+      const zone = apiZones.find(z => z.id === area.zoneId);
+      if (!zone) return false;
+      const sessionData = sessionZones[area.zoneId];
+      if (!sessionData || sessionData.hidden) return false;
+      return area.coords && area.coords.length > 0 && visibleZoneIds.has(area.zoneId);
+    });
+
+    return {
+      zoneLayer: filteredZones.length > 0
+        ? createZoneDisplayLayer({
+            zones: filteredZones.map(zone => ({
+              coords: zone.coords!,
+              color: sessionZones[zone.id].color
+            }))
+          })
+        : null,
+
+      areaLayer: (filteredCustomAreas.length > 0 || filteredScaledAreas.length > 0)
+        ? createSimulationAreaDisplayLayer({
+            areas: [
+              ...filteredCustomAreas.map(area => ({
+                coords: area.coords!,
+                color: area.color,
+                type: 'custom' as const
+              })),
+              ...filteredScaledAreas.map(area => ({
+                coords: area.coords,
+                color: area.color,
+                type: 'scaled' as const
+              }))
+            ]
+          })
+        : null
+    };
+  };
+
+  const drawingLayers =
+    ezState === 'EMISSION_ZONE_SELECTION' || ezState === 'SIMULATION_AREA_SELECTION'
+      ? createDrawingModeDisplayLayers(
+          ezState === 'EMISSION_ZONE_SELECTION' ? 'zone' : 'area',
+          activeZone,
+          activeCustomArea
+        )
+      : { zoneLayer: null, areaLayer: null };
+
   // Create output layers
   const isResultView = ezState === 'RESULT_VIEW' && activeService === 'EZ';
 
@@ -272,10 +361,12 @@ export function useLayers() {
   return [
     editableLayer,
     simulationAreaEditableLayer,
-    simulationAreaDisplayLayer,
+    drawingLayers.zoneLayer,
+    drawingLayers.areaLayer,
     displayLayer,
+    simulationAreaDisplayLayer,
     emissionsOutputLayer,
     peopleResponseOutputLayer,
     tripLegsOutputLayer
-  ];
+  ].filter(Boolean);
 }
