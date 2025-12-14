@@ -7,6 +7,7 @@ import { WelcomeView } from '~components/WelcomeView';
 import { ParameterSelectionView } from './input/ParameterSelectionView';
 import { OutputView } from './output';
 import { Progress } from './progress';
+import { DrawingControls } from './input/drawingControls';
 
 import styles from '~styles/index.module.less';
 
@@ -37,6 +38,7 @@ const EzService = () => {
         }[ezState]}
       </Drawer>
       <Progress />
+      <DrawingControls />
     </>
   );
 };
