@@ -5,8 +5,11 @@ export const DEFAULT_ZONE_ID = 'default-zone-00000000';
 export type EZStateType =
   | "WELCOME"
   | "PARAMETER_SELECTION"
-  | "EMISSION_ZONE_SELECTION"
-  | "SIMULATION_AREA_SELECTION"
+  | "DRAW_EM_ZONE"
+  | "EDIT_EM_ZONE"
+  | "REDRAW_EM_ZONE"
+  | "DRAW_SIM_AREA"
+  | "EDIT_SIM_AREA"
   | "AWAIT_RESULTS"
   | "RESULT_VIEW";
 

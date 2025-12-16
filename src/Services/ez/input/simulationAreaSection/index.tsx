@@ -44,7 +44,7 @@ const calculateScaledCoordinates = (
       ? transformScale(poly, scaleFactor)
       : transformScale(poly, scaleFactor, { origin: getBboxPoint(poly, origin) })
 
-    return (scaledPoly.geometry as any).coordinates as Coordinate[][]
+    return scaledPoly.geometry.coordinates as Coordinate[][]
   } catch (error) {
     console.error(`[SimulationAreaSection] Error scaling zone ${zone.id}:`, error)
     return null
@@ -108,7 +108,7 @@ const SimulationAreaSection = (): ReactElement => {
 
     const newAreaId = addCustomSimulationArea(areaName, areaColor)
     setActiveCustomArea(newAreaId)
-    setState('SIMULATION_AREA_SELECTION')
+    setState('DRAW_SIM_AREA')
 
     console.log('[SimulationAreaSection] Created custom area:', { id: newAreaId, name: areaName, color: areaColor })
   }

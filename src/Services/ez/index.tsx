@@ -19,7 +19,7 @@ const EzService = () => {
   return (
     <>
       <Drawer
-        open={activeService === 'EZ' && !['EMISSION_ZONE_SELECTION', 'SIMULATION_AREA_SELECTION', 'AWAIT_RESULTS'].includes(ezState)}
+        open={activeService === 'EZ' && !['DRAW_EM_ZONE', 'EDIT_EM_ZONE', 'REDRAW_EM_ZONE', 'DRAW_SIM_AREA', 'EDIT_SIM_AREA', 'AWAIT_RESULTS'].includes(ezState)}
         mask={false}
         width={730}
         placement="right"

@@ -28,11 +28,20 @@ export default function EzHeader() {
       case 'PARAMETER_SELECTION':
         setStepTitle('Parameter Selection');
         break;
-      case 'EMISSION_ZONE_SELECTION':
-        setStepTitle('Emission Zone Selection');
+      case 'DRAW_EM_ZONE':
+        setStepTitle('Draw Emission Zone');
         break;
-      case 'SIMULATION_AREA_SELECTION':
-        setStepTitle('Simulation Area Selection');
+      case 'EDIT_EM_ZONE':
+        setStepTitle('Edit Emission Zone');
+        break;
+      case 'REDRAW_EM_ZONE':
+        setStepTitle('Redraw Emission Zone');
+        break;
+      case 'DRAW_SIM_AREA':
+        setStepTitle('Draw Simulation Area');
+        break;
+      case 'EDIT_SIM_AREA':
+        setStepTitle('Edit Simulation Area');
         break;
       case 'AWAIT_RESULTS':
         setStepTitle('Processing');
