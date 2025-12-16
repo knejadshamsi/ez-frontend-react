@@ -6,7 +6,7 @@ import type { TripType } from '~stores/types';
 import { colorShader, HIDDEN_COLOR } from '~ez/utils/colorUtils';
 
 import { Button, Input, Tag } from 'antd';
-import { EditOutlined, SaveOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
+import { EditOutlined, SaveOutlined, EyeInvisibleOutlined, FormOutlined } from '@ant-design/icons';
 
 import PolicySection from '../VehicleRestrictions';
 
@@ -106,17 +106,60 @@ const ZoneSettings = ({ zoneId }) => {
               Geographic boundaries for this emission zone
             </span>
           </div>
-          <Button
-            onClick={() => {
-              setState('EMISSION_ZONE_SELECTION');
-            }}
-            className={styles.btn}
-            disabled={zone.hidden}
-          >
-            {zone.coordinates
-              ? 'Edit zone'
-              : 'Draw zone'}
-          </Button>
+          {!zone.coordinates ? (
+            <Button
+              onClick={() => {
+                setState('DRAW_EM_ZONE');
+              }}
+              className={styles.btn}
+              disabled={zone.hidden}
+            >
+              Draw zone
+            </Button>
+          ) : (
+            <div style={{
+              display: 'flex',
+              flexDirection: 'row',
+              gap: '8px',
+              alignItems: 'center',
+              '--zone-color-base': zone.hidden ? HIDDEN_COLOR : (zone.color || '#1890ff'),
+              '--zone-color-light': zone.hidden
+                ? colorShader(HIDDEN_COLOR, 1.3)
+                : (zone.color ? colorShader(zone.color, 1.3) : '#40a9ff'),
+              '--zone-color-border': zone.hidden
+                ? colorShader(HIDDEN_COLOR, 1.75)
+                : (zone.color ? colorShader(zone.color, 1.75) : '#d9d9d9'),
+              '--zone-color-hover': zone.hidden
+                ? colorShader(HIDDEN_COLOR, 0.9)
+                : (zone.color ? colorShader(zone.color, 0.9) : '#096dd9')
+            } as React.CSSProperties & {
+              '--zone-color-base': string;
+              '--zone-color-light': string;
+              '--zone-color-border': string;
+              '--zone-color-hover': string;
+            }}>
+              <Button
+                onClick={() => {
+                  setState('REDRAW_EM_ZONE');
+                }}
+                className={`${styles.btn} ${styles.redrawZoneButton}`}
+                disabled={zone.hidden}
+                type="primary"
+                style={{ flex: 1 }}
+              >
+                Redraw zone
+              </Button>
+              <Button
+                onClick={() => {
+                  setState('EDIT_EM_ZONE');
+                }}
+                disabled={zone.hidden}
+                type="default"
+                icon={<FormOutlined />}
+                className={styles.editZoneButton}
+              />
+            </div>
+          )}
         </div>
 
 

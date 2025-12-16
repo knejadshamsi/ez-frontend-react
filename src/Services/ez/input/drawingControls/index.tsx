@@ -1,8 +1,11 @@
 import { Button, Checkbox, Divider } from 'antd';
-import { CloseOutlined } from '@ant-design/icons';
+import { CloseOutlined, CheckOutlined } from '@ant-design/icons';
 import { useServiceStore } from '~globalStores';
 import { useEZServiceStore, useAPIPayloadStore, useDrawToolStore, useDrawingStateStore } from '~store';
 import { useEZSessionStore } from '~stores/session';
+import { useNotificationStore } from '~/Services/CustomNotification';
+import { validatePolygon } from '~ez/utils/polygonValidation';
+import { geoJsonToCoords } from '~ez/utils/geoJsonHelpers';
 import styles from './DrawingControls.module.less';
 
 interface LayerItem {
@@ -133,21 +136,54 @@ export const DrawingControls = () => {
   const zones = useAPIPayloadStore(state => state.payload.zones);
   const customSimulationAreas = useAPIPayloadStore(state => state.payload.customSimulationAreas);
   const scaledSimulationAreas = useAPIPayloadStore(state => state.payload.scaledSimulationAreas);
-  const removeZone = useAPIPayloadStore(state => state.removeZone);
   const removeCustomSimulationArea = useAPIPayloadStore(state => state.removeCustomSimulationArea);
+  const updateZone = useAPIPayloadStore(state => state.updateZone);
+  const updateCustomSimulationArea = useAPIPayloadStore(state => state.updateCustomSimulationArea);
+  const drawToolGeoJson = useDrawToolStore(state => state.drawToolGeoJson);
   const resetDrawTool = useDrawToolStore(state => state.reset);
   const resetDrawingState = useDrawingStateStore(state => state.reset);
+  const setNotification = useNotificationStore(state => state.setNotification);
 
-  if (activeService !== 'EZ') return null;
-  if (ezState !== 'EMISSION_ZONE_SELECTION' && ezState !== 'SIMULATION_AREA_SELECTION') {
-    return null;
-  }
+  const isDrawMode = ezState === 'DRAW_EM_ZONE' || ezState === 'DRAW_SIM_AREA' || ezState === 'REDRAW_EM_ZONE';
+  const isEditMode = ezState === 'EDIT_EM_ZONE' || ezState === 'EDIT_SIM_AREA';
+  const isZoneMode = ezState === 'DRAW_EM_ZONE' || ezState === 'EDIT_EM_ZONE' || ezState === 'REDRAW_EM_ZONE';
+  const isAreaMode = ezState === 'DRAW_SIM_AREA' || ezState === 'EDIT_SIM_AREA';
 
+  if (activeService !== 'EZ' || (!isDrawMode && !isEditMode)) return null;
+
+  // For both draw mode or edit mode.
   const handleCancel = () => {
-    if (ezState === 'EMISSION_ZONE_SELECTION' && activeZone) {
-      removeZone(activeZone);
-    } else if (ezState === 'SIMULATION_AREA_SELECTION' && activeCustomArea) {
-      removeCustomSimulationArea(activeCustomArea);
+ 
+      if (isDrawMode && ezState === 'DRAW_SIM_AREA' && activeCustomArea) removeCustomSimulationArea(activeCustomArea);
+
+  
+
+    resetDrawTool();
+    resetDrawingState();
+    setState('PARAMETER_SELECTION');
+  };
+
+  const handleDone = () => {
+    if (drawToolGeoJson.features.length > 0) {
+      const coords = geoJsonToCoords(drawToolGeoJson);
+
+      if (!coords) {
+        setNotification('Invalid polygon data', 'error');
+        return;
+      }
+
+      const validation = validatePolygon(coords, !isZoneMode);
+
+      if (!validation.isValid) {
+        setNotification(validation.error!, 'error');
+        return;
+      }
+
+      if (isZoneMode && activeZone) {
+        updateZone(activeZone, { coords });
+      } else if (activeCustomArea) {
+        updateCustomSimulationArea(activeCustomArea, { coords });
+      }
     }
 
     resetDrawTool();
@@ -156,13 +192,13 @@ export const DrawingControls = () => {
   };
 
   const otherZones = getOtherZones(
-    ezState === 'EMISSION_ZONE_SELECTION' ? activeZone : null,
+    isZoneMode ? activeZone : null,
     zones,
     sessionZones
   );
 
   const otherAreas = getOtherAreas(
-    ezState === 'SIMULATION_AREA_SELECTION' ? activeCustomArea : null,
+    isAreaMode ? activeCustomArea : null,
     customSimulationAreas,
     scaledSimulationAreas,
     zones,
@@ -173,11 +209,40 @@ export const DrawingControls = () => {
     <div className={styles.drawingControlsPanel}>
       <div className={styles.instructionsContainer}>
         <div className={styles.instructions}>
-          Click to place points. Complete the polygon or double click to save.
+          {isDrawMode
+            ? 'Click to place points. Complete the polygon or double click to save.'
+            : 'Drag vertices to move them. Click and drag on polygon lines to add new vertices. Right-click vertices to remove them.'}
         </div>
-        <Button onClick={handleCancel} icon={<CloseOutlined />} size="small" block>
-          Cancel
-        </Button>
+        {isDrawMode ? (
+          <Button
+            onClick={handleCancel}
+            icon={<CloseOutlined />}
+            size="small"
+            block
+          >
+            Cancel
+          </Button>
+        ) : (
+          <div className={styles.buttonGroup}>
+            <Button
+              onClick={handleCancel}
+              icon={<CloseOutlined />}
+              size="small"
+              className={styles.cancelButton}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDone}
+              icon={<CheckOutlined />}
+              size="small"
+              type="primary"
+              className={styles.doneButton}
+            >
+              Done
+            </Button>
+          </div>
+        )}
       </div>
 
       {(otherZones.length > 0 || otherAreas.length > 0) && (

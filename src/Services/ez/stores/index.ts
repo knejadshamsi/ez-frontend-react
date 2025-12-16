@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { v4 as uuidv4 } from 'uuid';
-import type { FeatureCollection, Geometry, GeoJsonProperties } from 'geojson';
+import type { FeatureCollection } from '@deck.gl-community/editable-layers';
 import {
   EZServiceStore,
   APIPayloadStore,
@@ -75,12 +75,12 @@ export const useEZServiceStore = create<EZServiceStore>((set) => ({
 // Manages temporary GeoJSON for map polygon drawing
 
 interface DrawToolStore {
-  drawToolGeoJson: FeatureCollection<Geometry, GeoJsonProperties>;
-  setDrawToolGeoJson: (data: FeatureCollection<Geometry, GeoJsonProperties>) => void;
+  drawToolGeoJson: FeatureCollection;
+  setDrawToolGeoJson: (data: FeatureCollection) => void;
   reset: () => void;
 }
 
-const DEFAULT_GEOJSON: FeatureCollection<Geometry, GeoJsonProperties> = {
+const DEFAULT_GEOJSON: FeatureCollection = {
   type: 'FeatureCollection',
   features: []
 };

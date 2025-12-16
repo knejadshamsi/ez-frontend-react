@@ -1,7 +1,8 @@
 import { type ReactElement } from 'react'
-import { DeleteOutlined } from '@ant-design/icons'
+import { DeleteOutlined, FormOutlined } from '@ant-design/icons'
 import { ColorPicker } from 'antd'
-import { useAPIPayloadStore } from '~store'
+import { useAPIPayloadStore, useEZServiceStore } from '~store'
+import { useEZSessionStore } from '~stores/session'
 import { colorShader } from '~ez/utils/colorUtils'
 import selectorStyles from '~ez/styles/simulationAreaSelector.module.less'
 import type { CustomSimulationArea } from '~ez/stores/types'
@@ -27,6 +28,8 @@ const DrawAreaList = (): ReactElement => {
   const customSimulationAreas = useAPIPayloadStore((state) => state.payload.customSimulationAreas)
   const removeCustomSimulationArea = useAPIPayloadStore((state) => state.removeCustomSimulationArea)
   const updateCustomSimulationArea = useAPIPayloadStore((state) => state.updateCustomSimulationArea)
+  const setState = useEZServiceStore((state) => state.setState)
+  const setActiveCustomArea = useEZSessionStore((state) => state.setActiveCustomArea)
 
   return (
     <div className={selectorStyles.drawAreaContainer}>
@@ -43,6 +46,21 @@ const DrawAreaList = (): ReactElement => {
             }}
           >
             <div className={selectorStyles.drawAreaNameLabel}>{area.name}</div>
+            <FormOutlined
+              onClick={() => {
+                if (area.coords) {
+                  setActiveCustomArea(area.id)
+                  setState('EDIT_SIM_AREA')
+                }
+              }}
+              style={{
+                cursor: area.coords ? 'pointer' : 'not-allowed',
+                color: area.coords ? '#1890ff' : '#d9d9d9',
+                fontSize: '16px',
+                marginLeft: '8px'
+              }}
+              title={area.coords ? 'Edit area boundaries' : 'Draw area first'}
+            />
             <ColorPicker
               value={area.color}
               onChange={(color) => updateCustomSimulationArea(area.id, { color: color.toHexString() })}
