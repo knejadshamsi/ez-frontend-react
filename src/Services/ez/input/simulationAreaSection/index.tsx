@@ -102,15 +102,13 @@ const SimulationAreaSection = (): ReactElement => {
   }, [apiZones, sessionZones])
 
   const handleSelectCustomArea = (): void => {
-    const areaCount = customSimulationAreas.length
-    const areaName = `Custom Area ${areaCount + 1}`
     const areaColor = DEFAULT_CUSTOM_AREA_COLOR
 
-    const newAreaId = addCustomSimulationArea(areaName, areaColor)
+    const newAreaId = addCustomSimulationArea(areaColor)
     setActiveCustomArea(newAreaId)
     setState('DRAW_SIM_AREA')
 
-    console.log('[SimulationAreaSection] Created custom area:', { id: newAreaId, name: areaName, color: areaColor })
+    console.log('[SimulationAreaSection] Created custom area:', { id: newAreaId, color: areaColor })
   }
 
   return (

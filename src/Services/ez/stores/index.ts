@@ -16,6 +16,7 @@ import {
   DEFAULT_ZONE_ID
 } from './types';
 import { useEZSessionStore } from './session';
+import { generateDefaultName, generateDuplicateName } from '../utils/namingUtils';
 
 // ============= DEFAULT VALUE =============
 const createInitialPayload = (): APIPayload => ({
@@ -97,8 +98,9 @@ export const useDrawToolStore = create<DrawToolStore>((set) => ({
 export const useAPIPayloadStore = create<APIPayloadStore>((set, get) => ({
   payload: createInitialPayload(),
 
-  addZone: (name: string, color: string): string => {
+  addZone: (color: string): string => {
     const zoneId = uuidv4();
+    const name = generateDefaultName('zone');
 
     set((state) => ({
       payload: {
@@ -155,23 +157,6 @@ export const useAPIPayloadStore = create<APIPayloadStore>((set, get) => ({
     if (!zoneToDuplicate) return;
 
     const newZoneId = uuidv4();
-
-    const generateDuplicateName = (originalName: string, existingNames: string[]): string => {
-      const copyPattern = /\s*\(Copy\)(\s+\d+)?$/;
-      const baseName = originalName.replace(copyPattern, '');
-
-      let candidateName = `${baseName} (Copy)`;
-      if (!existingNames.includes(candidateName)) {
-        return candidateName;
-      }
-
-      let counter = 2;
-      while (existingNames.includes(`${baseName} (Copy) ${counter}`)) {
-        counter++;
-      }
-
-      return `${baseName} (Copy) ${counter}`;
-    };
 
     set((state) => ({
       payload: {
@@ -241,8 +226,9 @@ export const useAPIPayloadStore = create<APIPayloadStore>((set, get) => ({
     });
   },
 
-  addCustomSimulationArea: (name: string, color: string): string => {
+  addCustomSimulationArea: (color: string): string => {
     const areaId = uuidv4();
+    const name = generateDefaultName('customArea');
 
     set((state) => ({
       payload: {

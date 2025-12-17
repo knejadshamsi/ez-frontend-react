@@ -44,8 +44,8 @@ export async function fetchScenarioInput(requestId: string): Promise<void> {
     if (inputData.customSimulationAreas && inputData.customSimulationAreas.length > 0) {
       inputData.customSimulationAreas.forEach(area => {
         if (area.coords && area.coords.length > 0) {
-          const id = apiPayloadStore.addCustomSimulationArea(area.name, area.color);
-          apiPayloadStore.updateCustomSimulationArea(id, { coords: area.coords });
+          const id = apiPayloadStore.addCustomSimulationArea(area.color);
+          apiPayloadStore.updateCustomSimulationArea(id, { name: area.name, coords: area.coords });
         }
       });
     }

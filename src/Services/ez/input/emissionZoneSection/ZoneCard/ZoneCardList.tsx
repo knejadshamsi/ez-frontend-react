@@ -134,7 +134,7 @@ const ZoneCardList = () => {
                 e.preventDefault();
                 e.stopPropagation();
                 const color = nextAvailableColor();
-                addZone(`New Zone ${apiZones.length + 1}`, color);
+                addZone(color);
               }}
               id="multi-zone-add-button"
             />

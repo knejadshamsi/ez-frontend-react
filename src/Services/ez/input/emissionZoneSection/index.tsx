@@ -48,7 +48,7 @@ const EmissionZoneSection = () => {
             style={{ width: '100%', backgroundColor: 'white' }}
             onClick={() => {
               const color = nextAvailableColor();
-              addZone(`New Zone ${apiZones.length + 1}`, color);
+              addZone(color);
             }}
             id="single-zone-add-button"
           >
