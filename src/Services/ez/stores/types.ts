@@ -107,13 +107,13 @@ export interface EZServiceStore {
 export interface APIPayloadStore {
   payload: APIPayload;
 
-  addZone: (name: string, color: string) => string;
+  addZone: (color: string) => string;
   removeZone: (zoneId: string) => void;
   duplicateZone: (zoneId: string) => void;
   updateZone: (zoneId: string, data: Partial<Zone>) => void;
   reorderZones: (activeId: string, overId: string) => void;
 
-  addCustomSimulationArea: (name: string, color: string) => string;
+  addCustomSimulationArea: (color: string) => string;
   updateCustomSimulationArea: (areaId: string, data: Partial<CustomSimulationArea>) => void;
   removeCustomSimulationArea: (areaId: string) => void;
 
