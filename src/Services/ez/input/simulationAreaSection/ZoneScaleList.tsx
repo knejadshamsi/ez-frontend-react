@@ -1,4 +1,4 @@
-import { type ReactElement } from 'react'
+import { type ReactElement, useEffect } from 'react'
 import { Button, Tooltip } from 'antd'
 import {
   AimOutlined,
@@ -10,6 +10,7 @@ import {
 import { useAPIPayloadStore } from '~store'
 import { useEZSessionStore } from '~stores/session'
 import { colorShader } from '~ez/utils/colorUtils'
+import { calculateMaxAllowedScale } from '~ez/utils/scaleUtils'
 import selectorStyles from '~ez/styles/simulationAreaSelector.module.less'
 import EZSlider from '~ez/components/EZSlider'
 import type { OriginType, ScaleUpdate, ValidatedZone } from './types'
@@ -65,6 +66,23 @@ const ZoneScaleList = (): ReactElement => {
     setZoneProperty(zoneId, 'scale', newScale)
   }
 
+  // Reset scale to 100% when zone coords change
+  useEffect(() => {
+    visibleZones.forEach(zone => {
+      if (!zone.coords) return
+
+      const sessionData = sessionZones[zone.id]
+      if (!sessionData) return
+
+      const [currentScale] = sessionData.scale || DEFAULT_SCALE
+
+      // Reset to 100% if coords have changed
+      if (currentScale !== 100) {
+        updateZoneSettings(zone.id, { percentage: 100 })
+      }
+    })
+  }, [apiZones.map(z => z.coords).join(',')]) // Watch coords changes
+
   return (
     <div className={selectorStyles.zoneScaleContainer}>
       {visibleZones.length === 0 ? (
@@ -77,6 +95,9 @@ const ZoneScaleList = (): ReactElement => {
             if (!sessionData) return null
 
             const [scalePercentage, scaleOrigin] = sessionData.scale || [100, 'center']
+            const maxAllowedScale = zone.coords
+              ? calculateMaxAllowedScale(zone.coords)
+              : 100
 
             return (
               <div
@@ -132,8 +153,7 @@ const ZoneScaleList = (): ReactElement => {
                       margin: 0,
                     }}
                     min={100}
-                    max={250}
-                    step={25}
+                    max={maxAllowedScale}
                     value={scalePercentage}
                     onChange={(value: number) => updateZoneSettings(zone.id, { percentage: value })}
                     tooltip={{ formatter: (value: number | undefined) => `${value}%` }}
