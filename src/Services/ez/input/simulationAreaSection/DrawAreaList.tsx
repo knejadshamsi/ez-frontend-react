@@ -4,6 +4,8 @@ import { ColorPicker } from 'antd'
 import { useAPIPayloadStore, useEZServiceStore } from '~store'
 import { useEZSessionStore } from '~stores/session'
 import { colorShader } from '~ez/utils/colorUtils'
+import { generateDefaultName } from '~ez/utils/namingUtils'
+import { InlineNameEditor } from '~ez/components/InlineNameEditor'
 import selectorStyles from '~ez/styles/simulationAreaSelector.module.less'
 import type { CustomSimulationArea } from '~ez/stores/types'
 import type { AreaColorPreset } from './types'
@@ -45,7 +47,12 @@ const DrawAreaList = (): ReactElement => {
               border: `2px solid ${colorShader(area.color, 1.75)}`,
             }}
           >
-            <div className={selectorStyles.drawAreaNameLabel}>{area.name}</div>
+            <InlineNameEditor
+              value={area.name}
+              onSave={(newName) => updateCustomSimulationArea(area.id, { name: newName })}
+              autoGenerateName={() => generateDefaultName('customArea')}
+              className={selectorStyles.drawAreaNameLabel}
+            />
             <FormOutlined
               onClick={() => {
                 if (area.coords) {

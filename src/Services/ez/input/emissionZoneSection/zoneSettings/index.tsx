@@ -1,18 +1,15 @@
-import { useState } from 'react';
-
 import { useAPIPayloadStore, useEZServiceStore } from '~store';
 import { useEZSessionStore } from '~stores/session';
 import type { TripType } from '~stores/types';
 import { colorShader, HIDDEN_COLOR } from '~ez/utils/colorUtils';
+import { InlineNameEditor } from '~ez/components/InlineNameEditor';
 
-import { Button, Input, Tag } from 'antd';
-import { EditOutlined, SaveOutlined, EyeInvisibleOutlined, FormOutlined } from '@ant-design/icons';
+import { Button, Tag } from 'antd';
+import { EyeInvisibleOutlined, FormOutlined } from '@ant-design/icons';
 
 import PolicySection from '../VehicleRestrictions';
 
 import styles from './zoneSettings.module.less';
-
-const MAX_NAME_LENGTH = 50;
 
 const ZoneSettings = ({ zoneId }) => {
   const apiZones = useAPIPayloadStore(state => state.payload.zones);
@@ -32,8 +29,6 @@ const ZoneSettings = ({ zoneId }) => {
     journey: apiZone?.trip || ['start'] as TripType[]
   };
 
-  const [isEditingName, setIsEditingName] = useState(false);
-
   return (
     <div className={styles.zoneSettingContainer}>
       {zone.hidden && (
@@ -46,46 +41,12 @@ const ZoneSettings = ({ zoneId }) => {
         </Tag>
       )}
 
-      <div className={styles.nameRow} style={{ display: 'flex', alignItems: 'center' }}>
-        {isEditingName ? (
-          <>
-            <Input
-              value={zone.name}
-              onChange={(e) => {
-                setZoneProperty(zoneId, 'name', e.target.value.slice(0, MAX_NAME_LENGTH))
-              }}
-              maxLength={MAX_NAME_LENGTH}
-              style={{ margin: 0, flex: 1, fontSize: '14px', fontWeight: '600' }}
-              autoFocus
-              onPressEnter={() => setIsEditingName(false)}
-              disabled={zone.hidden}
-            />
-            <Button
-              type="text"
-              size="small"
-              icon={<SaveOutlined />}
-              onClick={() => setIsEditingName(false)}
-              style={{ marginLeft: '8px', padding: '4px' }}
-              disabled={zone.hidden}
-            />
-          </>
-        ) : (
-          <>
-            <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
-              <h4 style={{ margin: '10px 0 0 8px', fontSize: '17px', fontWeight: '700' }}>
-                {zone?.name || `Zone ${zoneId}`}
-              </h4>
-              <Button
-                type="text"
-                size="small"
-                icon={<EditOutlined />}
-                onClick={() => setIsEditingName(true)}
-                style={{ margin: '10px 0 0 5px', padding: '4px' }}
-                disabled={zone.hidden}
-              />
-            </div>
-          </>
-        )}
+      <div className={styles.nameRow}>
+        <InlineNameEditor
+          value={zone.name || `Zone ${zoneId}`}
+          onSave={(newName) => setZoneProperty(zoneId, 'name', newName)}
+          disabled={zone.hidden}
+        />
       </div>
 
       <div
