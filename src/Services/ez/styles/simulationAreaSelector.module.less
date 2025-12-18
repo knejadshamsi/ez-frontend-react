@@ -144,8 +144,19 @@
 
 .drawAreaNameLabel {
   flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.drawAreaName {
   font-weight: bold;
   font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: fit-content;
 }
 
 .colorPickerDot {
