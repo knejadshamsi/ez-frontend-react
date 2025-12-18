@@ -1,4 +1,4 @@
-import { type ReactElement, useState, useRef, useEffect, type CSSProperties } from 'react'
+import { type ReactElement, useState, useRef, useEffect, useCallback, type CSSProperties } from 'react'
 import styles from './EZSlider.module.less'
 
 interface TooltipConfig {
@@ -21,7 +21,7 @@ interface EZSliderProps {
 const EZSlider = ({
   min = 0,
   max = 100,
-  step = 1,
+  step = 5,
   value = 0,
   onChange,
   tooltip,
@@ -37,6 +37,11 @@ const EZSlider = ({
   const percentage = ((value - min) / (max - min)) * 100
   const tooltipText = tooltip?.formatter ? tooltip.formatter(value) : value
 
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false)
+    setShowTooltip(false)
+  }, [])
+
   const handleAction = (action: string) => (e?: any) => {
     switch (action) {
       case 'change':
@@ -50,8 +55,7 @@ const EZSlider = ({
         setShowTooltip(true)
         break
       case 'mouseup':
-        setIsDragging(false)
-        setShowTooltip(false)
+        handleMouseUp()
         break
       case 'mouseenter':
         setShowTooltip(true)
@@ -66,12 +70,12 @@ const EZSlider = ({
 
   useEffect(() => {
     if (isDragging) {
-      document.addEventListener('mouseup', handleAction('mouseup') as any)
+      document.addEventListener('mouseup', handleMouseUp)
       return () => {
-        document.removeEventListener('mouseup', handleAction('mouseup') as any)
+        document.removeEventListener('mouseup', handleMouseUp)
       }
     }
-  }, [isDragging])
+  }, [isDragging, handleMouseUp])
 
   return (
     <div
