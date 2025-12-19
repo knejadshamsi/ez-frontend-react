@@ -92,6 +92,7 @@ export interface FullInputPayload {
   carDistribution: CarDistribution;
   modeUtilities: ModeUtilities;
   zoneSessionData?: { [zoneId: string]: { name: string; color: string; hidden: boolean; description?: string; scale: [number, string] } };
+  simulationAreaDisplay: { borderStyle: 'solid' | 'dashed' | 'dotted'; fillOpacity: number };
 }
 
 // ============= EZ SERVICE STORE INTERFACE =============
