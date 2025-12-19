@@ -1,9 +1,10 @@
-import { Divider, Button } from 'antd'
+import { Button } from 'antd'
 import { type ReactElement, useEffect } from 'react'
 import { useEZServiceStore, useAPIPayloadStore } from '~store'
 import { useEZSessionStore } from '~stores/session'
 import { ZoneScaleList } from './ZoneScaleList'
 import { DrawAreaList } from './DrawAreaList'
+import { SimulationAreaDisplayControls } from './SimulationAreaDisplayControls'
 import { polygon, transformScale, bbox, center } from '@turf/turf'
 import type { OriginType } from './types'
 import type { Zone, Coordinate } from '~ez/stores/types'
@@ -113,9 +114,17 @@ const SimulationAreaSection = (): ReactElement => {
 
   return (
     <>
-      <Divider orientationMargin={10} orientation="left" className={`${styles.divider} ${styles.boldText}`}>
-        <strong>2. SELECT SIMULATION AREA</strong>
-      </Divider>
+      <div className={styles.dividerWithControls}>
+        <strong className={styles.dividerTitle}>
+          2. SELECT SIMULATION AREA
+        </strong>
+        <div className={styles.dividerLine} />
+        {(scaledSimulationAreas.length > 0 || customSimulationAreas.length > 0) && (
+          <SimulationAreaDisplayControls compact />
+        )}
+        <div className={styles.dividerLineSpacer} />
+      </div>
+
       <div className={`${styles.container} ${styles.simulationAreaContainer}`}>
         <div className={styles.sectionContainer}>
           <div className={styles.subsectionContainer}>

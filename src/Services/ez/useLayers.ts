@@ -66,6 +66,7 @@ export function useLayers() {
   const activeZone = useEZSessionStore((state) => state.activeZone);
   const activeCustomArea = useEZSessionStore((state) => state.activeCustomArea);
   const sessionZones = useEZSessionStore((state) => state.zones);
+  const simulationAreaDisplay = useEZSessionStore((state) => state.simulationAreaDisplay);
   const apiZones = useAPIPayloadStore((state) => state.payload.zones);
   const customSimulationAreas = useAPIPayloadStore((state) => state.payload.customSimulationAreas);
   const scaledSimulationAreas = useAPIPayloadStore((state) => state.payload.scaledSimulationAreas);
@@ -322,7 +323,9 @@ export function useLayers() {
               color: area.color,
               type: 'scaled' as const
             }))
-        ]
+        ],
+        borderStyle: simulationAreaDisplay.borderStyle,
+        fillOpacity: simulationAreaDisplay.fillOpacity
       })
     : null;
 
@@ -376,7 +379,9 @@ export function useLayers() {
                 color: area.color,
                 type: 'scaled' as const
               }))
-            ]
+            ],
+            borderStyle: simulationAreaDisplay.borderStyle,
+            fillOpacity: simulationAreaDisplay.fillOpacity
           })
         : null
     };

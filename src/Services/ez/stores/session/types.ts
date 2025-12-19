@@ -1,5 +1,13 @@
 // === SESSION TYPES ===
 
+/* Simulation area display configuration */
+export type BorderStyle = 'dashed' | 'solid' | 'dotted';
+
+export interface SimulationAreaDisplayConfig {
+  borderStyle: BorderStyle;
+  fillOpacity: number; // 0 = transparent, 128 = filled
+}
+
 /* Zone session data for individual emission zones */
 export interface ZoneSessionData {
   name: string;
@@ -20,6 +28,7 @@ export interface EZSessionStore {
   colorPalette: string[];
   sseCleanup: (() => void) | null;
   isNewSimulation: boolean;
+  simulationAreaDisplay: SimulationAreaDisplayConfig;
 
   setScenarioTitle: (title: string) => void;
   setScenarioDescription: (description: string) => void;
@@ -33,6 +42,7 @@ export interface EZSessionStore {
   setSseCleanup: (cleanup: (() => void) | null) => void;
   abortSseStream: () => void;
   setIsNewSimulation: (value: boolean) => void;
+  setSimulationAreaDisplay: (config: Partial<SimulationAreaDisplayConfig>) => void;
   reset: () => void;
 }
 

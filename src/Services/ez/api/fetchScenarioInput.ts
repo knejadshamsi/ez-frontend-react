@@ -33,6 +33,9 @@ export async function fetchScenarioInput(requestId: string): Promise<void> {
       });
     }
 
+    // simulation area display config
+    sessionStore.setSimulationAreaDisplay(inputData.simulationAreaDisplay);
+
     // API payload
     if (inputData.zones) apiPayloadStore.setZones(inputData.zones);
     if (inputData.sources) apiPayloadStore.setSources(inputData.sources);

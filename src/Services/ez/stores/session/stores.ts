@@ -15,6 +15,7 @@ import {
   DEFAULT_REQUEST_ID,
   COLOR_PALETTE,
   DEFAULT_ZONE_SESSION_DATA,
+  DEFAULT_SIMULATION_AREA_DISPLAY,
   DEFAULT_VISUALIZATION_TYPE,
   DEFAULT_POLLUTANT_TYPE,
   DEFAULT_RESPONSE_VIEW,
@@ -35,6 +36,7 @@ const createInitialState = () => ({
   colorPalette: [...COLOR_PALETTE],
   sseCleanup: null as (() => void) | null,
   isNewSimulation: true,
+  simulationAreaDisplay: { ...DEFAULT_SIMULATION_AREA_DISPLAY },
 });
 
 export const useEZSessionStore = create<EZSessionStore>((set, get) => ({
@@ -103,6 +105,14 @@ export const useEZSessionStore = create<EZSessionStore>((set, get) => ({
 
   setIsNewSimulation: (isNewSimulation: boolean) =>
     set({ isNewSimulation }),
+
+  setSimulationAreaDisplay: (config) =>
+    set((state) => ({
+      simulationAreaDisplay: {
+        ...state.simulationAreaDisplay,
+        ...config
+      }
+    })),
 
   reset: () => {
     set(createInitialState());

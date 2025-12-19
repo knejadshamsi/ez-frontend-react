@@ -1,10 +1,15 @@
-import type { ZoneSessionData, VisualizationType, PollutantType, ResponseLayerView, BehavioralResponseType } from './types';
+import type { ZoneSessionData, VisualizationType, PollutantType, ResponseLayerView, BehavioralResponseType, SimulationAreaDisplayConfig } from './types';
 
 // === SESSION DEFAULTS ===
 
 export const DEFAULT_SCENARIO_TITLE = 'New Scenario';
 export const DEFAULT_SCENARIO_DESCRIPTION = '';
 export const DEFAULT_REQUEST_ID = '';
+
+export const DEFAULT_SIMULATION_AREA_DISPLAY: SimulationAreaDisplayConfig = {
+  borderStyle: 'dashed',
+  fillOpacity: 0
+};
 
 export const COLOR_PALETTE = [
   '#1A16E2',

@@ -11,11 +11,15 @@ interface SimulationAreaDisplayData {
 
 interface CreateSimulationAreaDisplayLayerInput {
   areas: SimulationAreaDisplayData[];
+  borderStyle: 'solid' | 'dashed' | 'dotted';
+  fillOpacity: number;
 }
 
 /** Create a dashed outline display layer for simulation areas */
 export const createSimulationAreaDisplayLayer = ({
-  areas
+  areas,
+  borderStyle,
+  fillOpacity
 }: CreateSimulationAreaDisplayLayerInput) => {
   // Return null if no areas
   if (!areas || areas.length === 0) {
@@ -23,11 +27,14 @@ export const createSimulationAreaDisplayLayer = ({
   }
 
   return new PolygonLayer({
-    id: 'simulation-area-display-layer',
+    id: `simulation-area-display-layer-${borderStyle}`,
     data: areas,
     getPolygon: (d: SimulationAreaDisplayData) => d.coords,
 
-    getFillColor: [0, 0, 0, 0],  // Fully transparent
+    getFillColor: (d: SimulationAreaDisplayData): [number, number, number, number] => {
+      const rgb = hexToRgb(d.color);
+      return [rgb[0], rgb[1], rgb[2], fillOpacity];
+    },
 
     // Colored outline
     getLineColor: (d: SimulationAreaDisplayData): [number, number, number, number] => {
@@ -37,8 +44,8 @@ export const createSimulationAreaDisplayLayer = ({
 
     getLineWidth: 3,
     pickable: false,
-    getDashArray: [8, 4], // Dashed line pattern
-    extensions: [new PathStyleExtension({ dash: true })],
+    getDashArray: borderStyle === 'solid' ? [0, 0] : borderStyle === 'dashed' ? [8, 4] : [2, 4],
+    extensions: borderStyle === 'solid' ? [] : [new PathStyleExtension({ dash: true })],
 
     // Disable depth testing to prevent z-fighting
     parameters: {
