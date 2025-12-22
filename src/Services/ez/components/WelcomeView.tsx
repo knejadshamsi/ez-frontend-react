@@ -1,30 +1,34 @@
-import { Space, Button, Input, Typography } from 'antd'
+import { Space, Button, Input, Typography, message } from 'antd'
 import { useEZSessionStore } from '~stores/session'
 import { useEZServiceStore } from '~store'
 import { loadScenario } from '~ez/api/startSimulation'
-import { useNotificationStore } from '~/Services/CustomNotification'
 import previousScenarios from '~ez/data/previousScenarios.json'
 import styles from '~ez/styles/WelcomeView.module.less'
 
 const { Text } = Typography
 
 export const WelcomeView = () => {
+  const [messageApi, contextHolder] = message.useMessage();
 
   const requestId = useEZSessionStore((state) => state.requestId)
   const setRequestId = useEZSessionStore((state) => state.setRequestId)
   const setState = useEZServiceStore((state) => state.setState)
-  const setNotification = useNotificationStore((state) => state.setNotification)
 
-  //====> CLICK HANDLING <====
+  const handleScenarioLoadError = (errorMessage: string) => {
+    messageApi.error(errorMessage || 'Failed to load scenario. Try again');
+    setState('WELCOME');
+  };
+
+  // CLICK HANDLING
 
   const handleViewScenario = async (scenarioRequestId: string) => {
     if (!scenarioRequestId || scenarioRequestId.trim() === '') {
-      setNotification('Invalid scenario ID', 'error')
-      return
+      messageApi.error('Invalid scenario ID');
+      return;
     }
 
-    setRequestId(scenarioRequestId)
-    await loadScenario(scenarioRequestId, setState)
+    setRequestId(scenarioRequestId);
+    await loadScenario(scenarioRequestId, setState, handleScenarioLoadError);
   }
 
   const handleCreateScenario = () => {
@@ -33,16 +37,17 @@ export const WelcomeView = () => {
 
   const handleViewPreviousScenario = async () => {
     if (!requestId || requestId.trim() === '') {
-      setNotification('Please enter a valid scenario ID', 'error')
-      return
+      messageApi.error('Please enter a valid scenario ID');
+      return;
     }
 
-    await loadScenario(requestId, setState)
+    await loadScenario(requestId, setState, handleScenarioLoadError);
   }
 
 
   return (
     <div className={styles.container}>
+      {contextHolder}
       <div className={styles.welcomeText}>
         <br />
         Welcome to <strong>Emission Zone Impact analysis Tool</strong>.<br />
