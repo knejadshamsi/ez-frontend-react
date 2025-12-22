@@ -1,3 +1,7 @@
+.headerContainer {
+  user-select: none;
+}
+
 .titleContainer {
   display: flex;
   flex-direction: column;
@@ -14,6 +18,42 @@
 
 .demoBadge {
   margin-top: -8px;
+}
+
+.demoModeWrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: -8px;
+}
+
+.demoBadgeContainer {
+  background-color: #fadb14;
+  color: rgba(0, 0, 0, 0.88);
+  border-radius: 10px;
+  padding: 0 8px;
+  font-size: 12px;
+  line-height: 20px;
+  height: 20px;
+  margin-left: 30px;
+}
+
+.retryButton {
+  padding: 0;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ff4d4f;
+  margin-left: 0;
+
+  &:hover {
+    color: #ff7875;
+  }
 }
 
 .stepTitleContainer {

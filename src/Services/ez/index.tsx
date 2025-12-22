@@ -1,7 +1,8 @@
-import { Drawer } from 'antd';
+import { Drawer, message } from 'antd';
 
 import { useServiceStore } from '~globalStores';
 import { useEZServiceStore } from '~store';
+import { useBackendAliveWatcher } from './useRetry';
 
 import { WelcomeView } from '~components/WelcomeView';
 import { ParameterSelectionView } from './input/ParameterSelectionView';
@@ -12,12 +13,16 @@ import { DrawingControls } from './input/drawingControls';
 import styles from '~styles/index.module.less';
 
 const EzService = () => {
+  const [messageApi, contextHolder] = message.useMessage();
 
   const activeService = useServiceStore((state) => state.activeService);
   const ezState = useEZServiceStore((state) => state.state);
 
+  useBackendAliveWatcher(messageApi);
+
   return (
     <>
+      {contextHolder}
       <Drawer
         open={activeService === 'EZ' && !['DRAW_EM_ZONE', 'EDIT_EM_ZONE', 'REDRAW_EM_ZONE', 'DRAW_SIM_AREA', 'EDIT_SIM_AREA', 'AWAIT_RESULTS'].includes(ezState)}
         mask={false}
