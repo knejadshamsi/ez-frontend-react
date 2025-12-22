@@ -11,7 +11,6 @@ import {
 } from '../progress';
 import { loadDemoData } from '../output/demo';
 import { fetchScenarioInput } from './fetchScenarioInput';
-import { useNotificationStore } from '~/Services/CustomNotification';
 
 export const startSimulation = async (setState: (state: EZStateType) => void): Promise<void> => {
   const isEzBackendAlive = useEZServiceStore.getState().isEzBackendAlive;
@@ -130,12 +129,12 @@ const runRealSimulation = (setState: (state: EZStateType) => void): void => {
 
 export const loadScenario = async (
   requestId: string,
-  setState: (state: EZStateType) => void
+  setState: (state: EZStateType) => void,
+  onError: (errorMessage: string) => void
 ): Promise<void> => {
   const isEzBackendAlive = useEZServiceStore.getState().isEzBackendAlive;
   const setIsNewSimulation = useEZSessionStore.getState().setIsNewSimulation;
   const setSseCleanup = useEZSessionStore.getState().setSseCleanup;
-  const setNotification = useNotificationStore.getState().setNotification;
 
   setIsNewSimulation(false);
   setState('AWAIT_RESULTS');
@@ -149,11 +148,15 @@ export const loadScenario = async (
   try {
     await fetchScenarioInput(requestId);
   } catch (error) {
-    setNotification('Failed to load scenario input data', 'error');
+    const errorMessage = error instanceof Error
+      ? error.message
+      : 'Failed to load scenario input data';
     console.error('[Load Scenario] Input fetch failed:', error);
+    onError(errorMessage);
+    return; // Stop execution
   }
 
-  runRealScenarioLoad(requestId, setState);
+  runRealScenarioLoad(requestId, setState, onError);
 };
 
 const runDemoScenarioLoad = (setState: (state: EZStateType) => void): (() => void) => {
@@ -177,10 +180,10 @@ const runDemoScenarioLoad = (setState: (state: EZStateType) => void): (() => voi
 
 const runRealScenarioLoad = (
   requestId: string,
-  setState: (state: EZStateType) => void
+  setState: (state: EZStateType) => void,
+  onError: (errorMessage: string) => void
 ): void => {
   const setSseCleanup = useEZSessionStore.getState().setSseCleanup;
-  const setNotification = useNotificationStore.getState().setNotification;
   const backendUrl = getBackendUrl();
 
   console.log('[REAL BACKEND] Loading scenario output data:', requestId);
@@ -207,8 +210,8 @@ const runRealScenarioLoad = (
     onError: (error) => {
       console.error('[SSE] Scenario load error:', error);
       setSseCleanup(null);
-      showProgressError(error.message || 'Failed to load scenario');
-      setNotification('Failed to load scenario results', 'error');
+      const errorMessage = error.message || 'Failed to load scenario results';
+      onError(errorMessage);
     },
   });
 
