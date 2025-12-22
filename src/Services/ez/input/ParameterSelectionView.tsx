@@ -7,10 +7,9 @@ import { InputContainer } from './inputContainer'
 import { createAPIRequest, validateAPIRequest } from '~ez/api/apiRequestFactory'
 
 import { startSimulation } from '~ez/api/startSimulation'
-import { useNotificationStore } from '~/Services/CustomNotification'
 import { hasOutputData } from '~stores/output'
 
-import { Button, Input, Modal } from 'antd'
+import { Button, Input, Modal, message } from 'antd'
 import { ArrowLeftOutlined, SendOutlined, EditOutlined, SaveOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
 
 import styles from './ParameterSelectionView.module.less'
@@ -19,6 +18,8 @@ const MAX_NAME_LENGTH = 50;
 
 export const ParameterSelectionView = () => {
   const [modal, contextHolder] = Modal.useModal();
+  const [messageApi, messageContextHolder] = message.useMessage();
+
   const setState = useEZServiceStore((state) => state.setState)
   const isEzBackendAlive = useEZServiceStore((state) => state.isEzBackendAlive)
   const scenarioTitle = useEZSessionStore((state) => state.scenarioTitle)
@@ -28,8 +29,6 @@ export const ParameterSelectionView = () => {
 
   const apiPayload = useAPIPayloadStore(state => state.payload)
 
-  const setNotification = useNotificationStore((state) => state.setNotification)
-
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState(scenarioTitle);
 
@@ -37,12 +36,17 @@ export const ParameterSelectionView = () => {
     setEditedTitle(scenarioTitle);
   }, [scenarioTitle]);
 
+  const handleSimulationError = (errorMessage: string) => {
+    messageApi.error(errorMessage || 'Simulation failed');
+    setState('PARAMETER_SELECTION');
+  };
+
   const handleStartSimulation = () => {
     const apiRequest = createAPIRequest(apiPayload, scenarioTitle, scenarioDescription);
     const validation = validateAPIRequest(apiRequest);
 
     if (!validation.isValid) {
-      setNotification(validation.error, 'error');
+      messageApi.error(validation.error);
       return;
     }
 
@@ -59,7 +63,7 @@ export const ParameterSelectionView = () => {
           onOk() {
             setIsNewSimulation(true);
             setState('AWAIT_RESULTS');
-            startSimulation(setState);
+            startSimulation(setState, handleSimulationError);
           },
           footer: (_, { OkBtn, CancelBtn }) => (
             <>
@@ -80,7 +84,7 @@ export const ParameterSelectionView = () => {
       } else {
         setIsNewSimulation(true);
         setState('AWAIT_RESULTS');
-        startSimulation(setState);
+        startSimulation(setState, handleSimulationError);
       }
     } else {
       if (outputExists) {
@@ -88,7 +92,7 @@ export const ParameterSelectionView = () => {
       } else {
         setIsNewSimulation(true);
         setState('AWAIT_RESULTS');
-        startSimulation(setState);
+        startSimulation(setState, handleSimulationError);
       }
     }
   }
@@ -96,6 +100,7 @@ export const ParameterSelectionView = () => {
   return (
     <>
       {contextHolder}
+      {messageContextHolder}
       <div className={styles.backButtonContainer}>
           <Button type="link" onClick={() => setState('WELCOME')} className={styles.backButton}>
             <ArrowLeftOutlined style={{fontSize: '12px'}} />

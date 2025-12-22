@@ -9,10 +9,14 @@ import {
   showProgressError,
   decodeProgressAlert,
 } from '../progress';
+import { useProgressStore } from '../progress/store';
 import { loadDemoData } from '../output/demo';
 import { fetchScenarioInput } from './fetchScenarioInput';
 
-export const startSimulation = async (setState: (state: EZStateType) => void): Promise<void> => {
+export const startSimulation = async (
+  setState: (state: EZStateType) => void,
+  onError: (errorMessage: string) => void
+): Promise<void> => {
   const isEzBackendAlive = useEZServiceStore.getState().isEzBackendAlive;
   const setSseCleanup = useEZSessionStore.getState().setSseCleanup;
 
@@ -20,7 +24,7 @@ export const startSimulation = async (setState: (state: EZStateType) => void): P
     const cleanup = runDemoSimulation(setState);
     setSseCleanup(cleanup);
   } else {
-    runRealSimulation(setState);
+    runRealSimulation(setState, onError);
   }
 };
 
@@ -75,7 +79,10 @@ const runDemoSimulation = (setState: (state: EZStateType) => void): (() => void)
   };
 };
 
-const runRealSimulation = (setState: (state: EZStateType) => void): void => {
+const runRealSimulation = (
+  setState: (state: EZStateType) => void,
+  onError: (errorMessage: string) => void
+): void => {
   const apiPayload = useAPIPayloadStore.getState().payload;
   const scenarioTitle = useEZSessionStore.getState().scenarioTitle;
   const scenarioDescription = useEZSessionStore.getState().scenarioDescription;
@@ -119,7 +126,14 @@ const runRealSimulation = (setState: (state: EZStateType) => void): void => {
     onError: (error) => {
       console.error('[SSE] Simulation error:', error);
       setSseCleanup(null);
-      showProgressError(error.message || 'Simulation failed');
+      const errorMessage = error.message || 'Simulation failed';
+
+      // Hide and reset progress
+      const progressStore = useProgressStore.getState();
+      progressStore.hide();
+      progressStore.reset();
+
+      onError(errorMessage);
     },
   });
 
