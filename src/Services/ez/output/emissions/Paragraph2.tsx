@@ -6,7 +6,7 @@ import outputStyles from '../Output.module.less';
 
 /**
  * Emissions Paragraph 2 - PM2.5 concentration and vehicle fleet composition
- * SSE Message: data_emissions_paragraph2
+ * SSE Message: data_text_paragraph2_emissions
  */
 export const Paragraph2= () => {
   const paragraph2Data = useEZOutputEmissionsStore((state) => state.emissionsParagraph2Data);

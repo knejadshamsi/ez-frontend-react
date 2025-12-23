@@ -4,7 +4,7 @@ import outputStyles from './Output.module.less';
 
 /**
  * Overview component - displays simulation summary statistics
- * SSE Message: data_overview
+ * SSE Message: data_text_overview
  */
 export const Overview = () => {
   const overviewData = useEZOutputOverviewStore((state) => state.overviewData);

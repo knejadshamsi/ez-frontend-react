@@ -10,7 +10,7 @@ import outputStyles from '../Output.module.less';
 
 /**
  * People Response Map - spatial distribution of behavioral responses
- * SSE Message: map_ready_people_response
+ * SSE Message: success_map_people_response
  */
 export const Map = () => {
   const isMapDataReady = useEZOutputMapReadyStore((state) => state.isPeopleResponseMapDataReady);

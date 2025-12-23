@@ -6,7 +6,7 @@ import outputStyles from '../Output.module.less';
 
 /**
  * Emissions Paragraph 1 - CO2 reduction and Paris Agreement context
- * SSE Message: data_emissions_paragraph1
+ * SSE Message: data_text_paragraph1_emissions
  */
 export const Paragraph1= () => {
   const paragraph1Data = useEZOutputEmissionsStore((state) => state.emissionsParagraph1Data);

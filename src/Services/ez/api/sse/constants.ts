@@ -1,19 +1,32 @@
-// === SIMULATION LIFE CYCLE EVENTS ===
-
-export const TIMELINE_EVENTS = [
-  'started', 'error',
-  'validation_started', 'validation_complete',
-  'preprocessing_started', 'preprocessing_complete',
-  'preprocessing_population_started', 'preprocessing_population_complete',
-  'preprocessing_network_started', 'preprocessing_network_complete',
-  'preprocessing_transit_started', 'preprocessing_transit_complete',
-  'preprocessing_config_started', 'preprocessing_config_complete',
-  'simulation_started', 'simulation_complete',
-  'simulation_base_started', 'simulation_base_complete',
-  'simulation_policy_started', 'simulation_policy_complete',
-  'postprocessing_started', 'postprocessing_complete',
-  'postprocessing_overview_started', 'postprocessing_overview_complete',
-  'postprocessing_emissions_started', 'postprocessing_emissions_complete',
-  'postprocessing_people_response_started', 'postprocessing_people_response_complete',
-  'postprocessing_trip_legs_started', 'postprocessing_trip_legs_complete',
-];
+// === SIMULATION PHASE EVENTS ===
+//
+// Phase events follow the pattern:
+// - pa_phase_* (phase started)
+// - success_phase_* (phase completed successfully)
+// - error_phase_* (phase failed)
+//
+// These are detected by prefix checking in handlers, no explicit array needed.
+//
+// Phase hierarchy for documentation:
+//
+// 1. Validation
+//    - validation
+//
+// 2. Preprocessing
+//    - preprocessing (parent)
+//    - preprocessing_population
+//    - preprocessing_network
+//    - preprocessing_transit
+//    - preprocessing_config
+//
+// 3. Simulation
+//    - simulation (parent)
+//    - simulation_base
+//    - simulation_policy
+//
+// 4. Postprocessing
+//    - postprocessing (parent)
+//    - postprocessing_overview
+//    - postprocessing_emissions
+//    - postprocessing_people_response
+//    - postprocessing_trip_legs

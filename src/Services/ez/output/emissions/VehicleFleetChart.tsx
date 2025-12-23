@@ -16,7 +16,7 @@ const pieChartOptions = {
 
 /**
  * Emissions Vehicle Fleet Chart - vehicle type contribution to emissions
- * SSE Message: data_emissions_pie_charts
+ * SSE Message: data_chart_pie_emissions
  */
 export const VehicleFleetChart = () => {
   const pieChartsData = useEZOutputEmissionsStore((state) => state.emissionsPieChartsData);

@@ -10,7 +10,7 @@ import outputStyles from '../Output.module.less';
 
 /**
  * Trip Legs Map - line layer showing selected trip routes
- * SSE Message: map_ready_trip_legs (signals data available)
+ * SSE Message: success_map_trip_legs (signals data available)
  * REST: GET /api/simulation/{requestId}/maps/trip-legs
  */
 export const Map = () => {

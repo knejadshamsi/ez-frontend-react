@@ -8,7 +8,7 @@ import outputStyles from '../Output.module.less';
 
 /**
  * People Response Time Impact - bar chart showing time deltas
- * SSE Message: data_people_response_time_impact
+ * SSE Message: data_chart_time_impact_people_response
  */
 export const TimeImpact = () => {
   const timeImpactData = useEZOutputPeopleResponseStore((state) => state.peopleResponseTimeImpactChartData);

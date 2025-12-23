@@ -8,7 +8,7 @@ import outputStyles from '../Output.module.less';
 
 /**
  * People Response Breakdown - stacked bar showing behavioral responses
- * SSE Message: data_people_response_breakdown
+ * SSE Message: data_chart_breakdown_people_response
  */
 export const ResponseBreakdown = () => {
   const breakdownData = useEZOutputPeopleResponseStore((state) => state.peopleResponseBreakdownChartData);
