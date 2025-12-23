@@ -11,7 +11,12 @@ interface ErrorPayload {
   details?: string;
 }
 
-// Overview statistics (SSE: data_overview)
+// Error message payload
+interface ErrorMessagePayload {
+  message: string;
+}
+
+// Overview statistics (SSE: data_text_overview)
 interface OverviewPayload {
   personCount: number;
   legCount: number;
@@ -23,7 +28,7 @@ interface OverviewPayload {
 
 // === EMISSIONS PAYLOADS ===
 
-// Emissions comparison data (SSE: data_emissions_paragraph1)
+// Emissions comparison data (SSE: data_text_paragraph1_emissions)
 interface EmissionsParagraph1Payload {
   co2Baseline: number;
   co2PostPolicy: number;
@@ -36,7 +41,7 @@ interface EmissionsParagraph1Payload {
   modeShiftPercentage: number;
 }
 
-// Air quality and vehicle fleet data (SSE: data_emissions_paragraph2)
+// Air quality and vehicle fleet data (SSE: data_text_paragraph2_emissions)
 interface EmissionsParagraph2Payload {
   pm25PostPolicy: number;
   zoneArea: number;
@@ -49,13 +54,13 @@ interface EmissionsParagraph2Payload {
   heavySharePostPolicy: number;
 }
 
-// Emissions bar chart arrays (SSE: data_emissions_bar_chart)
+// Emissions bar chart arrays (SSE: data_chart_bar_emissions)
 interface EmissionsBarChartPayload {
   baselineData: number[];
   postPolicyData: number[];
 }
 
-// Vehicle emissions pie chart data (SSE: data_emissions_pie_charts)
+// Vehicle emissions pie chart data (SSE: data_chart_pie_emissions)
 interface EmissionsPieChartsPayload {
   vehicleBaselineData: number[];
   vehiclePostPolicyData: number[];
@@ -63,7 +68,7 @@ interface EmissionsPieChartsPayload {
 
 // === PEOPLE RESPONSE PAYLOADS ===
 
-// Behavioral response percentages (SSE: data_people_response_paragraph1)
+// Behavioral response percentages (SSE: data_text_paragraph1_people_response)
 interface PeopleResponseParagraph1Payload {
   paidPenaltyPct: number;
   reroutedPct: number;
@@ -76,7 +81,7 @@ interface PeopleResponseParagraph1Payload {
   totalAffectedTrips: number;
 }
 
-// Time impact per response type (SSE: data_people_response_paragraph2)
+// Time impact per response type (SSE: data_text_paragraph2_people_response)
 interface PeopleResponseParagraph2Payload {
   avgPenaltyTime: number;
   avgRerouteTime: number;
@@ -86,14 +91,14 @@ interface PeopleResponseParagraph2Payload {
   avgBikeTime: number;
 }
 
-// Response breakdown chart data (SSE: data_people_response_breakdown, data_people_response_time_impact)
+// Response breakdown chart data (SSE: data_chart_breakdown_people_response, data_chart_time_impact_people_response)
 interface PeopleResponseChartPayload {
   data: number[];
 }
 
 // === TRIP LEGS PAYLOADS ===
 
-// First page of trip legs (SSE: data_trip_legs_first_page)
+// Trip legs table data (SSE: data_table_trip_legs)
 interface TripLegsFirstPagePayload {
   records: Array<{
     legId: string;
@@ -112,23 +117,41 @@ interface TripLegsFirstPagePayload {
 
 // Discriminated union for all SSE message types
 export type SSEMessage =
-  | { messageType: 'started'; payload: StartedPayload; timestamp: string }
+  // Lifecycle events
+  | { messageType: 'pa_connection'; payload: StartedPayload; timestamp: string }
   | { messageType: 'heartbeat'; payload: Record<string, never>; timestamp: string }
-  | { messageType: 'complete'; payload: Record<string, never>; timestamp: string }
-  | { messageType: 'error'; payload: ErrorPayload; timestamp: string }
-  | { messageType: 'data_overview'; payload: OverviewPayload; timestamp: string }
-  | { messageType: 'data_emissions_paragraph1'; payload: EmissionsParagraph1Payload; timestamp: string }
-  | { messageType: 'data_emissions_paragraph2'; payload: EmissionsParagraph2Payload; timestamp: string }
-  | { messageType: 'data_emissions_bar_chart'; payload: EmissionsBarChartPayload; timestamp: string }
-  | { messageType: 'data_emissions_pie_charts'; payload: EmissionsPieChartsPayload; timestamp: string }
-  | { messageType: 'data_people_response_paragraph1'; payload: PeopleResponseParagraph1Payload; timestamp: string }
-  | { messageType: 'data_people_response_paragraph2'; payload: PeopleResponseParagraph2Payload; timestamp: string }
-  | { messageType: 'data_people_response_breakdown'; payload: PeopleResponseChartPayload; timestamp: string }
-  | { messageType: 'data_people_response_time_impact'; payload: PeopleResponseChartPayload; timestamp: string }
-  | { messageType: 'data_trip_legs_first_page'; payload: TripLegsFirstPagePayload; timestamp: string }
-  | { messageType: 'map_ready_emissions'; payload: Record<string, never>; timestamp: string }
-  | { messageType: 'map_ready_people_response'; payload: Record<string, never>; timestamp: string }
-  | { messageType: 'map_ready_trip_legs'; payload: Record<string, never>; timestamp: string }
+  | { messageType: 'success_process'; payload: Record<string, never>; timestamp: string }
+  | { messageType: 'error_global'; payload: ErrorPayload; timestamp: string }
+
+  // Overview data
+  | { messageType: 'data_text_overview'; payload: OverviewPayload; timestamp: string }
+
+  // Emissions data
+  | { messageType: 'data_text_paragraph1_emissions'; payload: EmissionsParagraph1Payload; timestamp: string }
+  | { messageType: 'data_text_paragraph2_emissions'; payload: EmissionsParagraph2Payload; timestamp: string }
+  | { messageType: 'data_chart_bar_emissions'; payload: EmissionsBarChartPayload; timestamp: string }
+  | { messageType: 'data_chart_pie_emissions'; payload: EmissionsPieChartsPayload; timestamp: string }
+
+  // People response data
+  | { messageType: 'data_text_paragraph1_people_response'; payload: PeopleResponseParagraph1Payload; timestamp: string }
+  | { messageType: 'data_text_paragraph2_people_response'; payload: PeopleResponseParagraph2Payload; timestamp: string }
+  | { messageType: 'data_chart_breakdown_people_response'; payload: PeopleResponseChartPayload; timestamp: string }
+  | { messageType: 'data_chart_time_impact_people_response'; payload: PeopleResponseChartPayload; timestamp: string }
+
+  // Trip legs data
+  | { messageType: 'data_table_trip_legs'; payload: TripLegsFirstPagePayload; timestamp: string }
+
+  // Map ready signals
+  | { messageType: 'success_map_emissions'; payload: Record<string, never>; timestamp: string }
+  | { messageType: 'success_map_people_response'; payload: Record<string, never>; timestamp: string }
+  | { messageType: 'success_map_trip_legs'; payload: Record<string, never>; timestamp: string }
+
+  // Map errors
+  | { messageType: 'error_map_emissions'; payload: ErrorMessagePayload; timestamp: string }
+  | { messageType: 'error_map_people_response'; payload: ErrorMessagePayload; timestamp: string }
+  | { messageType: 'error_map_trip_legs'; payload: ErrorMessagePayload; timestamp: string }
+
+  // Catch-all for unknown message types
   | { messageType: string; payload: Record<string, unknown>; timestamp: string };
 
 // === EXTERNAL API TYPES ===

@@ -7,7 +7,6 @@ import {
 } from '~stores/output';
 import { decodeProgressAlert } from '../../progress';
 import type { SSEMessage, SimulationStreamConfig } from './types';
-import { TIMELINE_EVENTS } from './constants';
 import { decodeSSEMessage } from './decoder';
 
 // === PROGRESS ALERT HANDLER ===
@@ -18,8 +17,13 @@ function handleProgressAlertMessage(
   payload: SSEMessage['payload'],
   config: SimulationStreamConfig
 ): void {
-  // Route to progress decoder for timeline events
-  if (TIMELINE_EVENTS.includes(messageType)) {
+  // Route to progress decoder for phase/timeline events
+  // Phase events follow pattern: pa_phase_*, success_phase_*, error_phase_*
+  const isPhaseEvent = messageType.startsWith('pa_phase_') ||
+                       messageType.startsWith('success_phase_') ||
+                       messageType.startsWith('error_phase_');
+
+  if (isPhaseEvent) {
     decodeProgressAlert(messageType);
     if (config.onTimelineEvent) {
       config.onTimelineEvent(messageType);
@@ -29,7 +33,7 @@ function handleProgressAlertMessage(
 
   // Handle lifecycle events
   switch (messageType) {
-    case 'started':
+    case 'pa_connection':
       if (config.onStarted && 'requestId' in payload) {
         config.onStarted((payload as { requestId: string }).requestId);
       }
@@ -38,13 +42,13 @@ function handleProgressAlertMessage(
     case 'heartbeat':
       break;
 
-    case 'complete':
+    case 'success_process':
       if (config.onComplete) {
         config.onComplete();
       }
       break;
 
-    case 'error':
+    case 'error_global':
       if (config.onError) {
         const errorPayload = payload as { code: string; message: string; details?: string };
         config.onError({
@@ -55,16 +59,31 @@ function handleProgressAlertMessage(
       }
       break;
 
-    case 'map_ready_emissions':
+    case 'success_map_emissions':
       useEZOutputMapReadyStore.getState().setEmissionsMapDataReady(true);
       break;
 
-    case 'map_ready_people_response':
+    case 'success_map_people_response':
       useEZOutputMapReadyStore.getState().setPeopleResponseMapDataReady(true);
       break;
 
-    case 'map_ready_trip_legs':
+    case 'success_map_trip_legs':
       useEZOutputMapReadyStore.getState().setTripLegsMapDataReady(true);
+      break;
+
+    case 'error_map_emissions':
+      // TODO: Set error state and ready flag in stores (Phase 4)
+      console.warn('[SSE] Emissions map error received');
+      break;
+
+    case 'error_map_people_response':
+      // TODO: Set error state and ready flag in stores (Phase 4)
+      console.warn('[SSE] People response map error received');
+      break;
+
+    case 'error_map_trip_legs':
+      // TODO: Set error state and ready flag in stores (Phase 4)
+      console.warn('[SSE] Trip legs map error received');
       break;
 
     default:
@@ -81,7 +100,7 @@ function handleDataMessage(
   payload: SSEMessage['payload']
 ): void {
   switch (messageType) {
-    case 'data_overview': {
+    case 'data_text_overview': {
       const data = payload as {
         personCount: number;
         legCount: number;
@@ -101,7 +120,7 @@ function handleDataMessage(
       break;
     }
 
-    case 'data_emissions_paragraph1': {
+    case 'data_text_paragraph1_emissions': {
       const data = payload as {
         co2Baseline: number;
         co2PostPolicy: number;
@@ -127,7 +146,7 @@ function handleDataMessage(
       break;
     }
 
-    case 'data_emissions_paragraph2': {
+    case 'data_text_paragraph2_emissions': {
       const data = payload as {
         pm25PostPolicy: number;
         zoneArea: number;
@@ -153,7 +172,7 @@ function handleDataMessage(
       break;
     }
 
-    case 'data_emissions_bar_chart': {
+    case 'data_chart_bar_emissions': {
       const data = payload as {
         baselineData: number[];
         postPolicyData: number[];
@@ -165,7 +184,7 @@ function handleDataMessage(
       break;
     }
 
-    case 'data_emissions_pie_charts': {
+    case 'data_chart_pie_emissions': {
       const data = payload as {
         vehicleBaselineData: number[];
         vehiclePostPolicyData: number[];
@@ -177,7 +196,7 @@ function handleDataMessage(
       break;
     }
 
-    case 'data_people_response_paragraph1': {
+    case 'data_text_paragraph1_people_response': {
       const data = payload as {
         paidPenaltyPct: number;
         reroutedPct: number;
@@ -203,7 +222,7 @@ function handleDataMessage(
       break;
     }
 
-    case 'data_people_response_paragraph2': {
+    case 'data_text_paragraph2_people_response': {
       const data = payload as {
         avgPenaltyTime: number;
         avgRerouteTime: number;
@@ -223,7 +242,7 @@ function handleDataMessage(
       break;
     }
 
-    case 'data_people_response_breakdown': {
+    case 'data_chart_breakdown_people_response': {
       const data = payload as { data: number[] };
       useEZOutputPeopleResponseStore.getState().setPeopleResponseBreakdownChartData({
         responsePercentages: data.data,
@@ -231,7 +250,7 @@ function handleDataMessage(
       break;
     }
 
-    case 'data_people_response_time_impact': {
+    case 'data_chart_time_impact_people_response': {
       const data = payload as { data: number[] };
       useEZOutputPeopleResponseStore.getState().setPeopleResponseTimeImpactChartData({
         averageTimeDeltas: data.data,
@@ -239,7 +258,7 @@ function handleDataMessage(
       break;
     }
 
-    case 'data_trip_legs_first_page': {
+    case 'data_table_trip_legs': {
       const data = payload as {
         records: Array<{
           legId: string;

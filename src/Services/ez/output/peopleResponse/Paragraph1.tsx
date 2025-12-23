@@ -6,7 +6,7 @@ import outputStyles from '../Output.module.less';
 
 /**
  * People Response Paragraph 1 - behavioral breakdown and benchmarks
- * SSE Message: data_people_response_paragraph1
+ * SSE Message: data_text_paragraph1_people_response
  */
 export const Paragraph1= () => {
   const paragraph1Data = useEZOutputPeopleResponseStore((state) => state.peopleResponseParagraph1Data);

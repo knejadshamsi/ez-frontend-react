@@ -25,7 +25,7 @@ const barChartOptions = {
 
 /**
  * Emissions Bar Chart - pollutant comparison (baseline vs post-policy)
- * SSE Message: data_emissions_bar_chart
+ * SSE Message: data_chart_bar_emissions
  */
 export const BarChart = () => {
   const barChartData = useEZOutputEmissionsStore((state) => state.emissionsBarChartData);

@@ -10,7 +10,7 @@ import outputStyles from '../Output.module.less';
 
 /**
  * Trip Legs Table - paginated table of individual trip legs
- * SSE Message: data_trip_legs_first_page (first page delivery)
+ * SSE Message: data_table_trip_legs (first page delivery)
  * REST: GET /api/simulation/{requestId}/trip-legs?page={n}&pageSize={n}
  */
 export const Table = () => {
