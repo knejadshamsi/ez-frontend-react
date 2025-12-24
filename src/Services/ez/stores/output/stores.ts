@@ -169,36 +169,6 @@ export const useEZOutputTripLegsStore = create<EZOutputTripLegsStoreState>((set)
   }),
 }));
 
-// === MAP READY FLAGS STORE ===
-
-interface EZOutputMapReadyStoreState {
-  isEmissionsMapDataReady: boolean;
-  isPeopleResponseMapDataReady: boolean;
-  isTripLegsMapDataReady: boolean;
-
-  setEmissionsMapDataReady: (isReady: boolean) => void;
-  setPeopleResponseMapDataReady: (isReady: boolean) => void;
-  setTripLegsMapDataReady: (isReady: boolean) => void;
-
-  resetMapReadyStore: () => void;
-}
-
-export const useEZOutputMapReadyStore = create<EZOutputMapReadyStoreState>((set) => ({
-  isEmissionsMapDataReady: false,
-  isPeopleResponseMapDataReady: false,
-  isTripLegsMapDataReady: false,
-
-  setEmissionsMapDataReady: (isEmissionsMapDataReady) => set({ isEmissionsMapDataReady }),
-  setPeopleResponseMapDataReady: (isPeopleResponseMapDataReady) => set({ isPeopleResponseMapDataReady }),
-  setTripLegsMapDataReady: (isTripLegsMapDataReady) => set({ isTripLegsMapDataReady }),
-
-  resetMapReadyStore: () => set({
-    isEmissionsMapDataReady: false,
-    isPeopleResponseMapDataReady: false,
-    isTripLegsMapDataReady: false,
-  }),
-}));
-
 // === CHART CONFIGURATION STORE ===
 
 interface EZOutputChartConfigStoreState {

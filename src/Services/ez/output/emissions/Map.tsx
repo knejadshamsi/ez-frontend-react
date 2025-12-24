@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
-import { Radio, Spin, Alert } from 'antd';
-import { useEZOutputMapReadyStore } from '~stores/output';
+import { Radio, Spin } from 'antd';
 import { useEZOutputMapStore } from '~stores/output';
 import { useEZOutputFiltersStore } from '~stores/session';
 import { useEZServiceStore } from '~store';
@@ -10,11 +9,11 @@ import outputStyles from '../Output.module.less';
 
 // Interactive emissions map with pollutant selector and visualization toggle
 export const Map = () => {
-  const isMapDataReady = useEZOutputMapReadyStore((state) => state.isEmissionsMapDataReady);
-
-  const mapData = useEZOutputMapStore((state) => state.emissionsMapData);
-  const isLoading = useEZOutputMapStore((state) => state.isEmissionsMapLoading);
+  const state = useEZOutputMapStore((state) => state.emissionsMapState);
   const error = useEZOutputMapStore((state) => state.emissionsMapError);
+
+  const setState = useEZOutputMapStore((state) => state.setEmissionsMapState);
+  const setError = useEZOutputMapStore((state) => state.setEmissionsMapError);
 
   const visualizationType = useEZOutputFiltersStore((state) => state.selectedVisualizationType);
   const selectedPollutant = useEZOutputFiltersStore((state) => state.selectedPollutantType);
@@ -27,12 +26,18 @@ export const Map = () => {
   const isDemoMode = !useEZServiceStore((state) => state.isEzBackendAlive);
 
   useEffect(() => {
-    if (isMapVisible && !mapData && !isLoading) {
+    if (isMapVisible && state === 'success_initial') {
       fetchMapData('emissions', isDemoMode);
     }
-  }, [isMapVisible, mapData, isLoading, isDemoMode, fetchMapData]);
+  }, [isMapVisible, state, isDemoMode]);
 
-  if (!isMapDataReady) {
+  const handleRetry = () => {
+    setError(null);
+    setState('loading');
+    fetchMapData('emissions', isDemoMode);
+  };
+
+  if (state === 'inactive') {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
         <Spin size="default" tip="Preparing emissions map..." />
@@ -46,23 +51,11 @@ export const Map = () => {
       description="Interactive map showing emissions distribution across the network"
       isShown={isMapVisible}
       onToggle={toggleMapVisibility}
+      isLoading={state === 'loading'}
+      hasData={state === 'success'}
+      error={state === 'error_initial' || state === 'error' ? error : null}
+      onRetry={handleRetry}
     >
-      {isLoading && (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
-          <Spin size="small" tip="Loading map data..." />
-        </div>
-      )}
-
-      {error && (
-        <Alert
-          message="Error loading map data"
-          description={error}
-          type="error"
-          showIcon
-          style={{ marginBottom: '16px' }}
-        />
-      )}
-
       <div className={outputStyles.mapControlsContainer}>
         <div className={outputStyles.controlGroup}>
           <label className={outputStyles.controlLabel}>
@@ -94,7 +87,6 @@ export const Map = () => {
           </Radio.Group>
         </div>
       </div>
-
     </MapContainer>
   );
 };

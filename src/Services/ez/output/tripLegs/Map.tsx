@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
-import { Spin, Alert, Button } from 'antd';
-import { useEZOutputMapReadyStore } from '~stores/output';
+import { Spin, Button } from 'antd';
 import { useEZOutputMapStore } from '~stores/output';
 import { useEZOutputFiltersStore } from '~stores/session';
 import { useEZServiceStore } from '~store';
@@ -14,11 +13,12 @@ import outputStyles from '../Output.module.less';
  * REST: GET /api/simulation/{requestId}/maps/trip-legs
  */
 export const Map = () => {
-  const isMapDataReady = useEZOutputMapReadyStore((state) => state.isTripLegsMapDataReady);
-
+  const state = useEZOutputMapStore((state) => state.tripLegsMapState);
   const mapData = useEZOutputMapStore((state) => state.tripLegsMapData);
-  const isLoading = useEZOutputMapStore((state) => state.isTripLegsMapLoading);
   const error = useEZOutputMapStore((state) => state.tripLegsMapError);
+
+  const setState = useEZOutputMapStore((state) => state.setTripLegsMapState);
+  const setError = useEZOutputMapStore((state) => state.setTripLegsMapError);
 
   const isMapVisible = useEZOutputFiltersStore((state) => state.isTripLegsMapVisible);
   const toggleMapVisibility = useEZOutputFiltersStore((state) => state.toggleTripLegsMapVisibility);
@@ -30,12 +30,18 @@ export const Map = () => {
   const isDemoMode = !useEZServiceStore((state) => state.isEzBackendAlive);
 
   useEffect(() => {
-    if (isMapVisible && mapData.length === 0 && !isLoading) {
+    if (isMapVisible && state === 'success_initial') {
       fetchMapData('tripLegs', isDemoMode);
     }
-  }, [isMapVisible, mapData.length, isLoading, isDemoMode, fetchMapData]);
+  }, [isMapVisible, state, isDemoMode]);
 
-  if (!isMapDataReady) {
+  const handleRetry = () => {
+    setError(null);
+    setState('loading');
+    fetchMapData('tripLegs', isDemoMode);
+  };
+
+  if (state === 'inactive') {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
         <Spin size="default" tip="Preparing trip legs map..." />
@@ -59,37 +65,23 @@ export const Map = () => {
       description="Line layer showing the selected trip route on the network"
       isShown={isMapVisible}
       onToggle={toggleMapVisibility}
+      isLoading={state === 'loading'}
+      hasData={state === 'success'}
+      error={state === 'error_initial' || state === 'error' ? error : null}
+      onRetry={handleRetry}
     >
-      {isLoading && (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
-          <Spin size="small" tip="Loading map data..." />
-        </div>
-      )}
-
-      {error && (
-        <Alert
-          message="Error loading map data"
-          description={error}
-          type="error"
-          showIcon
-          style={{ marginBottom: '16px' }}
-        />
-      )}
-
-      {!isLoading && !error && mapData.length > 0 && (
-        <div className={outputStyles.tripLegsMapContainer}>
-          <span className={outputStyles.tripLegsMapText}>
-            {mapData.length} paths loaded. Select row from table below to view it on the map.
-          </span>
-          <Button
-            type={allPathsVisible ? 'primary' : 'default'}
-            size="small"
-            onClick={handleToggleAll}
-          >
-            {allPathsVisible ? 'Hide all' : 'Show all'}
-          </Button>
-        </div>
-      )}
+      <div className={outputStyles.tripLegsMapContainer}>
+        <span className={outputStyles.tripLegsMapText}>
+          {mapData.length} paths loaded. Select row from table below to view it on the map.
+        </span>
+        <Button
+          type={allPathsVisible ? 'primary' : 'default'}
+          size="small"
+          onClick={handleToggleAll}
+        >
+          {allPathsVisible ? 'Hide all' : 'Show all'}
+        </Button>
+      </div>
     </MapContainer>
   );
 };

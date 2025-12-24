@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
-import { Radio, Spin, Alert } from 'antd';
-import { useEZOutputMapReadyStore } from '~stores/output';
+import { Radio, Spin } from 'antd';
 import { useEZOutputMapStore, getPeopleResponsePoints } from '~stores/output';
 import { useEZOutputFiltersStore } from '~stores/session';
 import { useEZServiceStore } from '~store';
@@ -13,11 +12,12 @@ import outputStyles from '../Output.module.less';
  * SSE Message: success_map_people_response
  */
 export const Map = () => {
-  const isMapDataReady = useEZOutputMapReadyStore((state) => state.isPeopleResponseMapDataReady);
-
+  const state = useEZOutputMapStore((state) => state.peopleResponseMapState);
   const mapData = useEZOutputMapStore((state) => state.peopleResponseMapData);
-  const isLoading = useEZOutputMapStore((state) => state.isPeopleResponseMapLoading);
   const error = useEZOutputMapStore((state) => state.peopleResponseMapError);
+
+  const setState = useEZOutputMapStore((state) => state.setPeopleResponseMapState);
+  const setError = useEZOutputMapStore((state) => state.setPeopleResponseMapError);
 
   const responseLayerView = useEZOutputFiltersStore((state) => state.selectedResponseLayerView);
   const responseType = useEZOutputFiltersStore((state) => state.selectedBehavioralResponseType);
@@ -30,14 +30,18 @@ export const Map = () => {
   const isDemoMode = !useEZServiceStore((state) => state.isEzBackendAlive);
 
   useEffect(() => {
-    if (isMapVisible && !mapData && !isLoading) {
+    if (isMapVisible && state === 'success_initial') {
       fetchMapData('peopleResponse', isDemoMode);
     }
-  }, [isMapVisible, mapData, isLoading, isDemoMode, fetchMapData]);
+  }, [isMapVisible, state, isDemoMode]);
 
-  const currentPoints = getPeopleResponsePoints(mapData, responseLayerView, responseType);
+  const handleRetry = () => {
+    setError(null);
+    setState('loading');
+    fetchMapData('peopleResponse', isDemoMode);
+  };
 
-  if (!isMapDataReady) {
+  if (state === 'inactive') {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
         <Spin size="default" tip="Preparing people response map..." />
@@ -45,28 +49,19 @@ export const Map = () => {
     );
   }
 
+  const currentPoints = getPeopleResponsePoints(mapData, responseLayerView, responseType);
+
   return (
     <MapContainer
       title="People Response Map"
       description="Screen grid visualization showing spatial distribution of behavioral responses"
       isShown={isMapVisible}
       onToggle={toggleMapVisibility}
+      isLoading={state === 'loading'}
+      hasData={state === 'success'}
+      error={state === 'error_initial' || state === 'error' ? error : null}
+      onRetry={handleRetry}
     >
-      {isLoading && (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
-          <Spin size="small" tip="Loading map data..." />
-        </div>
-      )}
-
-      {error && (
-        <Alert
-          message="Error loading map data"
-          description={error}
-          type="error"
-          showIcon
-          style={{ marginBottom: '16px' }}
-        />
-      )}
 
       <div className={outputStyles.mapControlsContainerVertical}>
         <div className={outputStyles.controlGroup}>

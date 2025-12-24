@@ -3,7 +3,7 @@ import {
   useEZOutputEmissionsStore,
   useEZOutputPeopleResponseStore,
   useEZOutputTripLegsStore,
-  useEZOutputMapReadyStore,
+  useEZOutputMapStore,
 } from '~stores/output';
 import { decodeProgressAlert } from '../../progress';
 import type { SSEMessage, SimulationStreamConfig } from './types';
@@ -60,31 +60,37 @@ function handleProgressAlertMessage(
       break;
 
     case 'success_map_emissions':
-      useEZOutputMapReadyStore.getState().setEmissionsMapDataReady(true);
+      useEZOutputMapStore.getState().setEmissionsMapState('success_initial');
       break;
 
     case 'success_map_people_response':
-      useEZOutputMapReadyStore.getState().setPeopleResponseMapDataReady(true);
+      useEZOutputMapStore.getState().setPeopleResponseMapState('success_initial');
       break;
 
     case 'success_map_trip_legs':
-      useEZOutputMapReadyStore.getState().setTripLegsMapDataReady(true);
+      useEZOutputMapStore.getState().setTripLegsMapState('success_initial');
       break;
 
-    case 'error_map_emissions':
-      // TODO: Set error state and ready flag in stores (Phase 4)
-      console.warn('[SSE] Emissions map error received');
+    case 'error_map_emissions': {
+      const errorData = payload as { message: string };
+      useEZOutputMapStore.getState().setEmissionsMapState('error_initial');
+      useEZOutputMapStore.getState().setEmissionsMapError(errorData.message);
       break;
+    }
 
-    case 'error_map_people_response':
-      // TODO: Set error state and ready flag in stores (Phase 4)
-      console.warn('[SSE] People response map error received');
+    case 'error_map_people_response': {
+      const errorData = payload as { message: string };
+      useEZOutputMapStore.getState().setPeopleResponseMapState('error_initial');
+      useEZOutputMapStore.getState().setPeopleResponseMapError(errorData.message);
       break;
+    }
 
-    case 'error_map_trip_legs':
-      // TODO: Set error state and ready flag in stores (Phase 4)
-      console.warn('[SSE] Trip legs map error received');
+    case 'error_map_trip_legs': {
+      const errorData = payload as { message: string };
+      useEZOutputMapStore.getState().setTripLegsMapState('error_initial');
+      useEZOutputMapStore.getState().setTripLegsMapError(errorData.message);
       break;
+    }
 
     default:
       console.warn(`[SSE] Unhandled progress alert: ${messageType}`);

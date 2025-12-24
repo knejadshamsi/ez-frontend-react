@@ -5,7 +5,7 @@ import {
   useEZOutputEmissionsStore,
   useEZOutputPeopleResponseStore,
   useEZOutputTripLegsStore,
-  useEZOutputMapReadyStore,
+  useEZOutputMapStore,
   type EZOutputOverviewData,
   type EZEmissionsParagraph1Data,
   type EZEmissionsParagraph2Data,
@@ -108,16 +108,25 @@ const DEMO_TRIP_LEG_FIRST_PAGE: EZTripLegRecord[] = [
 // Populates all output stores with demo data (called when backend is unavailable)
 export const loadDemoData = (): void => {
   useEZOutputOverviewStore.getState().setOverviewData(DEMO_OVERVIEW_DATA);
+  useEZOutputOverviewStore.getState().setOverviewState('success');
 
   useEZOutputEmissionsStore.getState().setEmissionsParagraph1Data(DEMO_EMISSIONS_PARAGRAPH1_DATA);
+  useEZOutputEmissionsStore.getState().setEmissionsParagraph1State('success');
   useEZOutputEmissionsStore.getState().setEmissionsParagraph2Data(DEMO_EMISSIONS_PARAGRAPH2_DATA);
+  useEZOutputEmissionsStore.getState().setEmissionsParagraph2State('success');
   useEZOutputEmissionsStore.getState().setEmissionsBarChartData(DEMO_EMISSIONS_BAR_CHART_DATA);
+  useEZOutputEmissionsStore.getState().setEmissionsBarChartState('success');
   useEZOutputEmissionsStore.getState().setEmissionsPieChartsData(DEMO_EMISSIONS_PIE_CHARTS_DATA);
+  useEZOutputEmissionsStore.getState().setEmissionsPieChartsState('success');
 
   useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph1Data(DEMO_PEOPLE_RESPONSE_PARAGRAPH1_DATA);
+  useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph1State('success');
   useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph2Data(DEMO_PEOPLE_RESPONSE_PARAGRAPH2_DATA);
+  useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph2State('success');
   useEZOutputPeopleResponseStore.getState().setPeopleResponseBreakdownChartData(DEMO_PEOPLE_RESPONSE_BREAKDOWN_DATA);
+  useEZOutputPeopleResponseStore.getState().setPeopleResponseBreakdownChartState('success');
   useEZOutputPeopleResponseStore.getState().setPeopleResponseTimeImpactChartData(DEMO_PEOPLE_RESPONSE_TIME_IMPACT_DATA);
+  useEZOutputPeopleResponseStore.getState().setPeopleResponseTimeImpactChartState('success');
 
   useEZOutputTripLegsStore.getState().setTripLegsFirstPage({
     records: DEMO_TRIP_LEG_FIRST_PAGE,
@@ -125,9 +134,9 @@ export const loadDemoData = (): void => {
     pageSize: DEMO_TRIP_LEGS_PAGE_SIZE,
   });
 
-  useEZOutputMapReadyStore.getState().setEmissionsMapDataReady(true);
-  useEZOutputMapReadyStore.getState().setPeopleResponseMapDataReady(true);
-  useEZOutputMapReadyStore.getState().setTripLegsMapDataReady(true);
+  useEZOutputMapStore.getState().setEmissionsMapState('success_initial');
+  useEZOutputMapStore.getState().setPeopleResponseMapState('success_initial');
+  useEZOutputMapStore.getState().setTripLegsMapState('success_initial');
 };
 
 // Watches backend status and loads demo data when backend is unavailable

@@ -9,12 +9,13 @@ import type {
   PeopleResponseMapData,
   MapPointData,
   MapPathData,
+  OutputComponentState,
 } from '~stores/output';
 
 const DEMO_CONFIG = {
   pointsPerCategory: 150,
   defaultBbox: [-73.65, 45.45, -73.50, 45.55] as BBox,
-  networkDelayMs: 500,
+  networkDelayMs: 2000,
   weight: { min: 1, max: 11 },
   waypoints: { min: 3, max: 6 },
   co2Delta: { bias: -0.3, range: 500 },
@@ -136,7 +137,7 @@ type MapType = 'emissions' | 'peopleResponse' | 'tripLegs';
 const loadMapDataWithDelay = <T>(
   mapType: MapType,
   dataGetter: () => T | T[],
-  setLoading: (loading: boolean) => void,
+  setState: (state: OutputComponentState) => void,
   setData: (data: T) => void,
   generator: () => T
 ): void => {
@@ -145,10 +146,10 @@ const loadMapDataWithDelay = <T>(
 
   if (hasData) return;
 
-  setLoading(true);
+  setState('loading');
   setTimeout(() => {
     setData(generator());
-    setLoading(false);
+    setState('success');
   }, DEMO_CONFIG.networkDelayMs);
 };
 
@@ -160,7 +161,7 @@ export const loadDemoMapData = (mapType: MapType): void => {
       loadMapDataWithDelay(
         'emissions',
         () => store.emissionsMapData,
-        store.setEmissionsMapLoading,
+        store.setEmissionsMapState,
         store.setEmissionsMapData,
         generateDemoEmissionsMapData
       );
@@ -170,7 +171,7 @@ export const loadDemoMapData = (mapType: MapType): void => {
       loadMapDataWithDelay(
         'peopleResponse',
         () => store.peopleResponseMapData,
-        store.setPeopleResponseMapLoading,
+        store.setPeopleResponseMapState,
         store.setPeopleResponseMapData,
         generateDemoPeopleResponseMapData
       );
@@ -180,7 +181,7 @@ export const loadDemoMapData = (mapType: MapType): void => {
       loadMapDataWithDelay<MapPathData[]>(
         'tripLegs',
         () => store.tripLegsMapData,
-        store.setTripLegsMapLoading,
+        store.setTripLegsMapState,
         store.setTripLegsMapData,
         generateDemoTripLegsMapData
       );

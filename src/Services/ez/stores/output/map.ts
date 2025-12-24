@@ -1,37 +1,37 @@
 import { create } from 'zustand';
-import type { EmissionsMapData, PeopleResponseMapData, MapPathData } from './types';
+import type { EmissionsMapData, PeopleResponseMapData, MapPathData, OutputComponentState } from './types';
 
 // === MAP STORE ===
 
 interface EZOutputMapStoreState {
-  /* Emissions map data */
+  /* Emissions map state */
+  emissionsMapState: OutputComponentState;
   emissionsMapData: EmissionsMapData | null;
-  isEmissionsMapLoading: boolean;
   emissionsMapError: string | null;
 
-  /* People response map data */
+  /* People response map state */
+  peopleResponseMapState: OutputComponentState;
   peopleResponseMapData: PeopleResponseMapData | null;
-  isPeopleResponseMapLoading: boolean;
   peopleResponseMapError: string | null;
 
-  /* Trip legs map data */
+  /* Trip legs map state */
+  tripLegsMapState: OutputComponentState;
   tripLegsMapData: MapPathData[];
-  isTripLegsMapLoading: boolean;
   tripLegsMapError: string | null;
 
   /* Emissions actions */
+  setEmissionsMapState: (state: OutputComponentState) => void;
   setEmissionsMapData: (data: EmissionsMapData) => void;
-  setEmissionsMapLoading: (isLoading: boolean) => void;
   setEmissionsMapError: (error: string | null) => void;
 
   /* People response actions */
+  setPeopleResponseMapState: (state: OutputComponentState) => void;
   setPeopleResponseMapData: (data: PeopleResponseMapData) => void;
-  setPeopleResponseMapLoading: (isLoading: boolean) => void;
   setPeopleResponseMapError: (error: string | null) => void;
 
   /* Trip legs actions */
+  setTripLegsMapState: (state: OutputComponentState) => void;
   setTripLegsMapData: (data: MapPathData[]) => void;
-  setTripLegsMapLoading: (isLoading: boolean) => void;
   setTripLegsMapError: (error: string | null) => void;
 
   /* Reset */
@@ -39,30 +39,30 @@ interface EZOutputMapStoreState {
 }
 
 const createInitialMapState = () => ({
+  emissionsMapState: 'inactive' as OutputComponentState,
   emissionsMapData: null as EmissionsMapData | null,
-  isEmissionsMapLoading: false,
   emissionsMapError: null as string | null,
+  peopleResponseMapState: 'inactive' as OutputComponentState,
   peopleResponseMapData: null as PeopleResponseMapData | null,
-  isPeopleResponseMapLoading: false,
   peopleResponseMapError: null as string | null,
+  tripLegsMapState: 'inactive' as OutputComponentState,
   tripLegsMapData: [] as MapPathData[],
-  isTripLegsMapLoading: false,
   tripLegsMapError: null as string | null,
 });
 
 export const useEZOutputMapStore = create<EZOutputMapStoreState>((set) => ({
   ...createInitialMapState(),
 
+  setEmissionsMapState: (emissionsMapState) => set({ emissionsMapState }),
   setEmissionsMapData: (emissionsMapData) => set({ emissionsMapData }),
-  setEmissionsMapLoading: (isEmissionsMapLoading) => set({ isEmissionsMapLoading }),
   setEmissionsMapError: (emissionsMapError) => set({ emissionsMapError }),
 
+  setPeopleResponseMapState: (peopleResponseMapState) => set({ peopleResponseMapState }),
   setPeopleResponseMapData: (peopleResponseMapData) => set({ peopleResponseMapData }),
-  setPeopleResponseMapLoading: (isPeopleResponseMapLoading) => set({ isPeopleResponseMapLoading }),
   setPeopleResponseMapError: (peopleResponseMapError) => set({ peopleResponseMapError }),
 
+  setTripLegsMapState: (tripLegsMapState) => set({ tripLegsMapState }),
   setTripLegsMapData: (tripLegsMapData) => set({ tripLegsMapData }),
-  setTripLegsMapLoading: (isTripLegsMapLoading) => set({ isTripLegsMapLoading }),
   setTripLegsMapError: (tripLegsMapError) => set({ tripLegsMapError }),
 
   resetMapStore: () => set(createInitialMapState()),
