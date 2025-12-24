@@ -3,7 +3,6 @@ import {
   useEZOutputEmissionsStore,
   useEZOutputPeopleResponseStore,
   useEZOutputTripLegsStore,
-  useEZOutputMapReadyStore,
 } from './stores';
 import { useEZOutputMapStore } from './map';
 
@@ -17,7 +16,6 @@ export const resetAllEZOutputStores = (): void => {
   useEZOutputEmissionsStore.getState().resetEmissionsStore();
   useEZOutputPeopleResponseStore.getState().resetPeopleResponseStore();
   useEZOutputTripLegsStore.getState().resetTripLegsStore();
-  useEZOutputMapReadyStore.getState().resetMapReadyStore();
   useEZOutputMapStore.getState().resetMapStore();
 };
 

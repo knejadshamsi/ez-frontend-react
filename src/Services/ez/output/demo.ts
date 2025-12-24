@@ -5,7 +5,7 @@ import {
   useEZOutputEmissionsStore,
   useEZOutputPeopleResponseStore,
   useEZOutputTripLegsStore,
-  useEZOutputMapReadyStore,
+  useEZOutputMapStore,
   type EZOutputOverviewData,
   type EZEmissionsParagraph1Data,
   type EZEmissionsParagraph2Data,
@@ -125,9 +125,9 @@ export const loadDemoData = (): void => {
     pageSize: DEMO_TRIP_LEGS_PAGE_SIZE,
   });
 
-  useEZOutputMapReadyStore.getState().setEmissionsMapDataReady(true);
-  useEZOutputMapReadyStore.getState().setPeopleResponseMapDataReady(true);
-  useEZOutputMapReadyStore.getState().setTripLegsMapDataReady(true);
+  useEZOutputMapStore.getState().setEmissionsMapState('success_initial');
+  useEZOutputMapStore.getState().setPeopleResponseMapState('success_initial');
+  useEZOutputMapStore.getState().setTripLegsMapState('success_initial');
 };
 
 // Watches backend status and loads demo data when backend is unavailable

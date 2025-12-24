@@ -34,8 +34,8 @@ const fetchMapDataInternal = async (type: MapType): Promise<void> => {
   // Capitalize first letter for method names (emissions -> Emissions)
   const typeCapitalized = type.charAt(0).toUpperCase() + type.slice(1);
 
-  // Set loading and clear error
-  (store as any)[`set${typeCapitalized}MapLoading`](true);
+  // Set loading state and clear error
+  (store as any)[`set${typeCapitalized}MapState`]('loading');
   (store as any)[`set${typeCapitalized}MapError`](null);
 
   try {
@@ -47,11 +47,11 @@ const fetchMapDataInternal = async (type: MapType): Promise<void> => {
     );
 
     (store as any)[`set${typeCapitalized}MapData`](response.data);
+    (store as any)[`set${typeCapitalized}MapState`]('success');
   } catch (error) {
     const message = error instanceof Error ? error.message : `Failed to fetch ${type} map data`;
     (store as any)[`set${typeCapitalized}MapError`](message);
-  } finally {
-    (store as any)[`set${typeCapitalized}MapLoading`](false);
+    (store as any)[`set${typeCapitalized}MapState`]('error');
   }
 };
 

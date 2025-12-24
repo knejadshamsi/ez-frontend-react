@@ -189,3 +189,12 @@ export interface PeopleResponseMapData {
     cancelledTrip: MapPointData[];
   };
 }
+
+// === OUTPUT COMPONENT STATE MACHINE ===
+export type OutputComponentState =
+  | 'inactive'     
+  | 'error_initial'
+  | 'success_initial'
+  | 'loading'
+  | 'error'
+  | 'success';
