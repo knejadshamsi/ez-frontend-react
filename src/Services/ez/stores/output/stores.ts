@@ -16,6 +16,7 @@ import type {
   EZEmissionsBarChartConfig,
   EZVehicleEmissionsChartConfig,
   EZTripLegsTableConfig,
+  OutputComponentState,
 } from './types';
 import {
   DEFAULT_PEOPLE_RESPONSE_CHART_CONFIG,
@@ -120,13 +121,13 @@ interface TripLegsFirstPageData {
 interface EZOutputTripLegsStoreState {
   tripLegRecords: EZTripLegRecord[];
   tripLegsPagination: EZTripLegsPaginationInfo | null;
-  isTripLegsLoading: boolean;
-  tripLegsLoadError: string | null;
+  tripLegsTableState: OutputComponentState;
+  tripLegsTableError: string | null;
 
   setTripLegRecords: (records: EZTripLegRecord[]) => void;
   setTripLegsPagination: (pagination: EZTripLegsPaginationInfo) => void;
-  setTripLegsLoading: (isLoading: boolean) => void;
-  setTripLegsLoadError: (error: string | null) => void;
+  setTripLegsTableState: (state: OutputComponentState) => void;
+  setTripLegsTableError: (error: string | null) => void;
   setTripLegsFirstPage: (data: TripLegsFirstPageData) => void;
   setTripLegsPage: (page: number, records: EZTripLegRecord[]) => void;
 
@@ -136,13 +137,13 @@ interface EZOutputTripLegsStoreState {
 export const useEZOutputTripLegsStore = create<EZOutputTripLegsStoreState>((set) => ({
   tripLegRecords: [],
   tripLegsPagination: null,
-  isTripLegsLoading: false,
-  tripLegsLoadError: null,
+  tripLegsTableState: 'inactive' as OutputComponentState,
+  tripLegsTableError: null,
 
   setTripLegRecords: (tripLegRecords) => set({ tripLegRecords }),
   setTripLegsPagination: (tripLegsPagination) => set({ tripLegsPagination }),
-  setTripLegsLoading: (isTripLegsLoading) => set({ isTripLegsLoading }),
-  setTripLegsLoadError: (tripLegsLoadError) => set({ tripLegsLoadError }),
+  setTripLegsTableState: (tripLegsTableState) => set({ tripLegsTableState }),
+  setTripLegsTableError: (tripLegsTableError) => set({ tripLegsTableError }),
 
   setTripLegsFirstPage: ({ records, totalRecords, pageSize }) => set({
     tripLegRecords: records,
@@ -152,6 +153,7 @@ export const useEZOutputTripLegsStore = create<EZOutputTripLegsStoreState>((set)
       totalRecords,
       totalPages: Math.ceil(totalRecords / pageSize),
     },
+    tripLegsTableState: 'success' as OutputComponentState,
   }),
 
   setTripLegsPage: (page, records) => set((state) => ({
@@ -164,8 +166,8 @@ export const useEZOutputTripLegsStore = create<EZOutputTripLegsStoreState>((set)
   resetTripLegsStore: () => set({
     tripLegRecords: [],
     tripLegsPagination: null,
-    isTripLegsLoading: false,
-    tripLegsLoadError: null,
+    tripLegsTableState: 'inactive' as OutputComponentState,
+    tripLegsTableError: null,
   }),
 }));
 

@@ -1,4 +1,4 @@
-import { Table as AntTable, Spin } from 'antd';
+import { Table as AntTable, Spin, Alert, Button } from 'antd';
 import {
   useEZOutputTripLegsStore,
   useEZOutputChartConfigStore,
@@ -19,7 +19,8 @@ export const Table = () => {
 
   const tripLegRecords = useEZOutputTripLegsStore((state) => state.tripLegRecords);
   const pagination = useEZOutputTripLegsStore((state) => state.tripLegsPagination);
-  const isLoading = useEZOutputTripLegsStore((state) => state.isTripLegsLoading);
+  const state = useEZOutputTripLegsStore((state) => state.tripLegsTableState);
+  const error = useEZOutputTripLegsStore((state) => state.tripLegsTableError);
 
   const tableConfig = useEZOutputChartConfigStore((state) => state.tripLegsTableConfig);
 
@@ -54,15 +55,41 @@ export const Table = () => {
     fetchTripLegsPage(page);
   };
 
+  const handleRetry = () => {
+    if (pagination) {
+      fetchTripLegsPage(pagination.currentPage);
+    }
+  };
+
   return (
     <>
+      {error && (
+        <Alert
+          message="Error loading trip legs page"
+          description={error}
+          type="error"
+          showIcon
+          action={
+            <Button
+              size="small"
+              danger
+              onClick={handleRetry}
+              loading={state === 'loading'}
+            >
+              Retry
+            </Button>
+          }
+          className={outputStyles.tripLegsErrorAlert}
+        />
+      )}
+
       <span className={outputStyles.chartDescription}>
         Sample of individual trip legs showing the granular impact on emissions and travel time. Click column headers to sort or click a row to toggle visibility on map.
       </span>
       <AntTable
         dataSource={tripLegRecords}
         columns={columns}
-        loading={isLoading}
+        loading={state === 'loading'}
         pagination={{
           current: pagination.currentPage,
           pageSize: pagination.pageSize,
