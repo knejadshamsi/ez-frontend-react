@@ -59,8 +59,8 @@ export const fetchTripLegsPage = async (page: number): Promise<void> => {
     return;
   }
 
-  store.setTripLegsLoading(true);
-  store.setTripLegsLoadError(null);
+  store.setTripLegsTableState('loading');
+  store.setTripLegsTableError(null);
 
   try {
     if (isDemoMode) {
@@ -68,6 +68,7 @@ export const fetchTripLegsPage = async (page: number): Promise<void> => {
       await new Promise(resolve => setTimeout(resolve, 300));
       const records = generateDemoTripLegsPage(page, pagination.pageSize, pagination.totalRecords);
       store.setTripLegsPage(page, records);
+      store.setTripLegsTableState('success');
       console.log(`[TripLegsFetch] Demo page ${page} loaded with ${records.length} records`);
     } else {
       // Real mode
@@ -85,13 +86,13 @@ export const fetchTripLegsPage = async (page: number): Promise<void> => {
       );
 
       store.setTripLegsPage(page, response.data.records);
+      store.setTripLegsTableState('success');
       console.log(`[TripLegsFetch] Page ${page} loaded with ${response.data.records.length} records`);
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to fetch trip legs page';
     console.error('[TripLegsFetch] Error:', message);
-    store.setTripLegsLoadError(message);
-  } finally {
-    store.setTripLegsLoading(false);
+    store.setTripLegsTableError(message);
+    store.setTripLegsTableState('error');
   }
 };
