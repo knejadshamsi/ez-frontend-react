@@ -8,6 +8,54 @@ import {
 import { decodeProgressAlert } from '../../progress';
 import type { SSEMessage, SimulationStreamConfig } from './types';
 import { decodeSSEMessage } from './decoder';
+import type { OutputComponentState } from '~stores/output/types';
+
+// === ERROR HANDLER CONFIGURATION ===
+
+type ErrorHandlerConfig = {
+  setState: (state: OutputComponentState) => void;
+  setError: (error: string | null) => void;
+};
+
+// Configuration map for SSE component error handlers
+const ERROR_HANDLER_MAP: Record<string, ErrorHandlerConfig> = {
+  error_text_overview: {
+    setState: (state) => useEZOutputOverviewStore.getState().setOverviewState(state),
+    setError: (error) => useEZOutputOverviewStore.getState().setOverviewError(error),
+  },
+  error_text_paragraph1_emissions: {
+    setState: (state) => useEZOutputEmissionsStore.getState().setEmissionsParagraph1State(state),
+    setError: (error) => useEZOutputEmissionsStore.getState().setEmissionsParagraph1Error(error),
+  },
+  error_text_paragraph2_emissions: {
+    setState: (state) => useEZOutputEmissionsStore.getState().setEmissionsParagraph2State(state),
+    setError: (error) => useEZOutputEmissionsStore.getState().setEmissionsParagraph2Error(error),
+  },
+  error_chart_bar_emissions: {
+    setState: (state) => useEZOutputEmissionsStore.getState().setEmissionsBarChartState(state),
+    setError: (error) => useEZOutputEmissionsStore.getState().setEmissionsBarChartError(error),
+  },
+  error_chart_pie_emissions: {
+    setState: (state) => useEZOutputEmissionsStore.getState().setEmissionsPieChartsState(state),
+    setError: (error) => useEZOutputEmissionsStore.getState().setEmissionsPieChartsError(error),
+  },
+  error_text_paragraph1_people_response: {
+    setState: (state) => useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph1State(state),
+    setError: (error) => useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph1Error(error),
+  },
+  error_text_paragraph2_people_response: {
+    setState: (state) => useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph2State(state),
+    setError: (error) => useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph2Error(error),
+  },
+  error_chart_breakdown_people_response: {
+    setState: (state) => useEZOutputPeopleResponseStore.getState().setPeopleResponseBreakdownChartState(state),
+    setError: (error) => useEZOutputPeopleResponseStore.getState().setPeopleResponseBreakdownChartError(error),
+  },
+  error_chart_time_impact_people_response: {
+    setState: (state) => useEZOutputPeopleResponseStore.getState().setPeopleResponseTimeImpactChartState(state),
+    setError: (error) => useEZOutputPeopleResponseStore.getState().setPeopleResponseTimeImpactChartError(error),
+  },
+};
 
 // === PROGRESS ALERT HANDLER ===
 
@@ -31,7 +79,16 @@ function handleProgressAlertMessage(
     return;
   }
 
-  // Handle lifecycle events
+  // Check if this is a component error that uses the configuration map
+  if (messageType in ERROR_HANDLER_MAP) {
+    const errorData = payload as { message: string };
+    const config = ERROR_HANDLER_MAP[messageType];
+    config.setState('error');
+    config.setError(errorData.message);
+    return;
+  }
+
+  // Handle lifecycle events and map-specific events
   switch (messageType) {
     case 'pa_connection':
       if (config.onStarted && 'requestId' in payload) {
@@ -97,6 +154,21 @@ function handleProgressAlertMessage(
       break;
   }
 }
+
+// === SUCCESS STATE CONFIGURATION ===
+
+// Configuration map for success state setters (called after data is set)
+const SUCCESS_STATE_MAP: Record<string, () => void> = {
+  data_text_overview: () => useEZOutputOverviewStore.getState().setOverviewState('success'),
+  data_text_paragraph1_emissions: () => useEZOutputEmissionsStore.getState().setEmissionsParagraph1State('success'),
+  data_text_paragraph2_emissions: () => useEZOutputEmissionsStore.getState().setEmissionsParagraph2State('success'),
+  data_chart_bar_emissions: () => useEZOutputEmissionsStore.getState().setEmissionsBarChartState('success'),
+  data_chart_pie_emissions: () => useEZOutputEmissionsStore.getState().setEmissionsPieChartsState('success'),
+  data_text_paragraph1_people_response: () => useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph1State('success'),
+  data_text_paragraph2_people_response: () => useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph2State('success'),
+  data_chart_breakdown_people_response: () => useEZOutputPeopleResponseStore.getState().setPeopleResponseBreakdownChartState('success'),
+  data_chart_time_impact_people_response: () => useEZOutputPeopleResponseStore.getState().setPeopleResponseTimeImpactChartState('success'),
+};
 
 // === DATA MESSAGE HANDLER ===
 
@@ -289,6 +361,11 @@ function handleDataMessage(
     default:
       console.warn(`[SSE] Unhandled data message: ${messageType}`);
       break;
+  }
+
+  // Set success state using configuration map (if applicable)
+  if (messageType in SUCCESS_STATE_MAP) {
+    SUCCESS_STATE_MAP[messageType]();
   }
 }
 

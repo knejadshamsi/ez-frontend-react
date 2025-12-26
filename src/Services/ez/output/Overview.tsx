@@ -1,5 +1,7 @@
-import { Spin } from 'antd';
+import { Spin, Alert, Button } from 'antd';
 import { useEZOutputOverviewStore } from '~stores/output';
+import { useEZSessionStore } from '~stores/session';
+import { retryComponentData } from '../api/retryComponent';
 import outputStyles from './Output.module.less';
 
 /**
@@ -8,8 +10,36 @@ import outputStyles from './Output.module.less';
  */
 export const Overview = () => {
   const overviewData = useEZOutputOverviewStore((state) => state.overviewData);
+  const overviewState = useEZOutputOverviewStore((state) => state.overviewState);
+  const overviewError = useEZOutputOverviewStore((state) => state.overviewError);
+  const requestId = useEZSessionStore((state) => state.requestId);
 
-  if (!overviewData) {
+  const handleRetry = async () => {
+    if (requestId) {
+      await retryComponentData(requestId, 'text_overview');
+    }
+  };
+
+  if (overviewError) {
+    return (
+      <div className={outputStyles.contentWrapper}>
+        <Alert
+          message="Failed to load overview data"
+          description={overviewError}
+          type="error"
+          showIcon
+          className={outputStyles.sectionErrorAlert}
+          action={
+            <Button size="small" danger onClick={handleRetry}>
+              Retry
+            </Button>
+          }
+        />
+      </div>
+    );
+  }
+
+  if (overviewState === 'inactive' || overviewState === 'loading' || !overviewData) {
     return (
       <div className={outputStyles.contentWrapper} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
         <Spin size="large" tip="Loading overview data..." />

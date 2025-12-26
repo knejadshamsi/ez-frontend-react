@@ -1,9 +1,11 @@
-import { Spin } from 'antd';
+import { Spin, Alert, Button } from 'antd';
 import { Bar } from 'react-chartjs-2';
 import {
   useEZOutputPeopleResponseStore,
   useEZOutputChartConfigStore
 } from '~stores/output';
+import { useEZSessionStore } from '~stores/session';
+import { retryComponentData } from '../../api/retryComponent';
 import outputStyles from '../Output.module.less';
 
 /**
@@ -12,9 +14,35 @@ import outputStyles from '../Output.module.less';
  */
 export const TimeImpact = () => {
   const timeImpactData = useEZOutputPeopleResponseStore((state) => state.peopleResponseTimeImpactChartData);
+  const timeImpactState = useEZOutputPeopleResponseStore((state) => state.peopleResponseTimeImpactChartState);
+  const timeImpactError = useEZOutputPeopleResponseStore((state) => state.peopleResponseTimeImpactChartError);
   const chartConfig = useEZOutputChartConfigStore((state) => state.timeImpactChartConfig);
+  const requestId = useEZSessionStore((state) => state.requestId);
 
-  if (!timeImpactData) {
+  const handleRetry = async () => {
+    if (requestId) {
+      await retryComponentData(requestId, 'chart_time_impact_people_response');
+    }
+  };
+
+  if (timeImpactError) {
+    return (
+      <Alert
+        message="Failed to load time impact chart"
+        description={timeImpactError}
+        type="error"
+        showIcon
+        className={outputStyles.sectionErrorAlert}
+        action={
+          <Button size="small" danger onClick={handleRetry}>
+            Retry
+          </Button>
+        }
+      />
+    );
+  }
+
+  if (timeImpactState === 'inactive' || timeImpactState === 'loading' || !timeImpactData) {
     return (
       <div className={outputStyles.timeImpactChartContainer} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <Spin size="default" />

@@ -1,9 +1,11 @@
-import { Spin } from 'antd';
+import { Spin, Alert, Button } from 'antd';
 import { Bar } from 'react-chartjs-2';
 import {
   useEZOutputEmissionsStore,
   useEZOutputChartConfigStore
 } from '~stores/output';
+import { useEZSessionStore } from '~stores/session';
+import { retryComponentData } from '../../api/retryComponent';
 import outputStyles from '../Output.module.less';
 
 const barChartOptions = {
@@ -29,9 +31,35 @@ const barChartOptions = {
  */
 export const BarChart = () => {
   const barChartData = useEZOutputEmissionsStore((state) => state.emissionsBarChartData);
+  const barChartState = useEZOutputEmissionsStore((state) => state.emissionsBarChartState);
+  const barChartError = useEZOutputEmissionsStore((state) => state.emissionsBarChartError);
   const chartConfig = useEZOutputChartConfigStore((state) => state.emissionsBarChartConfig);
+  const requestId = useEZSessionStore((state) => state.requestId);
 
-  if (!barChartData) {
+  const handleRetry = async () => {
+    if (requestId) {
+      await retryComponentData(requestId, 'chart_bar_emissions');
+    }
+  };
+
+  if (barChartError) {
+    return (
+      <Alert
+        message="Failed to load emissions bar chart"
+        description={barChartError}
+        type="error"
+        showIcon
+        className={outputStyles.sectionErrorAlert}
+        action={
+          <Button size="small" danger onClick={handleRetry}>
+            Retry
+          </Button>
+        }
+      />
+    );
+  }
+
+  if (barChartState === 'inactive' || barChartState === 'loading' || !barChartData) {
     return (
       <div className={outputStyles.emissionsChartContainer} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <Spin size="default" />
