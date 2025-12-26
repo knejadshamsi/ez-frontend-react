@@ -1,9 +1,11 @@
-import { Spin } from 'antd';
+import { Spin, Alert, Button } from 'antd';
 import { Bar } from 'react-chartjs-2';
 import {
   useEZOutputPeopleResponseStore,
   useEZOutputChartConfigStore
 } from '~stores/output';
+import { useEZSessionStore } from '~stores/session';
+import { retryComponentData } from '../../api/retryComponent';
 import outputStyles from '../Output.module.less';
 
 /**
@@ -12,9 +14,35 @@ import outputStyles from '../Output.module.less';
  */
 export const ResponseBreakdown = () => {
   const breakdownData = useEZOutputPeopleResponseStore((state) => state.peopleResponseBreakdownChartData);
+  const breakdownState = useEZOutputPeopleResponseStore((state) => state.peopleResponseBreakdownChartState);
+  const breakdownError = useEZOutputPeopleResponseStore((state) => state.peopleResponseBreakdownChartError);
   const chartConfig = useEZOutputChartConfigStore((state) => state.peopleResponseChartConfig);
+  const requestId = useEZSessionStore((state) => state.requestId);
 
-  if (!breakdownData) {
+  const handleRetry = async () => {
+    if (requestId) {
+      await retryComponentData(requestId, 'chart_breakdown_people_response');
+    }
+  };
+
+  if (breakdownError) {
+    return (
+      <Alert
+        message="Failed to load response breakdown chart"
+        description={breakdownError}
+        type="error"
+        showIcon
+        className={outputStyles.sectionErrorAlert}
+        action={
+          <Button size="small" danger onClick={handleRetry}>
+            Retry
+          </Button>
+        }
+      />
+    );
+  }
+
+  if (breakdownState === 'inactive' || breakdownState === 'loading' || !breakdownData) {
     return (
       <div className={outputStyles.peopleResponseChartContainer} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <Spin size="default" />

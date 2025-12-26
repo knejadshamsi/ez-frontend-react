@@ -2,6 +2,8 @@ import { resetAllEZOutputStores } from '~stores/output';
 import type { SSEMessage, SimulationStreamConfig } from './types';
 import { handleSSEMessage } from './handlers';
 
+const UNIVERSAL_TIMEOUT_MS = 300000;
+
 // Starts an SSE simulation stream with lifecycle management
 export function startSimulationStream(config: SimulationStreamConfig): () => void {
   const {
@@ -17,6 +19,7 @@ export function startSimulationStream(config: SimulationStreamConfig): () => voi
   let abortController: AbortController | null = new AbortController();
   let heartbeatTimeoutId: NodeJS.Timeout | null = null;
   let connectionTimeoutId: NodeJS.Timeout | null = null;
+  let universalTimeoutId: NodeJS.Timeout | null = null;
 
   const resetHeartbeatTimer = () => {
     if (heartbeatTimeoutId) {
@@ -32,6 +35,20 @@ export function startSimulationStream(config: SimulationStreamConfig): () => voi
     }, heartbeatTimeout);
   };
 
+  const resetUniversalTimer = () => {
+    if (universalTimeoutId) {
+      clearTimeout(universalTimeoutId);
+    }
+    universalTimeoutId = setTimeout(() => {
+      console.error('[SSE] Universal timeout - no data received within 5 minutes');
+      config.onError?.({
+        code: 'UNIVERSAL_TIMEOUT',
+        message: 'No data received within 5 minutes - returning to input',
+      });
+      cleanup();
+    }, UNIVERSAL_TIMEOUT_MS);
+  };
+
   const cleanup = () => {
     if (heartbeatTimeoutId) {
       clearTimeout(heartbeatTimeoutId);
@@ -40,6 +57,10 @@ export function startSimulationStream(config: SimulationStreamConfig): () => voi
     if (connectionTimeoutId) {
       clearTimeout(connectionTimeoutId);
       connectionTimeoutId = null;
+    }
+    if (universalTimeoutId) {
+      clearTimeout(universalTimeoutId);
+      universalTimeoutId = null;
     }
     if (abortController) {
       abortController.abort();
@@ -87,6 +108,7 @@ export function startSimulationStream(config: SimulationStreamConfig): () => voi
       }
 
       resetHeartbeatTimer();
+      resetUniversalTimer();
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -112,6 +134,11 @@ export function startSimulationStream(config: SimulationStreamConfig): () => voi
               const message: SSEMessage = JSON.parse(jsonStr);
 
               resetHeartbeatTimer();
+
+              // Reset universal timer only for data messages (not heartbeats)
+              if (message.messageType.startsWith('data_')) {
+                resetUniversalTimer();
+              }
 
               handleSSEMessage(message, config);
             } catch (parseError) {

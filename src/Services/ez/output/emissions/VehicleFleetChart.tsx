@@ -1,9 +1,11 @@
-import { Row, Col, Spin } from 'antd';
+import { Row, Col, Spin, Alert, Button } from 'antd';
 import { Pie } from 'react-chartjs-2';
 import {
   useEZOutputEmissionsStore,
   useEZOutputChartConfigStore
 } from '~stores/output';
+import { useEZSessionStore } from '~stores/session';
+import { retryComponentData } from '../../api/retryComponent';
 import outputStyles from '../Output.module.less';
 
 const pieChartOptions = {
@@ -20,9 +22,35 @@ const pieChartOptions = {
  */
 export const VehicleFleetChart = () => {
   const pieChartsData = useEZOutputEmissionsStore((state) => state.emissionsPieChartsData);
+  const pieChartsState = useEZOutputEmissionsStore((state) => state.emissionsPieChartsState);
+  const pieChartsError = useEZOutputEmissionsStore((state) => state.emissionsPieChartsError);
   const chartConfig = useEZOutputChartConfigStore((state) => state.vehicleEmissionsChartConfig);
+  const requestId = useEZSessionStore((state) => state.requestId);
 
-  if (!pieChartsData) {
+  const handleRetry = async () => {
+    if (requestId) {
+      await retryComponentData(requestId, 'chart_pie_emissions');
+    }
+  };
+
+  if (pieChartsError) {
+    return (
+      <Alert
+        message="Failed to load vehicle emissions chart"
+        description={pieChartsError}
+        type="error"
+        showIcon
+        className={outputStyles.sectionErrorAlert}
+        action={
+          <Button size="small" danger onClick={handleRetry}>
+            Retry
+          </Button>
+        }
+      />
+    );
+  }
+
+  if (pieChartsState === 'inactive' || pieChartsState === 'loading' || !pieChartsData) {
     return (
       <div className={outputStyles.vehicleEmissionsContainer} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
         <Spin size="default" />
