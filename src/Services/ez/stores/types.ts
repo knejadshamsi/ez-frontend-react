@@ -19,6 +19,15 @@ export type TripType = 'start' | 'end' | 'pass'; // Which trips to include in si
 export type PolicyTier = 1 | 2 | 3; // 1: No restrictions , 2: Medium restrictions , 3: banned
 export type VehicleTypeId = 'zeroEmission' | 'nearZeroEmission' | 'lowEmission' | 'midEmission' | 'highEmission';
 
+// Vehicle type IDs array (for iteration)
+export const VEHICLE_TYPE_IDS: readonly VehicleTypeId[] = [
+  'zeroEmission',
+  'nearZeroEmission',
+  'lowEmission',
+  'midEmission',
+  'highEmission'
+] as const;
+
 // Vehicle type colors (single source of truth)
 export const VEHICLE_TYPE_COLORS: Record<VehicleTypeId, string> = {
   zeroEmission: '#34d399',

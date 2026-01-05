@@ -1,152 +1,230 @@
-import { useState, useCallback, useEffect } from 'react'
-import { useAPIPayloadStore } from '~store'
-import styles from '../simulationOptions.module.less'
-import type { CarDistribution } from '~ez/stores/types'
+import { useState, useCallback, useEffect } from 'react';
+import { message } from 'antd';
+import { useAPIPayloadStore } from '~store';
+import { useEZSessionStore } from '~stores/session';
+import styles from '../simulationOptions.module.less';
+import type { CarDistribution } from '~ez/stores/types';
+import { VEHICLE_TYPE_COLORS } from '~ez/stores/types';
+import { countEnabledCategories } from './utils/carDistributionUtils';
 
-const SEGMENT_COLORS = {
-  zeroEmission: '#86e086',
-  lowEmission: '#c0c0c0',
-  highEmission: '#ff6b6b'
-} as const
+const SEGMENT_COLORS = VEHICLE_TYPE_COLORS;
 
-const DEFAULT_CAR_RATIO = 0.85
+const SEGMENT_LABELS = {
+  zeroEmission: 'Zero Em.',
+  nearZeroEmission: 'Near-Zero Em.',
+  lowEmission: 'Low Em.',
+  midEmission: 'Mid Em.',
+  highEmission: 'High Em.'
+} as const;
 
-const calculateLeftDividerDistribution = (
-  constrainedPercentage: number,
-  current: CarDistribution
+// Calculate mouse position as percentage with 5% snapping
+const calculateSnappedPercentage = (mouseX: number, barRect: DOMRect): number => {
+  const rawPercentage = (mouseX / barRect.width) * 100;
+  const snappedPercentage = Math.round(rawPercentage / 5) * 5;
+  return Math.max(5, Math.min(95, snappedPercentage));
+};
+
+// Calculate cumulative percentage before a divider
+const calculateCumulativeBefore = (
+  dividerIndex: number,
+  enabledCategories: string[],
+  distribution: CarDistribution
+): number => {
+  let cumulative = 0;
+  for (let i = 0; i < dividerIndex; i++) {
+    cumulative += distribution[enabledCategories[i]];
+  }
+  return cumulative;
+};
+
+// Calculate cumulative percentage after right category
+const calculateCumulativeAfter = (
+  dividerIndex: number,
+  enabledCategories: string[],
+  distribution: CarDistribution
+): number => {
+  let cumulative = 0;
+  for (let i = dividerIndex + 2; i < enabledCategories.length; i++) {
+    cumulative += distribution[enabledCategories[i]];
+  }
+  return cumulative;
+};
+
+// Validate divider position is within allowed range
+const isValidDividerPosition = (
+  newPosition: number,
+  cumulativeBefore: number,
+  cumulativeAfter: number
+): boolean => {
+  const minLeftPos = cumulativeBefore + 5;
+  const maxRightPos = 100 - cumulativeAfter - 5;
+  return newPosition >= minLeftPos && newPosition <= maxRightPos;
+};
+
+// Calculate new distribution for adjacent categories
+const calculateNewDistribution = (
+  currentDistribution: CarDistribution,
+  leftCategory: string,
+  rightCategory: string,
+  newDividerPos: number,
+  cumulativeBefore: number,
+  cumulativeAfter: number
 ): CarDistribution => {
-  const currentRightPos = current.zeroEmission + current.lowEmission
-  const maxLeft = currentRightPos - 1
-  const newZeroEmission = Math.min(constrainedPercentage, maxLeft)
-  const remaining = 100 - newZeroEmission
-
-  const totalOther = current.lowEmission + current.highEmission
-  const lowEmissionRatio = totalOther > 0 ? current.lowEmission / totalOther : DEFAULT_CAR_RATIO
-
-  const newLowEmission = Math.round(remaining * lowEmissionRatio)
-  const newHighEmission = remaining - newLowEmission
-
-  return {
-    zeroEmission: newZeroEmission,
-    lowEmission: newLowEmission,
-    highEmission: newHighEmission
-  }
-}
-
-const calculateRightDividerDistribution = (
-  constrainedPercentage: number,
-  current: CarDistribution
-): CarDistribution | null => {
-  const minRight = current.zeroEmission + 1
-  const newRightPos = Math.max(constrainedPercentage, minRight)
-
-  const newLowEmission = newRightPos - current.zeroEmission
-  const newHighEmission = 100 - newRightPos
-
-  if (newHighEmission >= 1) {
-    return {
-      zeroEmission: current.zeroEmission,
-      lowEmission: newLowEmission,
-      highEmission: newHighEmission
-    }
-  }
-
-  return null
-}
+  const newDistribution = { ...currentDistribution };
+  newDistribution[leftCategory] = newDividerPos - cumulativeBefore;
+  newDistribution[rightCategory] = 100 - cumulativeAfter - newDividerPos;
+  return newDistribution;
+};
 
 const CarDistributionBar = () => {
-  const carDistribution = useAPIPayloadStore((state) => state.payload.carDistribution)
-  const setCarDistribution = useAPIPayloadStore((state) => state.setCarDistribution)
+  const carDistribution = useAPIPayloadStore((state) => state.payload.carDistribution);
+  const setCarDistribution = useAPIPayloadStore((state) => state.setCarDistribution);
+  const sessionStore = useEZSessionStore();
 
-  const [isDragging, setIsDragging] = useState<'left' | 'right' | null>(null)
+  const [messageApi, contextHolder] = message.useMessage();
+  const [isDragging, setIsDragging] = useState<number | null>(null);
 
-  const handleMouseDown = useCallback((divider: 'left' | 'right') => (e: React.MouseEvent) => {
-    e.preventDefault()
-    setIsDragging(divider)
-  }, [])
+  // Get list of enabled categories in order
+  const enabledCategories = Object.keys(carDistribution).filter(
+    key => sessionStore.carDistributionCategories[key]
+  );
+
+  // Handle legend item click (toggle category)
+  const handleLegendClick = (categoryKey: string) => {
+    const isCurrentlyEnabled = sessionStore.carDistributionCategories[categoryKey];
+    const enabledCount = countEnabledCategories(sessionStore.carDistributionCategories);
+
+    if (isCurrentlyEnabled && enabledCount <= 1) {
+      messageApi.warning('At least one emission category must remain enabled');
+      return;
+    }
+
+    sessionStore.toggleCarDistributionCategory(categoryKey);
+  };
+
+  // Calculate divider positions based on enabled categories
+  const getDividerPositions = () => {
+    const positions: number[] = [];
+    let cumulative = 0;
+
+    enabledCategories.forEach((key, index) => {
+      if (index < enabledCategories.length - 1) {
+        cumulative += carDistribution[key];
+        positions.push(cumulative);
+      }
+    });
+
+    return positions;
+  };
+
+  const dividerPositions = getDividerPositions();
+
+  const handleMouseDown = useCallback((dividerIndex: number) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(dividerIndex);
+  }, []);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isDragging) return
+    if (isDragging === null) return;
 
-    const rect = e.currentTarget.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const percentage = Math.round((x / rect.width) * 100)
-    const constrainedPercentage = Math.max(1, Math.min(99, percentage))
+    const rect = e.currentTarget.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
 
-    const current = useAPIPayloadStore.getState().payload.carDistribution
+    // Calculate snapped percentage from mouse position
+    const newDividerPos = calculateSnappedPercentage(mouseX, rect);
 
-    if (isDragging === 'left') {
-      const newDistribution = calculateLeftDividerDistribution(constrainedPercentage, current)
-      setCarDistribution(newDistribution)
-    } else if (isDragging === 'right') {
-      const newDistribution = calculateRightDividerDistribution(constrainedPercentage, current)
-      if (newDistribution) {
-        setCarDistribution(newDistribution)
-      }
-    }
-  }, [isDragging, setCarDistribution])
+    // Get the two categories on either side of this divider
+    const leftCategory = enabledCategories[isDragging];
+    const rightCategory = enabledCategories[isDragging + 1];
+    if (!leftCategory || !rightCategory) return;
+
+    // Calculate cumulative percentages before and after
+    const cumulativeBefore = calculateCumulativeBefore(isDragging, enabledCategories, carDistribution);
+    const cumulativeAfter = calculateCumulativeAfter(isDragging, enabledCategories, carDistribution);
+
+    // Validate position is within allowed range
+    if (!isValidDividerPosition(newDividerPos, cumulativeBefore, cumulativeAfter)) return;
+
+    // Calculate and apply new distribution
+    const newDistribution = calculateNewDistribution(
+      carDistribution,
+      leftCategory,
+      rightCategory,
+      newDividerPos,
+      cumulativeBefore,
+      cumulativeAfter
+    );
+
+    setCarDistribution(newDistribution);
+  }, [isDragging, carDistribution, enabledCategories, setCarDistribution]);
 
   useEffect(() => {
-    if (!isDragging) return
+    if (isDragging === null) return;
 
-    const handleMouseUp = () => setIsDragging(null)
-    document.addEventListener('mouseup', handleMouseUp)
-    return () => document.removeEventListener('mouseup', handleMouseUp)
-  }, [isDragging])
-
-  const leftDividerPos = carDistribution.zeroEmission
-  const rightDividerPos = carDistribution.zeroEmission + carDistribution.lowEmission
+    const handleMouseUp = () => setIsDragging(null);
+    document.addEventListener('mouseup', handleMouseUp);
+    return () => document.removeEventListener('mouseup', handleMouseUp);
+  }, [isDragging]);
 
   return (
     <div className={styles.distributionContainer}>
+      {contextHolder}
+
+      {/* Legend above bar */}
+      <div className={styles.legend}>
+        {Object.entries(SEGMENT_COLORS).map(([key, color]) => {
+          const isEnabled = sessionStore.carDistributionCategories[key];
+          const label = SEGMENT_LABELS[key];
+
+          return (
+            <div
+              key={key}
+              className={styles.legendItem}
+              onClick={() => handleLegendClick(key)}
+              style={{
+                cursor: 'pointer',
+                opacity: isEnabled ? 1 : 0.5,
+                textDecoration: isEnabled ? 'none' : 'line-through'
+              }}
+            >
+              <span
+                className={styles.legendColor}
+                style={{ backgroundColor: color }}
+              />
+              <span className={styles.legendLabel}>{label}</span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Distribution bar */}
       <div className={styles.distributionBar} onMouseMove={handleMouseMove}>
-        <div
-          className={styles.distributionSegment}
-          style={{
-            width: `${carDistribution.zeroEmission}%`,
-            backgroundColor: SEGMENT_COLORS.zeroEmission
-          }}
-        >
-          <span className={styles.segmentLabel}>Zero Emission</span>
-          <span className={styles.segmentValue}>{carDistribution.zeroEmission}%</span>
-        </div>
+        {/* Segments as direct flex children */}
+        {enabledCategories.map((key) => (
+          <div
+            key={key}
+            className={styles.distributionSegment}
+            style={{
+              width: `${carDistribution[key]}%`,
+              backgroundColor: SEGMENT_COLORS[key]
+            }}
+          >
+            <span className={styles.segmentValue}>{carDistribution[key]}%</span>
+          </div>
+        ))}
 
-        <div
-          className={`${styles.dividerBar} ${isDragging === 'left' ? styles.dividerActive : ''}`}
-          style={{ left: `${leftDividerPos}%` }}
-          onMouseDown={handleMouseDown('left')}
-        />
-
-        <div
-          className={styles.distributionSegment}
-          style={{
-            width: `${carDistribution.lowEmission}%`,
-            backgroundColor: SEGMENT_COLORS.lowEmission
-          }}
-        >
-          <span className={styles.segmentLabel}>Low Emission</span>
-          <span className={styles.segmentValue}>{carDistribution.lowEmission}%</span>
-        </div>
-
-        <div
-          className={`${styles.dividerBar} ${isDragging === 'right' ? styles.dividerActive : ''}`}
-          style={{ left: `${rightDividerPos}%` }}
-          onMouseDown={handleMouseDown('right')}
-        />
-
-        <div
-          className={styles.distributionSegment}
-          style={{
-            width: `${carDistribution.highEmission}%`,
-            backgroundColor: SEGMENT_COLORS.highEmission
-          }}
-        >
-          <span className={styles.segmentLabel}>High Emission</span>
-          <span className={styles.segmentValue}>{carDistribution.highEmission}%</span>
-        </div>
+        {/* Dividers as separate absolutely positioned children */}
+        {dividerPositions.map((pos, index) => (
+          <div
+            key={`divider-${index}`}
+            className={`${styles.dividerBar} ${isDragging === index ? styles.dividerActive : ''}`}
+            style={{ left: `${pos}%` }}
+            onMouseDown={handleMouseDown(index)}
+          />
+        ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CarDistributionBar
+export default CarDistributionBar;

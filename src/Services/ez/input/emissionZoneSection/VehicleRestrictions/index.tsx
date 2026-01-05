@@ -77,7 +77,7 @@ const PolicySection = ({ zoneId }: PolicySectionProps) => {
       }}
     >
       <span className={styles.sectionHeader}>
-        <strong>RESTRICTIONS</strong>
+        <strong>VEHICLE RESTRICTIONS</strong>
       </span>
 
       <div className={styles.schedulerContainer}>

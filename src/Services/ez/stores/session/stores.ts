@@ -20,7 +20,15 @@ import {
   DEFAULT_POLLUTANT_TYPE,
   DEFAULT_RESPONSE_VIEW,
   DEFAULT_BEHAVIORAL_RESPONSE,
+  DEFAULT_CAR_DISTRIBUTION_CATEGORIES,
 } from './defaults';
+import { useAPIPayloadStore } from '../index';
+import {
+  redistributeOnDisable,
+  redistributeOnEnable,
+  countEnabledCategories,
+  MINIMUM_PERCENTAGE
+} from '~ez/input/simulationOptions/basicSettings/utils/carDistributionUtils';
 
 // === SESSION STORE ===
 
@@ -37,6 +45,7 @@ const createInitialState = () => ({
   sseCleanup: null as (() => void) | null,
   isNewSimulation: true,
   simulationAreaDisplay: { ...DEFAULT_SIMULATION_AREA_DISPLAY },
+  carDistributionCategories: { ...DEFAULT_CAR_DISTRIBUTION_CATEGORIES },
 });
 
 export const useEZSessionStore = create<EZSessionStore>((set, get) => ({
@@ -113,6 +122,64 @@ export const useEZSessionStore = create<EZSessionStore>((set, get) => ({
         ...config
       }
     })),
+
+  toggleCarDistributionCategory: (category: string) => {
+    const state = get();
+    const payloadStore = useAPIPayloadStore.getState();
+    const currentDistribution = payloadStore.payload.carDistribution;
+
+    const isCurrentlyEnabled = state.carDistributionCategories[category];
+
+    if (isCurrentlyEnabled) {
+      // === DISABLING ===
+
+      // Check: at least 1 must remain enabled
+      const enabledCount = countEnabledCategories(state.carDistributionCategories);
+
+      if (enabledCount <= 1) {
+        // Do nothing - component will handle warning message
+        return;
+      }
+
+      // Use utility function to redistribute
+      const newDistribution = redistributeOnDisable(
+        currentDistribution,
+        category,
+        state.carDistributionCategories
+      );
+
+      payloadStore.setCarDistribution(newDistribution);
+
+      // Update session
+      set((state) => ({
+        carDistributionCategories: {
+          ...state.carDistributionCategories,
+          [category]: false
+        }
+      }));
+
+    } else {
+      // === RE-ENABLING ===
+
+      // Use utility function to redistribute
+      const newDistribution = redistributeOnEnable(
+        currentDistribution,
+        category,
+        state.carDistributionCategories,
+        MINIMUM_PERCENTAGE
+      );
+
+      payloadStore.setCarDistribution(newDistribution);
+
+      // Update session
+      set((state) => ({
+        carDistributionCategories: {
+          ...state.carDistributionCategories,
+          [category]: true
+        }
+      }));
+    }
+  },
 
   reset: () => {
     set(createInitialState());

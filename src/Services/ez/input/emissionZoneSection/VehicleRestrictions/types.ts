@@ -1,6 +1,5 @@
 import { RefObject } from 'react';
-
-export type VehicleTypeId = 'zero_emission' | 'low_emission' | 'high_emission';
+import { VehicleTypeId, VEHICLE_TYPE_COLORS } from '~ez/stores/types';
 
 export interface VehicleTypeInfo {
   label: string;
@@ -20,7 +19,6 @@ export interface TimeBlock extends TimeRange {
 }
 
 export interface Vehicle {
-  id: number;
   type: VehicleTypeId;
   blocks: TimeBlock[];
 }
@@ -37,8 +35,8 @@ export interface PolicySectionProps {
 
 export interface BlockEditorProps {
   activeBlock: ActiveBlock | null;
-  onUpdate: (vehicleId: number, blockId: number, updates: Partial<TimeBlock>) => void;
-  onDelete: (vehicleId: number, blockId: number) => void;
+  onUpdate: (vehicleType: VehicleTypeId, blockId: number, updates: Partial<TimeBlock>) => void;
+  onDelete: (vehicleType: VehicleTypeId, blockId: number) => void;
   onClose: () => void;
 }
 
@@ -54,22 +52,22 @@ export interface VehicleRowProps {
   containerWidth: number;
   timeColumnWidth: number;
   zoneColor: string;
-  selectedVehicleId: number | null;
+  selectedVehicleType: VehicleTypeId | null;
   selectedBlockId: number | null;
-  onVehicleClick: (vehicleId: number) => void;
-  onGridDoubleClick: (event: React.MouseEvent, vehicleId: number) => void;
-  onBlockMouseDown: (event: React.MouseEvent, vehicleId: number, blockId: number, dragType: 'move' | 'resize', edge?: 'start' | 'end') => void;
-  onBlockDoubleClick: (vehicleId: number, block: TimeBlock, rowIndex: number, event: React.MouseEvent) => void;
+  onVehicleClick: (vehicleType: VehicleTypeId) => void;
+  onGridDoubleClick: (event: React.MouseEvent, vehicleType: VehicleTypeId) => void;
+  onBlockMouseDown: (event: React.MouseEvent, vehicleType: VehicleTypeId, blockId: number, dragType: 'move' | 'resize', edge?: 'start' | 'end') => void;
+  onBlockDoubleClick: (vehicleType: VehicleTypeId, block: TimeBlock, rowIndex: number, event: React.MouseEvent) => void;
 }
 
 export interface RestrictionBlockProps {
   block: TimeBlock;
-  vehicleId: number;
+  vehicleType: VehicleTypeId;
   rowIndex: number;
   timeColumnWidth: number;
   isSelected: boolean;
-  onMouseDown: (event: React.MouseEvent, vehicleId: number, blockId: number, dragType: 'move' | 'resize', edge?: 'start' | 'end') => void;
-  onClick: (vehicleId: number, block: TimeBlock, rowIndex: number, event: React.MouseEvent) => void;
+  onMouseDown: (event: React.MouseEvent, vehicleType: VehicleTypeId, blockId: number, dragType: 'move' | 'resize', edge?: 'start' | 'end') => void;
+  onClick: (vehicleType: VehicleTypeId, block: TimeBlock, rowIndex: number, event: React.MouseEvent) => void;
 }
 
 export interface UseSchedulerStateParams {
@@ -78,9 +76,9 @@ export interface UseSchedulerStateParams {
 
 export interface UseSchedulerStateReturn {
   vehicles: Vehicle[];
-  updateBlock: (vehicleId: number, blockId: number, updates: any) => void;
-  deleteBlock: (vehicleId: number, blockId: number) => void;
-  addBlock: (vehicleId: number, newBlock: any) => void;
+  updateBlock: (vehicleType: VehicleTypeId, blockId: number, updates: any) => void;
+  deleteBlock: (vehicleType: VehicleTypeId, blockId: number) => void;
+  addBlock: (vehicleType: VehicleTypeId, newBlock: any) => void;
   syncVehiclesToPolicy: (updatedVehicles: Vehicle[]) => void;
   setVehicles: React.Dispatch<React.SetStateAction<Vehicle[]>>;
 }
@@ -98,7 +96,7 @@ export interface UseBlockInteractionsParams {
 
 export interface DragData {
   type: 'move' | 'resize';
-  vehicleId: number;
+  vehicleType: VehicleTypeId;
   blockId: number;
   initialX: number;
   initialStart?: number;
@@ -121,7 +119,9 @@ export interface ContainerSize {
 }
 
 export const VEHICLE_TYPES: Record<VehicleTypeId, VehicleTypeInfo> = {
-  zero_emission: { label: 'Zero Em. Vehicle', color: '#34d399' },
-  low_emission: { label: 'Low Em. Vehicle', color: '#fbbf24' },
-  high_emission: { label: 'High Em. Vehicle', color: '#ef4444' },
+  zeroEmission: { label: 'Zero Em.', color: VEHICLE_TYPE_COLORS.zeroEmission },
+  nearZeroEmission: { label: 'Near-Zero Em.', color: VEHICLE_TYPE_COLORS.nearZeroEmission },
+  lowEmission: { label: 'Low Em.', color: VEHICLE_TYPE_COLORS.lowEmission },
+  midEmission: { label: 'Mid Em.', color: VEHICLE_TYPE_COLORS.midEmission },
+  highEmission: { label: 'High Em.', color: VEHICLE_TYPE_COLORS.highEmission }
 };
