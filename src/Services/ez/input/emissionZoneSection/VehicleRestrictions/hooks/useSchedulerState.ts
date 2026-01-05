@@ -2,12 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAPIPayloadStore } from '~store';
 import { vehiclesToPolicy, policyToVehicles } from '../vehicleUtils';
 import { Vehicle, UseSchedulerStateParams, UseSchedulerStateReturn } from '../types';
-
-const DEFAULT_VEHICLES: Vehicle[] = [
-  { id: 1, type: 'ev', blocks: [] },
-  { id: 2, type: 'veh', blocks: [] },
-  { id: 3, type: 'h_veh', blocks: [] }
-];
+import { VehicleTypeId, VEHICLE_TYPE_IDS } from '~ez/stores/types';
 
 export const useSchedulerState = ({ zoneId }: UseSchedulerStateParams): UseSchedulerStateReturn => {
   const apiZones = useAPIPayloadStore(state => state.payload.zones);
@@ -17,22 +12,22 @@ export const useSchedulerState = ({ zoneId }: UseSchedulerStateParams): UseSched
   const apiZone = apiZones.find(z => z.id === zoneId);
   const currentPolicies = apiZone?.policies || [];
 
-  const [vehicles, setVehicles] = useState<Vehicle[]>(() => {
-    if (currentPolicies.length === 0) {
-      return DEFAULT_VEHICLES;
-    }
-    return policyToVehicles(currentPolicies);
-  });
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
 
   useEffect(() => {
     if (zoneId) {
-      if (currentPolicies.length === 0) {
-        setVehicles(DEFAULT_VEHICLES);
-      } else {
-        setVehicles(policyToVehicles(currentPolicies));
-      }
+      const defaultVehicles: Vehicle[] = VEHICLE_TYPE_IDS.map(type => ({
+        type,
+        blocks: []
+      }));
+
+      setVehicles(
+        currentPolicies.length === 0
+          ? defaultVehicles
+          : policyToVehicles(currentPolicies)
+      );
     }
-  }, [zoneId]);
+  }, [zoneId, currentPolicies]);
 
   const syncVehiclesToPolicy = useCallback((updatedVehicles: Vehicle[]) => {
     if (zoneId) {
@@ -41,10 +36,10 @@ export const useSchedulerState = ({ zoneId }: UseSchedulerStateParams): UseSched
   }, [zoneId, updateZone]);
 
   // Block update
-  const updateBlock = useCallback((vehicleId: number, blockId: number, updates: any) => {
+  const updateBlock = useCallback((vehicleType: VehicleTypeId, blockId: number, updates: any) => {
     setVehicles(prevVehicles => {
       const updatedVehicles = prevVehicles.map(vehicle => {
-        if (vehicle.id !== vehicleId) return vehicle;
+        if (vehicle.type !== vehicleType) return vehicle;
 
         return {
           ...vehicle,
@@ -61,10 +56,10 @@ export const useSchedulerState = ({ zoneId }: UseSchedulerStateParams): UseSched
   }, [syncVehiclesToPolicy]);
 
   // Block delete
-  const deleteBlock = useCallback((vehicleId: number, blockId: number) => {
+  const deleteBlock = useCallback((vehicleType: VehicleTypeId, blockId: number) => {
     setVehicles(prevVehicles => {
       const updatedVehicles = prevVehicles.map(vehicle => {
-        if (vehicle.id !== vehicleId) return vehicle;
+        if (vehicle.type !== vehicleType) return vehicle;
 
         return {
           ...vehicle,
@@ -78,10 +73,10 @@ export const useSchedulerState = ({ zoneId }: UseSchedulerStateParams): UseSched
   }, [syncVehiclesToPolicy]);
 
   // Add new block
-  const addBlock = useCallback((vehicleId: number, newBlock: any) => {
+  const addBlock = useCallback((vehicleType: VehicleTypeId, newBlock: any) => {
     setVehicles(prevVehicles => {
       const updatedVehicles = prevVehicles.map(vehicle => {
-        if (vehicle.id !== vehicleId) return vehicle;
+        if (vehicle.type !== vehicleType) return vehicle;
 
         return {
           ...vehicle,

@@ -8,7 +8,7 @@ import { useSchedulerState } from './hooks/useSchedulerState';
 import { useBlockInteractions } from './hooks/useBlockInteractions';
 import { useContainerResize } from './hooks/useContainerResize';
 import { HEADER_HEIGHT, ROW_HEIGHT, VEHICLE_COLUMN_WIDTH, TIME_COLUMNS } from './constants';
-import { PolicySectionProps } from './types';
+import { PolicySectionProps, VehicleTypeId } from './types';
 import styles from '../zoneSettings/zoneSettings.module.less';
 
 const PolicySection = ({ zoneId }: PolicySectionProps) => {
@@ -33,14 +33,15 @@ const PolicySection = ({ zoneId }: PolicySectionProps) => {
   const timeColumnWidth = (containerSize.width - VEHICLE_COLUMN_WIDTH) / TIME_COLUMNS;
 
   const {
-    selectedVehicleId,
-    setSelectedVehicleId,
+    selectedVehicleType,
+    setSelectedVehicleType,
     selectedBlockId,
     setSelectedBlockId,
     showBlockEditor,
     setShowBlockEditor,
     blockEditorPosition,
     activeBlock,
+    overlapBlocked,
     handleBlockDoubleClick,
     handleGridDoubleClick,
     handleBlockMouseDown
@@ -55,8 +56,8 @@ const PolicySection = ({ zoneId }: PolicySectionProps) => {
     rowHeight: ROW_HEIGHT
   });
 
-  const handleDeleteBlock = (vehicleId: number, blockId: number) => {
-    deleteBlock(vehicleId, blockId);
+  const handleDeleteBlock = (vehicleType: VehicleTypeId, blockId: number) => {
+    deleteBlock(vehicleType, blockId);
     setShowBlockEditor(false);
     setSelectedBlockId(null);
   };
@@ -81,7 +82,7 @@ const PolicySection = ({ zoneId }: PolicySectionProps) => {
 
       <div className={styles.schedulerContainer}>
         <div className={styles.boundariesText}>
-          Double-click to add restrictions for vehicle emission groups. Click icon to edit, drag edges to resize, drag center to move.
+          Double-click to add restrictions for vehicle emission groups. Click icon to edit, drag edges to resize, drag center to move. Click vehicle type name to enable/disable categories globally.
         </div>
 
         <div className={styles.svgGrid} ref={containerRef}>
@@ -90,6 +91,7 @@ const PolicySection = ({ zoneId }: PolicySectionProps) => {
             width={containerSize.width}
             height={totalHeight}
             className="overflow-visible"
+            style={{ cursor: overlapBlocked ? 'not-allowed' : 'default' }}
           >
             <TimeHeader
               containerWidth={containerSize.width}
@@ -99,15 +101,15 @@ const PolicySection = ({ zoneId }: PolicySectionProps) => {
 
             {vehicles.map((vehicle, rowIndex) => (
               <VehicleRow
-                key={`vehicle-${vehicle.id}`}
+                key={`vehicle-${vehicle.type}`}
                 vehicle={vehicle}
                 rowIndex={rowIndex}
                 containerWidth={containerSize.width}
                 timeColumnWidth={timeColumnWidth}
                 zoneColor={zoneColor}
-                selectedVehicleId={selectedVehicleId}
+                selectedVehicleType={selectedVehicleType}
                 selectedBlockId={selectedBlockId}
-                onVehicleClick={setSelectedVehicleId}
+                onVehicleClick={setSelectedVehicleType}
                 onGridDoubleClick={handleGridDoubleClick}
                 onBlockMouseDown={handleBlockMouseDown}
                 onBlockDoubleClick={handleBlockDoubleClick}
