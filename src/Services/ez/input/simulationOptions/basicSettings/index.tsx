@@ -80,7 +80,7 @@ const BasicSettingsSection = () => {
 
       <div className={styles.sliderSection}>
         <div className={styles.title}>
-          <span><strong>Car Distribution</strong></span>
+          <span><strong>Vehicle Distribution</strong></span>
         </div>
         <div className={styles.description}>
           Adjust the distribution of vehicle types among car users. Drag dividers to change percentages.

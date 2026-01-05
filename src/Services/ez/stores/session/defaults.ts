@@ -1,4 +1,4 @@
-import type { ZoneSessionData, VisualizationType, PollutantType, ResponseLayerView, BehavioralResponseType, SimulationAreaDisplayConfig } from './types';
+import type { ZoneSessionData, VisualizationType, PollutantType, ResponseLayerView, BehavioralResponseType, SimulationAreaDisplayConfig, CarDistributionCategories } from './types';
 
 // === SESSION DEFAULTS ===
 
@@ -27,6 +27,14 @@ export const DEFAULT_ZONE_SESSION_DATA: ZoneSessionData = {
   color: COLOR_PALETTE[0],
   hidden: false,
   scale: [100, 'center']
+};
+
+export const DEFAULT_CAR_DISTRIBUTION_CATEGORIES: CarDistributionCategories = {
+  zeroEmission: true,
+  nearZeroEmission: true,
+  lowEmission: true,
+  midEmission: false,
+  highEmission: false
 };
 
 // === FILTER DEFAULTS ===
