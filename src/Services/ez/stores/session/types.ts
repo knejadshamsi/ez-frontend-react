@@ -17,6 +17,16 @@ export interface ZoneSessionData {
   scale: [number, string];
 }
 
+/* Car distribution categories enable/disable state */
+export interface CarDistributionCategories {
+  zeroEmission: boolean;
+  nearZeroEmission: boolean;
+  lowEmission: boolean;
+  midEmission: boolean;
+  highEmission: boolean;
+  [key: string]: boolean;
+}
+
 /* Main session store interface */
 export interface EZSessionStore {
   scenarioTitle: string;
@@ -29,6 +39,7 @@ export interface EZSessionStore {
   sseCleanup: (() => void) | null;
   isNewSimulation: boolean;
   simulationAreaDisplay: SimulationAreaDisplayConfig;
+  carDistributionCategories: CarDistributionCategories;
 
   setScenarioTitle: (title: string) => void;
   setScenarioDescription: (description: string) => void;
@@ -43,6 +54,7 @@ export interface EZSessionStore {
   abortSseStream: () => void;
   setIsNewSimulation: (value: boolean) => void;
   setSimulationAreaDisplay: (config: Partial<SimulationAreaDisplayConfig>) => void;
+  toggleCarDistributionCategory: (category: string) => void;
   reset: () => void;
 }
 

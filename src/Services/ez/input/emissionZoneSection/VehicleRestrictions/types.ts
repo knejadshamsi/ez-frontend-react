@@ -1,6 +1,6 @@
 import { RefObject } from 'react';
 
-export type VehicleTypeId = 'ev' | 'veh' | 'h_veh';
+export type VehicleTypeId = 'zero_emission' | 'low_emission' | 'high_emission';
 
 export interface VehicleTypeInfo {
   label: string;
@@ -121,7 +121,7 @@ export interface ContainerSize {
 }
 
 export const VEHICLE_TYPES: Record<VehicleTypeId, VehicleTypeInfo> = {
-  ev: { label: 'Electric Vehicles', color: '#34d399' },
-  veh: { label: 'Vehicles', color: '#fbbf24' },
-  h_veh: { label: 'Heavy Vehicles', color: '#ef4444' },
+  zero_emission: { label: 'Zero Em. Vehicle', color: '#34d399' },
+  low_emission: { label: 'Low Em. Vehicle', color: '#fbbf24' },
+  high_emission: { label: 'High Em. Vehicle', color: '#ef4444' },
 };

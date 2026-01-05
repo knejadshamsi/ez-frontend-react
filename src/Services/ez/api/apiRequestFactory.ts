@@ -8,7 +8,7 @@ export interface APIRequest {
     coords: Coordinate[][];
     trip: string[];
     policies: Array<{
-      vehicleType: 'ev' | 'veh' | 'h_veh';
+      vehicleType: 'zero_emission' | 'low_emission' | 'high_emission';
       tier: 1 | 2 | 3;
       period: [string, string];
       penalty?: number;
@@ -26,8 +26,8 @@ export interface APIRequest {
     percentage: number;
   };
   carDistribution: {
-    ev: number;
-    car: number;
+    zeroEmission: number;
+    lowEmission: number;
     highEmission: number;
   };
   modeUtilities: {
@@ -90,8 +90,8 @@ export const validateAPIRequest = (request: APIRequest): { isValid: boolean; err
     };
   }
 
-  const { ev, car, highEmission } = request.carDistribution;
-  const total = ev + car + highEmission;
+  const { zeroEmission, lowEmission, highEmission } = request.carDistribution;
+  const total = zeroEmission + lowEmission + highEmission;
   if (Math.abs(total - 100) > 0.01) {
     return {
       isValid: false,
