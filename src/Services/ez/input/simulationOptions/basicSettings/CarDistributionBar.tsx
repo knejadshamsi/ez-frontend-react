@@ -4,8 +4,8 @@ import styles from '../simulationOptions.module.less'
 import type { CarDistribution } from '~ez/stores/types'
 
 const SEGMENT_COLORS = {
-  ev: '#86e086',
-  car: '#c0c0c0',
+  zeroEmission: '#86e086',
+  lowEmission: '#c0c0c0',
   highEmission: '#ff6b6b'
 } as const
 
@@ -15,20 +15,20 @@ const calculateLeftDividerDistribution = (
   constrainedPercentage: number,
   current: CarDistribution
 ): CarDistribution => {
-  const currentRightPos = current.ev + current.car
+  const currentRightPos = current.zeroEmission + current.lowEmission
   const maxLeft = currentRightPos - 1
-  const newEv = Math.min(constrainedPercentage, maxLeft)
-  const remaining = 100 - newEv
+  const newZeroEmission = Math.min(constrainedPercentage, maxLeft)
+  const remaining = 100 - newZeroEmission
 
-  const totalOther = current.car + current.highEmission
-  const carRatio = totalOther > 0 ? current.car / totalOther : DEFAULT_CAR_RATIO
+  const totalOther = current.lowEmission + current.highEmission
+  const lowEmissionRatio = totalOther > 0 ? current.lowEmission / totalOther : DEFAULT_CAR_RATIO
 
-  const newCar = Math.round(remaining * carRatio)
-  const newHighEmission = remaining - newCar
+  const newLowEmission = Math.round(remaining * lowEmissionRatio)
+  const newHighEmission = remaining - newLowEmission
 
   return {
-    ev: newEv,
-    car: newCar,
+    zeroEmission: newZeroEmission,
+    lowEmission: newLowEmission,
     highEmission: newHighEmission
   }
 }
@@ -37,16 +37,16 @@ const calculateRightDividerDistribution = (
   constrainedPercentage: number,
   current: CarDistribution
 ): CarDistribution | null => {
-  const minRight = current.ev + 1
+  const minRight = current.zeroEmission + 1
   const newRightPos = Math.max(constrainedPercentage, minRight)
 
-  const newCar = newRightPos - current.ev
+  const newLowEmission = newRightPos - current.zeroEmission
   const newHighEmission = 100 - newRightPos
 
   if (newHighEmission >= 1) {
     return {
-      ev: current.ev,
-      car: newCar,
+      zeroEmission: current.zeroEmission,
+      lowEmission: newLowEmission,
       highEmission: newHighEmission
     }
   }
@@ -94,8 +94,8 @@ const CarDistributionBar = () => {
     return () => document.removeEventListener('mouseup', handleMouseUp)
   }, [isDragging])
 
-  const leftDividerPos = carDistribution.ev
-  const rightDividerPos = carDistribution.ev + carDistribution.car
+  const leftDividerPos = carDistribution.zeroEmission
+  const rightDividerPos = carDistribution.zeroEmission + carDistribution.lowEmission
 
   return (
     <div className={styles.distributionContainer}>
@@ -103,12 +103,12 @@ const CarDistributionBar = () => {
         <div
           className={styles.distributionSegment}
           style={{
-            width: `${carDistribution.ev}%`,
-            backgroundColor: SEGMENT_COLORS.ev
+            width: `${carDistribution.zeroEmission}%`,
+            backgroundColor: SEGMENT_COLORS.zeroEmission
           }}
         >
-          <span className={styles.segmentLabel}>EV</span>
-          <span className={styles.segmentValue}>{carDistribution.ev}%</span>
+          <span className={styles.segmentLabel}>Zero Emission</span>
+          <span className={styles.segmentValue}>{carDistribution.zeroEmission}%</span>
         </div>
 
         <div
@@ -120,12 +120,12 @@ const CarDistributionBar = () => {
         <div
           className={styles.distributionSegment}
           style={{
-            width: `${carDistribution.car}%`,
-            backgroundColor: SEGMENT_COLORS.car
+            width: `${carDistribution.lowEmission}%`,
+            backgroundColor: SEGMENT_COLORS.lowEmission
           }}
         >
-          <span className={styles.segmentLabel}>Car</span>
-          <span className={styles.segmentValue}>{carDistribution.car}%</span>
+          <span className={styles.segmentLabel}>Low Emission</span>
+          <span className={styles.segmentValue}>{carDistribution.lowEmission}%</span>
         </div>
 
         <div

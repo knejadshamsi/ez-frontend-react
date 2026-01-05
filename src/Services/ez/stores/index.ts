@@ -47,9 +47,11 @@ const createInitialPayload = (): APIPayload => ({
     percentage: 5
   },
   carDistribution: {
-    ev: 10,
-    car: 85,
-    highEmission: 5
+    zeroEmission: 30,
+    nearZeroEmission: 35,
+    lowEmission: 35,
+    midEmission: 0,
+    highEmission: 0
   },
   modeUtilities: {
     walk: 0,

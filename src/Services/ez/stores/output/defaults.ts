@@ -28,8 +28,8 @@ export const DEFAULT_EMISSIONS_BAR_CHART_CONFIG: EZEmissionsBarChartConfig = {
 };
 
 export const DEFAULT_VEHICLE_EMISSIONS_CHART_CONFIG: EZVehicleEmissionsChartConfig = {
-  vehicleTypeIds: ['electric', 'standard', 'heavy'],
-  vehicleTypeLabels: ['Electric Vehicles', 'Standard Vehicles', 'Heavy Vehicles'],
+  vehicleTypeIds: ['zero_emission', 'low_emission', 'high_emission'],
+  vehicleTypeLabels: ['Zero Emission Vehicles', 'Low Emission Vehicles', 'High Emission Vehicles'],
   vehicleTypeColors: ['#b2dfb2', '#b8d4e8', '#d9cdc3'],
 };
 

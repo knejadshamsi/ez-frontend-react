@@ -17,8 +17,19 @@ export type EZStateType =
 export type Coordinate = [number, number]; // [longitude, latitude]
 export type TripType = 'start' | 'end' | 'pass'; // Which trips to include in simulation
 export type PolicyTier = 1 | 2 | 3; // 1: No restrictions , 2: Medium restrictions , 3: banned
+export type VehicleTypeId = 'zeroEmission' | 'nearZeroEmission' | 'lowEmission' | 'midEmission' | 'highEmission';
+
+// Vehicle type colors (single source of truth)
+export const VEHICLE_TYPE_COLORS: Record<VehicleTypeId, string> = {
+  zeroEmission: '#34d399',
+  nearZeroEmission: '#86efac',
+  lowEmission: '#fbbf24',
+  midEmission: '#fb923c',
+  highEmission: '#ef4444'
+} as const;
+
 export interface Policy {
-  vehicleType: 'ev' | 'veh' | 'h_veh';  // Vehicle type
+  vehicleType: VehicleTypeId;  // Vehicle type
   tier: PolicyTier;                      // Restriction level
   period: [string, string];              // Time range ["HH:MM", "HH:MM"]
   penalty?: number;                      // Penalty amount for restricted tier (INTEGER, minimum 1)
@@ -45,8 +56,10 @@ export interface SimulationOptions {
   percentage: number;
 }
 export interface CarDistribution {
-  ev: number;
-  car: number;
+  zeroEmission: number;
+  nearZeroEmission: number;
+  lowEmission: number;
+  midEmission: number;
   highEmission: number;
 }
 export interface ModeUtilities {

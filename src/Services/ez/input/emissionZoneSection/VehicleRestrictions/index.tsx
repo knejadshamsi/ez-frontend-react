@@ -81,7 +81,7 @@ const PolicySection = ({ zoneId }: PolicySectionProps) => {
 
       <div className={styles.schedulerContainer}>
         <div className={styles.boundariesText}>
-          Double-click to add restrictions. Click icon to edit, drag edges to resize, drag center to move.
+          Double-click to add restrictions for vehicle emission groups. Click icon to edit, drag edges to resize, drag center to move.
         </div>
 
         <div className={styles.svgGrid} ref={containerRef}>
