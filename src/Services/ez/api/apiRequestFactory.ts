@@ -1,4 +1,5 @@
-import { APIPayload, Coordinate } from '~stores/types';
+import { APIPayload, Coordinate, CarDistribution } from '~stores/types';
+import { useEZSessionStore } from '~stores/session';
 
 export interface APIRequest {
   scenarioTitle: string;
@@ -8,7 +9,7 @@ export interface APIRequest {
     coords: Coordinate[][];
     trip: string[];
     policies: Array<{
-      vehicleType: 'zero_emission' | 'low_emission' | 'high_emission';
+      vehicleType: 'zeroEmission' | 'nearZeroEmission' | 'lowEmission' | 'midEmission' | 'highEmission';
       tier: 1 | 2 | 3;
       period: [string, string];
       penalty?: number;
@@ -27,7 +28,9 @@ export interface APIRequest {
   };
   carDistribution: {
     zeroEmission: number;
+    nearZeroEmission: number;
     lowEmission: number;
+    midEmission: number;
     highEmission: number;
   };
   modeUtilities: {
@@ -45,6 +48,27 @@ export const createAPIRequest = (
   scenarioTitle: string,
   scenarioDescription?: string
 ): APIRequest => {
+  const sessionStore = useEZSessionStore.getState();
+
+  // Filter carDistribution - only include enabled categories
+  const enabledDistribution: Partial<CarDistribution> = {};
+  let totalPercentage = 0;
+
+  Object.entries(payload.carDistribution).forEach(([key, value]) => {
+    if (sessionStore.carDistributionCategories[key]) {
+      enabledDistribution[key] = value;
+      totalPercentage += value;
+    }
+  });
+
+  // Normalize to ensure 100% (handle rounding)
+  if (totalPercentage > 0 && Math.abs(totalPercentage - 100) > 0.01) {
+    const scale = 100 / totalPercentage;
+    Object.keys(enabledDistribution).forEach(key => {
+      enabledDistribution[key] = Math.round(enabledDistribution[key]! * scale);
+    });
+  }
+
   const scaledCoords: Coordinate[][][] = payload.scaledSimulationAreas
     .filter(area => area.coords && area.coords.length > 0)
     .map(area => area.coords);
@@ -57,19 +81,24 @@ export const createAPIRequest = (
 
   const zonesWithCoords = payload.zones.filter(zone => zone.coords !== null);
 
+  // Filter zones - remove policies for disabled vehicle types
+  const filteredZones = zonesWithCoords.map(zone => ({
+    id: zone.id,
+    coords: zone.coords!,
+    trip: zone.trip,
+    policies: zone.policies.filter(policy => {
+      return sessionStore.carDistributionCategories[policy.vehicleType];
+    })
+  }));
+
   return {
     scenarioTitle,
     scenarioDescription,
-    zones: zonesWithCoords.map(zone => ({
-      id: zone.id,
-      coords: zone.coords!,
-      trip: zone.trip,
-      policies: zone.policies
-    })),
+    zones: filteredZones,
     simulationArea,
     sources: payload.sources,
     simulationOptions: payload.simulationOptions,
-    carDistribution: payload.carDistribution,
+    carDistribution: enabledDistribution as CarDistribution,
     modeUtilities: payload.modeUtilities
   };
 };
@@ -90,12 +119,25 @@ export const validateAPIRequest = (request: APIRequest): { isValid: boolean; err
     };
   }
 
-  const { zeroEmission, lowEmission, highEmission } = request.carDistribution;
-  const total = zeroEmission + lowEmission + highEmission;
+  // Check that all carDistribution values sum to 100%
+  const total = Object.values(request.carDistribution).reduce((sum, value) => sum + value, 0);
   if (Math.abs(total - 100) > 0.01) {
     return {
       isValid: false,
       error: `Car distribution must sum to 100% (currently ${total}%)`
+    };
+  }
+
+  // Check that at least one category is enabled
+  const sessionStore = useEZSessionStore.getState();
+  const enabledCategories = Object.entries(request.carDistribution).filter(([key]) =>
+    sessionStore.carDistributionCategories[key]
+  );
+
+  if (enabledCategories.length === 0) {
+    return {
+      isValid: false,
+      error: 'At least one emission category must be enabled'
     };
   }
 

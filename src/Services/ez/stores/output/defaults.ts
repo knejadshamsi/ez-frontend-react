@@ -7,6 +7,7 @@ import type {
   EZVehicleEmissionsChartConfig,
   EZTripLegsTableConfig,
 } from './types';
+import { VEHICLE_TYPE_COLORS } from '../types';
 
 export const DEFAULT_PEOPLE_RESPONSE_CHART_CONFIG: EZPeopleResponseChartConfig = {
   categoryIds: ['paidPenalty', 'rerouted', 'switchedToBus', 'switchedToSubway', 'switchedToWalking', 'switchedToBiking', 'cancelledTrip'],
@@ -28,9 +29,9 @@ export const DEFAULT_EMISSIONS_BAR_CHART_CONFIG: EZEmissionsBarChartConfig = {
 };
 
 export const DEFAULT_VEHICLE_EMISSIONS_CHART_CONFIG: EZVehicleEmissionsChartConfig = {
-  vehicleTypeIds: ['zero_emission', 'low_emission', 'high_emission'],
-  vehicleTypeLabels: ['Zero Emission Vehicles', 'Low Emission Vehicles', 'High Emission Vehicles'],
-  vehicleTypeColors: ['#b2dfb2', '#b8d4e8', '#d9cdc3'],
+  vehicleTypeIds: ['zeroEmission', 'nearZeroEmission', 'lowEmission', 'midEmission', 'highEmission'],
+  vehicleTypeLabels: ['Zero Emission Vehicles', 'Near-Zero Emission Vehicles', 'Low Emission Vehicles', 'Mid Emission Vehicles', 'High Emission Vehicles'],
+  vehicleTypeColors: Object.values(VEHICLE_TYPE_COLORS),
 };
 
 export const DEFAULT_TRIP_LEGS_TABLE_CONFIG: EZTripLegsTableConfig = {

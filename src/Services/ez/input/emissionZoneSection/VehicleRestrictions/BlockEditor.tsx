@@ -8,11 +8,11 @@ const BlockEditor = ({ activeBlock, onUpdate, onDelete }: BlockEditorProps) => {
   const { vehicle, block } = activeBlock;
 
   const handleUpdate = (updates: Partial<TimeBlock>) => {
-    onUpdate(vehicle.id, block.id, updates);
+    onUpdate(vehicle.type, block.id, updates);
   };
 
   const handleDelete = () => {
-    onDelete(vehicle.id, block.id);
+    onDelete(vehicle.type, block.id);
   };
 
   return (

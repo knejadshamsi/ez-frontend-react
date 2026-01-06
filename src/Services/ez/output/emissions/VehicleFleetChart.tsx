@@ -85,18 +85,15 @@ export const VehicleFleetChart = () => {
       </span>
       <div className={outputStyles.vehicleEmissionsContainer}>
         <div className={outputStyles.legendContainer}>
-          <div className={outputStyles.legendItem}>
-            <div className={`${outputStyles.legendColorBox} ${outputStyles.electricVehicleColor}`}></div>
-            <span className={outputStyles.legendText}>Zero Emission Vehicles</span>
-          </div>
-          <div className={outputStyles.legendItem}>
-            <div className={`${outputStyles.legendColorBox} ${outputStyles.standardVehicleColor}`}></div>
-            <span className={outputStyles.legendText}>Low Emission Vehicles</span>
-          </div>
-          <div className={outputStyles.legendItem}>
-            <div className={`${outputStyles.legendColorBox} ${outputStyles.heavyVehicleColor}`}></div>
-            <span className={outputStyles.legendText}>High Emission Vehicles</span>
-          </div>
+          {chartConfig.vehicleTypeLabels.map((label, index) => (
+            <div key={chartConfig.vehicleTypeIds[index]} className={outputStyles.legendItem}>
+              <div
+                className={outputStyles.legendColorBox}
+                style={{ backgroundColor: chartConfig.vehicleTypeColors[index] }}
+              ></div>
+              <span className={outputStyles.legendText}>{label}</span>
+            </div>
+          ))}
         </div>
         <Row gutter={24}>
           <Col span={12}>

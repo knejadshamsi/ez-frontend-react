@@ -114,21 +114,26 @@ export const policyToVehicles = (policies: Policy[] | null | undefined): Vehicle
 
   const items = policies.map(policyToItem);
 
-  return items.map((item, index) => {
+  // Group policies by vehicle type
+  const vehicleMap = new Map<VehicleTypeId, TimeBlock[]>();
+
+  items.forEach(item => {
     const { vehicleType, policyValues, operatingHours = ["00:00", "23:59"] } = item;
 
-    const vehicle: Vehicle = {
-      id: index + 1,
-      type: vehicleType,
-      blocks: []
-    };
+    if (!vehicleMap.has(vehicleType)) {
+      vehicleMap.set(vehicleType, []);
+    }
 
+    const blocks = vehicleMap.get(vehicleType)!;
     const start = timeToColumn(operatingHours[0] || "00:00");
     const end = timeToColumn(operatingHours[1] || "23:59");
 
+    // Generate unique block ID based on existing blocks
+    const newBlockId = blocks.length > 0 ? Math.max(...blocks.map(b => b.id)) + 1 : 1;
+
     if (policyValues === "banned") {
-      vehicle.blocks.push({
-        id: 1,
+      blocks.push({
+        id: newBlockId,
         start,
         end,
         type: 'banned'
@@ -136,8 +141,8 @@ export const policyToVehicles = (policies: Policy[] | null | undefined): Vehicle
     } else if (policyValues === "free") {
       // No blocks for free access
     } else if (Array.isArray(policyValues) && policyValues.length > 0) {
-      vehicle.blocks.push({
-        id: 1,
+      blocks.push({
+        id: newBlockId,
         start,
         end,
         type: 'restricted',
@@ -145,9 +150,13 @@ export const policyToVehicles = (policies: Policy[] | null | undefined): Vehicle
         interval: 1800
       });
     }
-
-    return vehicle;
   });
+
+  // Convert map to vehicle array
+  return Array.from(vehicleMap.entries()).map(([vehicleType, blocks]) => ({
+    type: vehicleType,
+    blocks
+  }));
 };
 
 export const getBlockDescription = (block: TimeBlock | null): string => {

@@ -2,6 +2,7 @@ import { VEHICLE_TYPES, VehicleRowProps } from '../types';
 import { RestrictionBlock } from './RestrictionBlock';
 import { colorShader } from '~ez/utils/colorUtils';
 import { HEADER_HEIGHT, ROW_HEIGHT, VEHICLE_COLUMN_WIDTH } from '../constants';
+import { useEZSessionStore } from '~stores/session';
 
 export const VehicleRow = ({
   vehicle,
@@ -9,7 +10,7 @@ export const VehicleRow = ({
   containerWidth,
   timeColumnWidth,
   zoneColor,
-  selectedVehicleId,
+  selectedVehicleType,
   selectedBlockId,
   onVehicleClick,
   onGridDoubleClick,
@@ -18,15 +19,27 @@ export const VehicleRow = ({
 }: VehicleRowProps) => {
   const rowY = HEADER_HEIGHT + rowIndex * ROW_HEIGHT;
 
+  const sessionStore = useEZSessionStore();
+  const isEnabled = sessionStore.carDistributionCategories[vehicle.type];
+
+  const handleVehicleNameClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    sessionStore.toggleCarDistributionCategory(vehicle.type);
+  };
+
   return (
-    <g key={`vehicle-${vehicle.id}`}>
+    <g key={`vehicle-${vehicle.type}`}>
       <rect
         x="0"
         y={rowY}
         width={VEHICLE_COLUMN_WIDTH}
         height={ROW_HEIGHT}
-        fill={vehicle.id === selectedVehicleId ? colorShader(zoneColor, 1.5) : colorShader(zoneColor, 2.0)}
-        onClick={() => onVehicleClick(vehicle.id)}
+        fill={isEnabled
+          ? (vehicle.type === selectedVehicleType ? colorShader(zoneColor, 1.5) : colorShader(zoneColor, 2.0))
+          : '#f3f4f6'
+        }
+        opacity={isEnabled ? 1 : 0.5}
+        onClick={() => isEnabled && onVehicleClick(vehicle.type)}
       />
 
       <text
@@ -36,15 +49,16 @@ export const VehicleRow = ({
         textAnchor="start"
         fontWeight="600"
         fontSize="13"
-        fill="#374151"
-        onClick={() => onVehicleClick(vehicle.id)}
+        fill={isEnabled ? "#374151" : "#9ca3af"}
+        style={{ cursor: 'pointer', textDecoration: isEnabled ? 'none' : 'line-through' }}
+        onClick={handleVehicleNameClick}
       >
         {VEHICLE_TYPES[vehicle.type]?.label || vehicle.type}
       </text>
 
       <defs>
         <pattern
-          id={`grid-bg-${vehicle.id}`}
+          id={`grid-bg-${vehicle.type}`}
           patternUnits="userSpaceOnUse"
           width={timeColumnWidth * 4}
           height={ROW_HEIGHT}
@@ -60,8 +74,8 @@ export const VehicleRow = ({
         y={rowY}
         width={containerWidth - VEHICLE_COLUMN_WIDTH}
         height={ROW_HEIGHT}
-        fill={`url(#grid-bg-${vehicle.id})`}
-        onDoubleClick={(e) => onGridDoubleClick(e, vehicle.id)}
+        fill={`url(#grid-bg-${vehicle.type})`}
+        onDoubleClick={(e) => onGridDoubleClick(e, vehicle.type)}
       />
 
       {/* Grid lines (2-hour divisions only) */}
@@ -89,13 +103,13 @@ export const VehicleRow = ({
 
       {/* Restriction Blocks */}
       {vehicle.blocks.map(block => {
-        const isSelected = selectedBlockId === block.id && selectedVehicleId === vehicle.id;
+        const isSelected = selectedBlockId === block.id && selectedVehicleType === vehicle.type;
 
         return (
           <RestrictionBlock
             key={`block-${block.id}`}
             block={block}
-            vehicleId={vehicle.id}
+            vehicleType={vehicle.type}
             rowIndex={rowIndex}
             timeColumnWidth={timeColumnWidth}
             isSelected={isSelected}
