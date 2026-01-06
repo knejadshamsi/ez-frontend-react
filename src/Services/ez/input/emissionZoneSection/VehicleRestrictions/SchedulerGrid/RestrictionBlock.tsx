@@ -4,7 +4,7 @@ import { VEHICLE_COLUMN_WIDTH, ROW_HEIGHT, BLOCK_HEIGHT_RATIO, RESIZE_ZONE_RATIO
 
 export const RestrictionBlock = ({
   block,
-  vehicleId,
+  vehicleType,
   rowIndex,
   timeColumnWidth,
   isSelected,
@@ -71,7 +71,7 @@ export const RestrictionBlock = ({
         height={blockHeight}
         fill="transparent"
         style={{ cursor: 'ew-resize' }}
-        onMouseDown={(e) => onMouseDown(e, vehicleId, block.id, 'resize', 'start')}
+        onMouseDown={(e) => onMouseDown(e, vehicleType, block.id, 'resize', 'start')}
       />
 
       {/* Center 50% - Drag to move */}
@@ -82,7 +82,7 @@ export const RestrictionBlock = ({
         height={blockHeight}
         fill="transparent"
         style={{ cursor: 'move' }}
-        onMouseDown={(e) => onMouseDown(e, vehicleId, block.id, 'move')}
+        onMouseDown={(e) => onMouseDown(e, vehicleType, block.id, 'move')}
       />
 
       {/* Right 25% - Resize right edge */}
@@ -93,7 +93,7 @@ export const RestrictionBlock = ({
         height={blockHeight}
         fill="transparent"
         style={{ cursor: 'ew-resize' }}
-        onMouseDown={(e) => onMouseDown(e, vehicleId, block.id, 'resize', 'end')}
+        onMouseDown={(e) => onMouseDown(e, vehicleType, block.id, 'resize', 'end')}
       />
 
       {/* Block label text - clickable to open popover */}
@@ -107,7 +107,7 @@ export const RestrictionBlock = ({
         style={{ cursor: 'pointer' }}
         onClick={(event) => {
           event.stopPropagation();
-          onClick(vehicleId, block, rowIndex, event);
+          onClick(vehicleType, block, rowIndex, event);
         }}
       >
         {getBlockLabel()}
