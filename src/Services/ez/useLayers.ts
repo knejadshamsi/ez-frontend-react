@@ -425,13 +425,13 @@ export function useLayers() {
     : null;
 
   return [
-    editablePolygonLayer,
-    drawingLayers.zoneLayer,
     drawingLayers.areaLayer,
-    displayLayer,
     simulationAreaDisplayLayer,
+    drawingLayers.zoneLayer,
+    displayLayer,
     emissionsOutputLayer,
     peopleResponseOutputLayer,
-    tripLegsOutputLayer
+    tripLegsOutputLayer,
+    editablePolygonLayer
   ].filter(Boolean);
 }

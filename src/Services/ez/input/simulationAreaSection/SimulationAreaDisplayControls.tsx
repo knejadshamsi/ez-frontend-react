@@ -15,6 +15,11 @@ interface SimulationAreaDisplayControlsProps {
   compact?: boolean
 }
 
+// Opacity values for fill states
+const FILL_OPACITY_TRANSPARENT = 0;
+const FILL_OPACITY_LIGHT = 51;      // 20% opacity
+const FILL_OPACITY_FULL = 128;      // 50.2% opacity
+
 // button cycling design for border style and fill opacity
 const SimulationAreaDisplayControls = ({ compact = false }: SimulationAreaDisplayControlsProps): ReactElement => {
   const simulationAreaDisplay = useEZSessionStore((state) => state.simulationAreaDisplay)
@@ -33,9 +38,22 @@ const SimulationAreaDisplayControls = ({ compact = false }: SimulationAreaDispla
     setSimulationAreaDisplay({ borderStyle: nextStyle[simulationAreaDisplay.borderStyle] })
   }
 
-  // Fill toggle: transparent (0) ↔ filled (128)
+  // Fill cycling: transparent (0) → lightly colored (51) → fully colored (128) → transparent
   const handleFillClick = () => {
-    const nextOpacity = simulationAreaDisplay.fillOpacity === 0 ? 128 : 0
+    let nextOpacity: number
+
+    switch (simulationAreaDisplay.fillOpacity) {
+      case FILL_OPACITY_TRANSPARENT:
+        nextOpacity = FILL_OPACITY_LIGHT
+        break
+      case FILL_OPACITY_LIGHT:
+        nextOpacity = FILL_OPACITY_FULL
+        break
+      default:
+        nextOpacity = FILL_OPACITY_TRANSPARENT
+        break
+    }
+
     setSimulationAreaDisplay({ fillOpacity: nextOpacity })
   }
 
@@ -51,11 +69,15 @@ const SimulationAreaDisplayControls = ({ compact = false }: SimulationAreaDispla
     }
   }
 
-  // Get icon for fill
+  // Get icon for fill with appropriate styling
   const getFillIcon = () => {
-    return simulationAreaDisplay.fillOpacity === 0
-      ? <BorderOutlined />
-      : <BgColorsOutlined />
+    if (simulationAreaDisplay.fillOpacity === FILL_OPACITY_TRANSPARENT) {
+      return <BorderOutlined />
+    } else if (simulationAreaDisplay.fillOpacity === FILL_OPACITY_LIGHT) {
+      return <BgColorsOutlined style={{ opacity: 0.5 }} />
+    } else {
+      return <BgColorsOutlined />
+    }
   }
 
   // Get tooltip text
@@ -69,7 +91,14 @@ const SimulationAreaDisplayControls = ({ compact = false }: SimulationAreaDispla
   }
 
   const getFillLabel = () => {
-    return `Fill: ${simulationAreaDisplay.fillOpacity === 0 ? 'Transparent' : 'Colored'}`
+    switch (simulationAreaDisplay.fillOpacity) {
+      case FILL_OPACITY_TRANSPARENT:
+        return 'Fill: Transparent'
+      case FILL_OPACITY_LIGHT:
+        return 'Fill: Lightly Colored'
+      default:
+        return 'Fill: Colored'
+    }
   }
 
   return (
