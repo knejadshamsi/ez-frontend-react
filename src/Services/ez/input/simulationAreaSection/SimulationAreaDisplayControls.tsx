@@ -76,6 +76,7 @@ const SimulationAreaDisplayControls = ({ compact = false }: SimulationAreaDispla
     <div className={containerClassName}>
       <Tooltip title={getBorderStyleLabel()}>
         <Button
+          className={styles.iconButton}
           size={buttonSize}
           icon={getBorderStyleIcon()}
           onClick={handleBorderStyleClick}
@@ -88,6 +89,7 @@ const SimulationAreaDisplayControls = ({ compact = false }: SimulationAreaDispla
 
       <Tooltip title={getFillLabel()}>
         <Button
+          className={styles.iconButton}
           size={buttonSize}
           icon={getFillIcon()}
           onClick={handleFillClick}

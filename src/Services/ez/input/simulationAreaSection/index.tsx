@@ -66,6 +66,8 @@ const SimulationAreaSection = (): ReactElement => {
   const upsertScaledSimulationArea = useAPIPayloadStore((state) => state.upsertScaledSimulationArea)
   const removeScaledSimulationArea = useAPIPayloadStore((state) => state.removeScaledSimulationArea)
 
+  const showControls = scaledSimulationAreas.length > 0 || customSimulationAreas.length > 0
+
   useEffect(() => {
     const visibleZones = apiZones.filter(zone => {
       const sessionData = sessionZones[zone.id]
@@ -118,11 +120,15 @@ const SimulationAreaSection = (): ReactElement => {
         <strong className={styles.dividerTitle}>
           2. SELECT SIMULATION AREA
         </strong>
-        <div className={styles.dividerLine} />
-        {(scaledSimulationAreas.length > 0 || customSimulationAreas.length > 0) && (
-          <SimulationAreaDisplayControls compact />
+        <hr className={styles.dividerLine} />
+        {showControls && (
+          <>
+            <div className={styles.controlsWrapper}>
+              <SimulationAreaDisplayControls compact />
+            </div>
+            <hr className={styles.dividerLineSpacer} />
+          </>
         )}
-        <div className={styles.dividerLineSpacer} />
       </div>
 
       <div className={`${styles.container} ${styles.simulationAreaContainer}`}>

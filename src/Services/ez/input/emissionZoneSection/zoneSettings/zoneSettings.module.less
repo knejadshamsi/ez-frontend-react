@@ -26,11 +26,6 @@
     flex-direction: column;
     justify-content: center;
   }
-
-  &> :last-child{
-    display: grid;
-    place-items: center;
-  }
 }
 
 .boundariesText {
@@ -96,6 +91,11 @@
 
 .btn {
   min-width: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 2px;
+  margin-top: 8px;
 }
 
 .redrawZoneButton {
@@ -118,6 +118,7 @@
   padding: 4px 8px;
   background: transparent !important;
   border-color: var(--zone-color-border) !important;
+  margin-top: 8px;
 
   &:hover:not(:disabled) {
     background-color: var(--zone-color-light) !important;

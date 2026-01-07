@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import ZoneCard from './ZoneCard';
+import ZoneCardContent from './ZoneCardContent';
 import AddZoneCard from './AddZoneCard';
 import containerStyles from './ZoneCardsContainer.module.less';
 import { useAPIPayloadStore } from '~store';
@@ -26,6 +27,7 @@ const EDGE_THRESHOLD = 10;
 const ZoneCardList = () => {
   const apiZones = useAPIPayloadStore(state => state.payload.zones);
   const sessionZones = useEZSessionStore(state => state.zones);
+  const activeZone = useEZSessionStore(state => state.activeZone);
   const addZone = useAPIPayloadStore(state => state.addZone);
   const reorderZones = useAPIPayloadStore(state => state.reorderZones);
   const nextAvailableColor = useEZSessionStore(state => state.nextAvailableColor);
@@ -155,8 +157,27 @@ const ZoneCardList = () => {
         </div>
       </SortableContext>
 
-      <DragOverlay dropAnimation={null}>
-        {activeId ? <ZoneCard zoneId={activeId} /> : null}
+      <DragOverlay>
+        {activeId ? (
+          (() => {
+            const zoneData = sessionZones[activeId];
+            const name = zoneData?.name || '';
+            const baseColor = zoneData?.color || '#1890ff';
+            const isHidden = zoneData?.hidden || false;
+            const isSelected = activeId === activeZone;
+
+            return (
+              <ZoneCardContent
+                zoneId={activeId}
+                name={name}
+                baseColor={baseColor}
+                isHidden={isHidden}
+                isSelected={isSelected}
+                isDragging={true}
+              />
+            );
+          })()
+        ) : null}
       </DragOverlay>
     </DndContext>
   );
