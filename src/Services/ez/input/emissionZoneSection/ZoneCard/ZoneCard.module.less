@@ -6,7 +6,7 @@
   padding: 8px;
   position: relative;
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  transition: box-shadow 0.2s ease-in-out, height 0.2s ease-in-out;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -148,4 +148,9 @@
 .colorTrigger:hover {
   transform: scale(1.15);
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
+}
+
+.placeholderWrapper {
+  // Block scale transforms that cause visual glitches, but allow translate for sorting
+  scale: 1 1 !important;
 }

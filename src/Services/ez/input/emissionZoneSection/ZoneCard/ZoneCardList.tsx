@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import ZoneCard from './ZoneCard';
+import ZoneCardContent from './ZoneCardContent';
 import AddZoneCard from './AddZoneCard';
 import containerStyles from './ZoneCardsContainer.module.less';
 import { useAPIPayloadStore } from '~store';
@@ -155,8 +156,27 @@ const ZoneCardList = () => {
         </div>
       </SortableContext>
 
-      <DragOverlay dropAnimation={null}>
-        {activeId ? <ZoneCard zoneId={activeId} /> : null}
+      <DragOverlay>
+        {activeId ? (
+          (() => {
+            const zoneData = sessionZones[activeId];
+            const name = zoneData?.name || '';
+            const baseColor = zoneData?.color || '#1890ff';
+            const isHidden = zoneData?.hidden || false;
+            const isSelected = activeId === useEZSessionStore.getState().activeZone;
+
+            return (
+              <ZoneCardContent
+                zoneId={activeId}
+                name={name}
+                baseColor={baseColor}
+                isHidden={isHidden}
+                isSelected={isSelected}
+                isDragging={true}
+              />
+            );
+          })()
+        ) : null}
       </DragOverlay>
     </DndContext>
   );

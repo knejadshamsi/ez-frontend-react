@@ -138,7 +138,7 @@ const ZoneSettings = ({ zoneId }) => {
         }}
       >
         <span className={styles.sectionHeader}><strong>JOURNEYS</strong></span>
-        <div className={styles.boundariesText} style={{ marginBottom: '16px' }}>
+        <div className={styles.boundariesText}>
           Include Agents in the simulation
         </div>
         <div className={styles.journeyButtonGroup}>
