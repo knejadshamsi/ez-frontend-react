@@ -5,7 +5,7 @@ export type BorderStyle = 'dashed' | 'solid' | 'dotted';
 
 export interface SimulationAreaDisplayConfig {
   borderStyle: BorderStyle;
-  fillOpacity: number; // 0 = transparent, 128 = filled
+  fillOpacity: number; // 0 = transparent, 51 = lightly colored, 128 = fully colored
 }
 
 /* Zone session data for individual emission zones */
