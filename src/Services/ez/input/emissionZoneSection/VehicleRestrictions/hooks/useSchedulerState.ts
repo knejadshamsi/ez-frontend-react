@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAPIPayloadStore } from '~store';
-import { vehiclesToPolicy, policyToVehicles } from '../vehicleUtils';
+import { vehiclesToPolicy, policyToVehicles } from '../policyConversions';
 import { Vehicle, UseSchedulerStateParams, UseSchedulerStateReturn } from '../types';
 import { VehicleTypeId, VEHICLE_TYPE_IDS } from '~ez/stores/types';
 
@@ -8,14 +8,13 @@ export const useSchedulerState = ({ zoneId }: UseSchedulerStateParams): UseSched
   const apiZones = useAPIPayloadStore(state => state.payload.zones);
   const updateZone = useAPIPayloadStore(state => state.updateZone);
 
-  // Get current zone's policies
-  const apiZone = apiZones.find(z => z.id === zoneId);
-  const currentPolicies = apiZone?.policies || [];
-
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
 
   useEffect(() => {
     if (zoneId) {
+      const apiZone = apiZones.find(z => z.id === zoneId);
+      const currentPolicies = apiZone?.policies || [];
+
       const defaultVehicles: Vehicle[] = VEHICLE_TYPE_IDS.map(type => ({
         type,
         blocks: []
@@ -27,7 +26,7 @@ export const useSchedulerState = ({ zoneId }: UseSchedulerStateParams): UseSched
           : policyToVehicles(currentPolicies)
       );
     }
-  }, [zoneId, currentPolicies]);
+  }, [zoneId, apiZones]);
 
   const syncVehiclesToPolicy = useCallback((updatedVehicles: Vehicle[]) => {
     if (zoneId) {

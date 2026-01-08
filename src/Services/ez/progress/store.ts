@@ -124,10 +124,6 @@ export const areAllStepsComplete = (steps: StepStatus): boolean => {
   return Object.values(steps).every(state => state === 'completed');
 };
 
-export const hasAnyStepFailed = (steps: StepStatus): boolean => {
-  return Object.values(steps).some(state => state === 'failed');
-};
-
 export const getProgressStatus = (state: ProgressState): 'running' | 'success' | 'error' | null => {
   if (!state.isVisible) return null;
   if (state.errorMessage) return 'error';
@@ -146,8 +142,4 @@ export const showProgress = (): void => {
 
 export const showProgressError = (message: string): void => {
   useProgressStore.getState().setError(message);
-};
-
-export const closeProgress = (): void => {
-  useProgressStore.getState().hide();
 };

@@ -1,7 +1,7 @@
 import { Spin, Alert, Button } from 'antd';
 import { useEZOutputOverviewStore } from '~stores/output';
 import { useEZSessionStore } from '~stores/session';
-import { retryComponentData } from '../api/retryComponent';
+import { retryComponentData } from '~ez/api';
 import outputStyles from './Output.module.less';
 
 /**

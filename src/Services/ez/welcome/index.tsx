@@ -1,9 +1,9 @@
 import { Space, Button, Input, Typography, message } from 'antd'
 import { useEZSessionStore } from '~stores/session'
 import { useEZServiceStore } from '~store'
-import { loadScenario } from '~ez/api/startSimulation'
-import previousScenarios from '~ez/data/previousScenarios.json'
-import styles from '~ez/styles/WelcomeView.module.less'
+import { loadScenario } from '~ez/api'
+import previousScenarios from './previousScenarios.json'
+import styles from './WelcomeView.module.less'
 
 const { Text } = Typography
 

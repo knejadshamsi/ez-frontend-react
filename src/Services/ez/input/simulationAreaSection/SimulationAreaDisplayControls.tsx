@@ -9,7 +9,7 @@ import {
 } from '@ant-design/icons'
 import { useEZSessionStore } from '~stores/session'
 import type { BorderStyle } from '~stores/session'
-import styles from './simulationAreaDisplayControls.module.less'
+import styles from './simulationAreaSection.module.less'
 
 interface SimulationAreaDisplayControlsProps {
   compact?: boolean
@@ -20,7 +20,6 @@ const FILL_OPACITY_TRANSPARENT = 0;
 const FILL_OPACITY_LIGHT = 51;      // 20% opacity
 const FILL_OPACITY_FULL = 128;      // 50.2% opacity
 
-// button cycling design for border style and fill opacity
 const SimulationAreaDisplayControls = ({ compact = false }: SimulationAreaDisplayControlsProps): ReactElement => {
   const simulationAreaDisplay = useEZSessionStore((state) => state.simulationAreaDisplay)
   const setSimulationAreaDisplay = useEZSessionStore((state) => state.setSimulationAreaDisplay)
@@ -57,7 +56,6 @@ const SimulationAreaDisplayControls = ({ compact = false }: SimulationAreaDispla
     setSimulationAreaDisplay({ fillOpacity: nextOpacity })
   }
 
-  // Get icon for border style
   const getBorderStyleIcon = () => {
     switch (simulationAreaDisplay.borderStyle) {
       case 'dashed':
@@ -69,7 +67,6 @@ const SimulationAreaDisplayControls = ({ compact = false }: SimulationAreaDispla
     }
   }
 
-  // Get icon for fill with appropriate styling
   const getFillIcon = () => {
     if (simulationAreaDisplay.fillOpacity === FILL_OPACITY_TRANSPARENT) {
       return <BorderOutlined />
@@ -79,8 +76,6 @@ const SimulationAreaDisplayControls = ({ compact = false }: SimulationAreaDispla
       return <BgColorsOutlined />
     }
   }
-
-  // Get tooltip text
   const getBorderStyleLabel = () => {
     const labels: Record<BorderStyle, string> = {
       'dashed': 'Dashed',

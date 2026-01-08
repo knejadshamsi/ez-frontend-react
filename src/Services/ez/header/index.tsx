@@ -5,8 +5,7 @@ import { useServiceStore } from '~globalStores';
 import { useEZSessionStore } from '~stores/session';
 import { useEZServiceStore } from '~store';
 import { resetAllEZOutputStores } from '~stores/output';
-import { checkBackendHealth } from '../api/healthCheck';
-import { getBackendUrl } from '../api/config';
+import { checkBackendHealth, getBackendUrl } from '~ez/api';
 import styles from './header.module.less';
 
 const { Title } = Typography;

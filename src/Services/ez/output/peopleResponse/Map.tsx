@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
 import { Radio, Spin } from 'antd';
-import { useEZOutputMapStore, getPeopleResponsePoints } from '~stores/output';
+import { useEZOutputMapStore } from '~stores/output';
 import { useEZOutputFiltersStore } from '~stores/session';
 import { useEZServiceStore } from '~store';
-import { fetchMapData } from '../../api/mapDataFetch';
+import { selectPeopleResponseMapPoints } from '~utils/mapDataSelectors';
+import { fetchMapData } from '~ez/api';
 import { MapContainer } from '../reusables';
 import outputStyles from '../Output.module.less';
 
@@ -49,7 +50,7 @@ export const Map = () => {
     );
   }
 
-  const currentPoints = getPeopleResponsePoints(mapData, responseLayerView, responseType);
+  const currentPoints = selectPeopleResponseMapPoints(mapData, responseLayerView, responseType);
 
   return (
     <MapContainer

@@ -1,7 +1,7 @@
 import { useAPIPayloadStore, useEZServiceStore } from '~store';
 import { useEZSessionStore } from '~stores/session';
 import type { TripType } from '~stores/types';
-import { colorShader, HIDDEN_COLOR } from '~ez/utils/colorUtils';
+import { colorShader, HIDDEN_COLOR } from '~utils/colors';
 import { InlineNameEditor } from '~ez/components/InlineNameEditor';
 
 import { Button, Tag } from 'antd';

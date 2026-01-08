@@ -2,7 +2,7 @@ import { useEffect, useCallback } from 'react';
 import { useServiceStore } from '~globalStores';
 import { useEZServiceStore, useAPIPayloadStore, useDrawToolStore, useDrawingStateStore } from '~store';
 import { useEZSessionStore, useEZOutputFiltersStore } from '~stores/session';
-import { useEZOutputMapStore, getEmissionsPointsForPollutant, getPeopleResponsePoints } from '~stores/output';
+import { useEZOutputMapStore } from '~stores/output';
 import { useNotificationStore } from '~/Services/CustomNotification';
 import { createEditablePolygonLayer } from './factories/createEditablePolygonLayer';
 import { createZoneDisplayLayer } from './factories/createZoneDisplayLayer';
@@ -11,8 +11,10 @@ import { createEmissionsHeatmapLayer } from './factories/createEmissionsHeatmapL
 import { createEmissionsHexagonLayer } from './factories/createEmissionsHexagonLayer';
 import { createPeopleResponseGridLayerForType } from './factories/createPeopleResponseGridLayer';
 import { createTripLegsPathLayer } from './factories/createTripLegsPathLayer';
-import { validatePolygon } from './utils/polygonValidation';
-import { coordsToGeoJSON, hexToRgb } from './utils/geoJsonHelpers';
+import { validatePolygon } from '~utils/polygonValidation';
+import { coordsToGeoJSON } from '~utils/geoJson';
+import { hexToRgb } from '~utils/colors';
+import { selectEmissionsMapPoints, selectPeopleResponseMapPoints } from '~utils/mapDataSelectors';
 import type { Coordinate, EZStateType } from './stores/types';
 import type { FeatureCollection } from 'geojson';
 
@@ -400,7 +402,7 @@ export function useLayers() {
 
   const emissionsOutputLayer = isResultView && isEmissionsMapVisible && emissionsMapData
     ? (() => {
-        const points = getEmissionsPointsForPollutant(emissionsMapData, selectedPollutantType);
+        const points = selectEmissionsMapPoints(emissionsMapData, selectedPollutantType);
         if (points.length === 0) return null;
         return selectedVisualizationType === 'heatmap'
           ? createEmissionsHeatmapLayer({ data: points })
@@ -410,7 +412,7 @@ export function useLayers() {
 
   const peopleResponseOutputLayer = isResultView && isPeopleResponseMapVisible && peopleResponseMapData
     ? (() => {
-        const points = getPeopleResponsePoints(peopleResponseMapData, selectedResponseLayerView, selectedBehavioralResponseType);
+        const points = selectPeopleResponseMapPoints(peopleResponseMapData, selectedResponseLayerView, selectedBehavioralResponseType);
         if (points.length === 0) return null;
         return createPeopleResponseGridLayerForType(points, selectedBehavioralResponseType);
       })()

@@ -1,3 +1,4 @@
+// Main container styles
 .container {
   display: flex;
   flex-direction: column;
@@ -33,10 +34,47 @@
   color: #00695c;
 }
 
-.descriptionText {
-  color: #484848;
+.optionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.optionCard {
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.02);
+  }
+
+  &.selected {
+    border-left: 3px solid #1890ff;
+    background: rgba(24, 144, 255, 0.05);
+  }
+}
+
+.optionTitle {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.optionDescription {
+  color: rgba(0, 0, 0, 0.45);
   font-size: 14px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.optionContent {
+  margin-top: 16px;
+  border-top: 1px solid #f0f0f0;
 }
 
 .emptyStateMessage {
@@ -48,6 +86,13 @@
   border-radius: 4px;
 }
 
+.descriptionText {
+  margin-bottom: 16px;
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 14px;
+}
+
+// Area items and lists
 .areaItem {
   display: flex;
   justify-content: space-between;
@@ -66,24 +111,126 @@
 
 .areasList {
   margin-bottom: 16px;
-  max-width: 600px;
+  max-width: 500px;
   width: 100%;
 }
 
+.zoneScaleContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.zoneScaleCard {
+  height: 36px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.zoneScaleNameLabel {
+  font-weight: bold;
+  font-size: 13px;
+  min-width: 80px;
+  max-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.originButtonsContainer {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  justify-content: center;
+}
+
+.zoneScaleSliderContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zoneScalePercentage {
+  font-size: 12px;
+  font-weight: 500;
+  min-width: 40px;
+}
+
+// Draw area styles
+.drawAreaContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.drawAreaCard {
+  height: 36px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: space-between;
+  padding: 4px 12px;
+}
+
+.drawAreaNameLabel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.drawAreaName {
+  font-weight: bold;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: fit-content;
+}
+
+.colorPickerDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s;
+
+  &:hover {
+    box-shadow: 0 0 0 2px #1890ff;
+  }
+}
+
+// Display controls
+.controlsContainer {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  &.compact {
+    gap: 6px;
+  }
+}
+
+.iconButton {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+// Dividers
 .divider {
   font-size: 0.9rem;
   font-weight: 700;
   margin: 32px 0 24px;
-}
-
-.boldText {
-  font-weight: bold !important;
-}
-
-.customAreaButtonContainer {
-  margin-top: 12px;
-  display: flex;
-  justify-content: center;
 }
 
 .dividerWithControls {
@@ -117,6 +264,16 @@
   border: none;
   border-top: 1px solid rgba(5, 5, 5, 0.06);
   margin: 0;
+}
+
+.boldText {
+  font-weight: bold !important;
+}
+
+.customAreaButtonContainer {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
 }
 
 .controlsWrapper {

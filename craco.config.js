@@ -10,7 +10,8 @@ module.exports = {
       '~store': path.resolve(__dirname, 'src/Services/ez/stores/index'),
       '~stores/*': path.resolve(__dirname, 'src/Services/ez/stores/*'),
       '~styles': path.resolve(__dirname, 'src/Services/ez/styles'),
-      '~components': path.resolve(__dirname, 'src/Services/ez/components')
+      '~components': path.resolve(__dirname, 'src/Services/ez/components'),
+      '~utils': path.resolve(__dirname, 'src/Services/ez/utils')
     },
     configure: (webpackConfig) => {
       webpackConfig.resolve.fullySpecified = false;

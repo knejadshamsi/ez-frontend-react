@@ -1,5 +1,5 @@
-import { generateMergedHeaders } from '../vehicleUtils';
-import { colorShader } from '~ez/utils/colorUtils';
+import { generateMergedHeaders } from '../policyConversions';
+import { colorShader } from '~utils/colors';
 import { HEADER_HEIGHT, VEHICLE_COLUMN_WIDTH, TIME_COLUMNS } from '../constants';
 import { TimeHeaderProps } from '../types';
 

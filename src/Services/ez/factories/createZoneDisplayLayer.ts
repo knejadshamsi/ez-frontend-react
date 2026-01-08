@@ -1,6 +1,6 @@
 import { PolygonLayer } from '@deck.gl/layers';
 import type { Coordinate } from '~stores/types';
-import { hexToRgb } from '../utils/colorUtils';
+import { hexToRgb } from '~utils/colors';
 
 interface ZoneDisplayData {
   coords: Coordinate[][];

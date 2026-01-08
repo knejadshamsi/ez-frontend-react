@@ -1,8 +1,8 @@
 import { Spin, Alert, Button } from 'antd';
 import { useEZOutputEmissionsStore } from '~stores/output';
 import { useEZSessionStore } from '~stores/session';
-import { retryComponentData } from '../../api/retryComponent';
-import { generateEmissionsParagraph1Text } from '../utils/emissionsTextGenerator';
+import { retryComponentData } from '~ez/api';
+import { generateEmissionsParagraph1Text } from '~ez/output/utils/emissionsTextGenerator';
 import { HighlightedText } from '../reusables';
 import outputStyles from '../Output.module.less';
 

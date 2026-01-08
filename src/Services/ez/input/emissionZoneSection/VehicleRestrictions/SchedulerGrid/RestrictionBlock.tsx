@@ -1,5 +1,5 @@
 import { RestrictionBlockProps } from '../types';
-import { columnToTime } from '../vehicleUtils';
+import { columnToTime } from '../policyConversions';
 import { VEHICLE_COLUMN_WIDTH, ROW_HEIGHT, BLOCK_HEIGHT_RATIO, RESIZE_ZONE_RATIO, DRAG_ZONE_RATIO, ICON_ONLY_THRESHOLD, FULL_LABEL_THRESHOLD } from '../constants';
 
 export const RestrictionBlock = ({

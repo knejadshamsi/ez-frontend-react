@@ -5,7 +5,7 @@ import {
   type EZTripLegRecord,
 } from '~stores/output';
 import { useEZOutputFiltersStore } from '~stores/session';
-import { fetchTripLegsPage } from '../../api/tripLegsFetch';
+import { fetchTripLegsPage } from '~ez/api';
 import outputStyles from '../Output.module.less';
 
 /**

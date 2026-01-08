@@ -16,7 +16,7 @@ import {
   DEFAULT_ZONE_ID
 } from './types';
 import { useEZSessionStore } from './session';
-import { generateDefaultName, generateDuplicateName } from '../utils/namingUtils';
+import { generateDefaultName, generateDuplicateName } from '~utils/zoneNames';
 
 // ============= DEFAULT VALUE =============
 const createInitialPayload = (): APIPayload => ({

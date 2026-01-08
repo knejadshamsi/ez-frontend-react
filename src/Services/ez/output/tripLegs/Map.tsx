@@ -3,7 +3,7 @@ import { Spin, Button } from 'antd';
 import { useEZOutputMapStore } from '~stores/output';
 import { useEZOutputFiltersStore } from '~stores/session';
 import { useEZServiceStore } from '~store';
-import { fetchMapData } from '../../api/mapDataFetch';
+import { fetchMapData } from '~ez/api';
 import { MapContainer } from '../reusables';
 import outputStyles from '../Output.module.less';
 

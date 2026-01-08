@@ -1,6 +1,8 @@
 import { RefObject } from 'react';
 import { VehicleTypeId, VEHICLE_TYPE_COLORS } from '~ez/stores/types';
 
+export type { VehicleTypeId };
+
 export interface VehicleTypeInfo {
   label: string;
   color: string;

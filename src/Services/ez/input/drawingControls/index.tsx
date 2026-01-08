@@ -4,8 +4,8 @@ import { useServiceStore } from '~globalStores';
 import { useEZServiceStore, useAPIPayloadStore, useDrawToolStore, useDrawingStateStore } from '~store';
 import { useEZSessionStore } from '~stores/session';
 import { useNotificationStore } from '~/Services/CustomNotification';
-import { validatePolygon } from '~ez/utils/polygonValidation';
-import { geoJsonToCoords } from '~ez/utils/geoJsonHelpers';
+import { validatePolygon } from '~utils/polygonValidation';
+import { geoJsonToCoords } from '~utils/geoJson';
 import styles from './DrawingControls.module.less';
 
 interface LayerItem {

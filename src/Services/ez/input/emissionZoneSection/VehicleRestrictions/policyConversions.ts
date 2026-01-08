@@ -54,16 +54,6 @@ export const columnToTime = (column: number): string => {
   return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 };
 
-export const generateTimeLabels = (): string[] => {
-  const labels: string[] = [];
-  for (let hour = 0; hour < 24; hour++) {
-    for (let min = 0; min < 60; min += 30) {
-      labels.push(`${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`);
-    }
-  }
-  return labels;
-};
-
 export const generateMergedHeaders = (): string[] => {
   const headers: string[] = [];
   for (let hour = 2; hour < 24; hour += 2) {
@@ -81,14 +71,14 @@ export const checkOverlap = (block1: TimeRange, block2: TimeRange): boolean => {
 };
 
 export const vehiclesToPolicy = (vehicles: Vehicle[]): Policy[] => {
-  const items: PolicyItem[] = vehicles.flatMap(vehicle => {
+  const items: PolicyItem[] = vehicles.flatMap((vehicle): PolicyItem[] => {
     const blocks = vehicle.blocks || [];
 
     // If no blocks, vehicle is unrestricted
     if (blocks.length === 0) {
       return [{
         vehicleType: vehicle.type,
-        policyValues: "free" as const,
+        policyValues: "free",
         operatingHours: ["00:00", "23:59"] as [string, string]
       }];
     }
@@ -97,7 +87,7 @@ export const vehiclesToPolicy = (vehicles: Vehicle[]): Policy[] => {
     return blocks.map(block => ({
       vehicleType: vehicle.type,
       policyValues: block.type === 'banned'
-        ? "banned" as const
+        ? "banned"
         : [block.penalty || 0],
       operatingHours: [
         columnToTime(block.start),
@@ -157,17 +147,4 @@ export const policyToVehicles = (policies: Policy[] | null | undefined): Vehicle
     type: vehicleType,
     blocks
   }));
-};
-
-export const getBlockDescription = (block: TimeBlock | null): string => {
-  if (!block) return '';
-
-  const startTime = columnToTime(block.start);
-  const endTime = columnToTime(block.end);
-
-  if (block.type === 'banned') {
-    return `Banned from ${startTime} to ${endTime}`;
-  } else {
-    return `Restricted from ${startTime} to ${endTime} | Penalty: ${block.penalty} every ${block.interval} seconds`;
-  }
 };

@@ -24,7 +24,8 @@
       "~store": ["Services/ez/stores"],
       "~stores/*": ["Services/ez/stores/*"],
       "~styles/*": ["Services/ez/styles/*"],
-      "~components/*": ["Services/ez/components/*"]
+      "~components/*": ["Services/ez/components/*"],
+      "~utils/*": ["Services/ez/utils/*"]
     }
   },
   "include": ["src"],

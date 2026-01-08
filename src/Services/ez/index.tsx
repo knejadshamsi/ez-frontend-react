@@ -4,13 +4,13 @@ import { useServiceStore } from '~globalStores';
 import { useEZServiceStore } from '~store';
 import { useBackendAliveWatcher } from './useRetry';
 
-import { WelcomeView } from '~components/WelcomeView';
+import { WelcomeView } from './welcome';
 import { ParameterSelectionView } from './input/ParameterSelectionView';
 import { OutputView } from './output';
 import { Progress } from './progress';
 import { DrawingControls } from './input/drawingControls';
 
-import styles from '~styles/index.module.less';
+import styles from './index.module.less';
 
 const EzService = () => {
   const [messageApi, contextHolder] = message.useMessage();

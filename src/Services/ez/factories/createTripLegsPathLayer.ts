@@ -43,27 +43,3 @@ export const createTripLegsPathLayer = ({
     pickable: true,
   });
 };
-
-// Create a highlight layer for the selected path
-export const createTripLegsHighlightLayer = ({
-  data,
-  selectedPathId,
-  idSuffix = '',
-}: CreateTripLegsPathLayerInput) => {
-  if (!selectedPathId) return null;
-
-  const selectedPath = data.find((d) => d.id === selectedPathId);
-  if (!selectedPath) return null;
-
-  return new PathLayer<MapPathData>({
-    id: `ez-trip-legs-highlight${idSuffix}`,
-    data: [selectedPath],
-    getPath: (d) => d.path,
-    getColor: [0, 100, 255, 255], // Bright blue
-    getWidth: 10,
-    widthMinPixels: 4,
-    capRounded: true,
-    jointRounded: true,
-    pickable: false,
-  });
-};

@@ -7,16 +7,34 @@ import {
   RadiusBottomleftOutlined,
   RadiusBottomrightOutlined
 } from '@ant-design/icons'
+import { polygon, area } from '@turf/turf'
 import { useAPIPayloadStore } from '~store'
 import { useEZSessionStore } from '~stores/session'
-import { colorShader } from '~ez/utils/colorUtils'
-import { calculateMaxAllowedScale } from '~ez/utils/scaleUtils'
-import selectorStyles from '~ez/styles/simulationAreaSelector.module.less'
+import { colorShader } from '~utils/colors'
+import { SIMULATION_AREA_CONSTRAINTS } from '~utils/polygonValidation'
+import selectorStyles from './simulationAreaSection.module.less'
 import EZSlider from '~ez/components/EZSlider'
 import type { OriginType, ScaleUpdate, ValidatedZone } from './types'
+import type { Coordinate } from '~stores/types'
 
 const ORIGIN_OPTIONS: OriginType[] = ['center', 'top-left', 'top-right', 'bottom-left', 'bottom-right']
 const DEFAULT_SCALE: [number, OriginType] = [100, 'center']
+
+const calculateMaxAllowedScale = (coords: Coordinate[][]): number => {
+  try {
+    const poly = polygon(coords)
+    const zoneAreaSqM = area(poly)
+
+    const maxScale = Math.sqrt(
+      SIMULATION_AREA_CONSTRAINTS.MAX_AREA_SQ_M / zoneAreaSqM
+    ) * 100
+
+    return Math.floor(maxScale)
+  } catch (error) {
+    console.error('[ZoneScaleList] Error calculating max scale:', error)
+    return 100
+  }
+}
 
 const getOriginIcon = (origin: OriginType): ReactElement => {
   switch (origin) {

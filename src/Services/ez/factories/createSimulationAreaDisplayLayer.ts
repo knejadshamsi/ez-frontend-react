@@ -1,7 +1,7 @@
 import { PolygonLayer } from '@deck.gl/layers';
 import { PathStyleExtension } from '@deck.gl/extensions';
 import type { Coordinate } from '~stores/types';
-import { hexToRgb } from '../utils/colorUtils';
+import { hexToRgb } from '~utils/colors';
 
 interface SimulationAreaDisplayData {
   coords: Coordinate[][];

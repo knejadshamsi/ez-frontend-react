@@ -1,10 +1,21 @@
-import { calculateComparison } from './comparisonUtils';
 import type {
   EZEmissionsParagraph1Data,
   EZEmissionsParagraph2Data
 } from '~stores/output';
 
-// TYPES
+type ComparisonMode = 'past' | 'present' | 'gerund' | 'noun';
+type ComparisonDirection = 'increase' | 'decrease' | 'stable';
+type ComparisonMagnitude = 'stable' | 'slight' | 'moderate' | 'dramatic';
+
+interface ComparisonResult {
+  percentChange: number;
+  baseline: number;
+  postValue: number;
+  magnitude: ComparisonMagnitude;
+  direction: ComparisonDirection;
+  getVerb: (mode: ComparisonMode) => string;
+  getDescription: (mode: ComparisonMode) => string;
+}
 
 type Pollutant = 'pm25' | 'pm10' | 'no2';
 
@@ -13,7 +24,52 @@ interface WHOThresholds {
   interimTargets: number[];
 }
 
-// CONSTANTS
+const DEFAULT_COMPARISON_THRESHOLDS = {
+  stable: 5,
+  slight: 10,
+  dramatic: 50
+} as const;
+
+const SLIGHT_SYNONYMS = [
+  'slightly',
+  'marginally',
+  'modestly',
+  'somewhat',
+  'minimally'
+] as const;
+
+const DRAMATIC_SYNONYMS = [
+  'dramatically',
+  'significantly',
+  'substantially',
+  'considerably',
+  'markedly',
+  'sharply',
+  'greatly',
+  'massively',
+  'largely'
+] as const;
+
+const VERB_CONJUGATIONS = {
+  increase: {
+    past: 'increased',
+    present: 'increases',
+    gerund: 'increasing',
+    noun: 'increase'
+  },
+  decrease: {
+    past: 'decreased',
+    present: 'decreases',
+    gerund: 'decreasing',
+    noun: 'decrease'
+  },
+  stable: {
+    past: 'remained stable',
+    present: 'remains stable',
+    gerund: 'remaining stable',
+    noun: 'stability'
+  }
+} as const;
 
 const WHO_GUIDELINES: Record<Pollutant, WHOThresholds> = {
   pm25: {
@@ -51,6 +107,73 @@ const BOX_MODEL_CONSTANTS = {
 } as const;
 
 // HELPER FUNCTIONS
+
+function getRandomSynonym(synonyms: readonly string[]): string {
+  return synonyms[Math.floor(Math.random() * synonyms.length)];
+}
+
+function calculateComparison(
+  baseline: number,
+  postValue: number,
+  options?: {
+    stableThreshold?: number;
+    slightThreshold?: number;
+    dramaticThreshold?: number;
+  }
+): ComparisonResult {
+  const stableThreshold = options?.stableThreshold ?? DEFAULT_COMPARISON_THRESHOLDS.stable;
+  const slightThreshold = options?.slightThreshold ?? DEFAULT_COMPARISON_THRESHOLDS.slight;
+  const dramaticThreshold = options?.dramaticThreshold ?? DEFAULT_COMPARISON_THRESHOLDS.dramatic;
+
+  const percentChange = Math.abs(((postValue - baseline) / baseline) * 100);
+
+  let magnitude: ComparisonMagnitude;
+  let direction: ComparisonDirection;
+
+  if (percentChange < stableThreshold) {
+    magnitude = 'stable';
+    direction = 'stable';
+  } else if (percentChange < slightThreshold) {
+    magnitude = 'slight';
+    direction = postValue > baseline ? 'increase' : 'decrease';
+  } else if (percentChange <= dramaticThreshold) {
+    magnitude = 'moderate';
+    direction = postValue > baseline ? 'increase' : 'decrease';
+  } else {
+    magnitude = 'dramatic';
+    direction = postValue > baseline ? 'increase' : 'decrease';
+  }
+
+  const getVerb = (mode: ComparisonMode): string => {
+    return VERB_CONJUGATIONS[direction][mode];
+  };
+
+  const getDescription = (mode: ComparisonMode): string => {
+    const verb = getVerb(mode);
+
+    if (magnitude === 'stable') {
+      return verb;
+    } else if (magnitude === 'slight') {
+      const adjective = getRandomSynonym(SLIGHT_SYNONYMS);
+      return `${adjective} ${verb}`;
+    } else if (magnitude === 'moderate') {
+      return verb;
+    } else {
+      const adjective = getRandomSynonym(DRAMATIC_SYNONYMS);
+      return `${adjective} ${verb}`;
+    }
+  };
+
+  return {
+    percentChange,
+    baseline,
+    postValue,
+    magnitude,
+    direction,
+    getVerb,
+    getDescription
+  };
+}
 
 function tonnesToConcentration(
   tonnesPerDay: number,

@@ -5,7 +5,6 @@ import { useEZSessionStore } from '~stores/session';
 import styles from '../simulationOptions.module.less';
 import type { CarDistribution } from '~ez/stores/types';
 import { VEHICLE_TYPE_COLORS } from '~ez/stores/types';
-import { countEnabledCategories } from './utils/carDistributionUtils';
 
 const SEGMENT_COLORS = VEHICLE_TYPE_COLORS;
 
@@ -92,7 +91,7 @@ const CarDistributionBar = () => {
   // Handle legend item click (toggle category)
   const handleLegendClick = (categoryKey: string) => {
     const isCurrentlyEnabled = sessionStore.carDistributionCategories[categoryKey];
-    const enabledCount = countEnabledCategories(sessionStore.carDistributionCategories);
+    const enabledCount = Object.values(sessionStore.carDistributionCategories).filter(v => v).length;
 
     if (isCurrentlyEnabled && enabledCount <= 1) {
       messageApi.warning('At least one emission category must remain enabled');

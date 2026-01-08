@@ -1,6 +1,6 @@
 import { VEHICLE_TYPES, VehicleRowProps } from '../types';
 import { RestrictionBlock } from './RestrictionBlock';
-import { colorShader } from '~ez/utils/colorUtils';
+import { colorShader } from '~utils/colors';
 import { HEADER_HEIGHT, ROW_HEIGHT, VEHICLE_COLUMN_WIDTH } from '../constants';
 import { useEZSessionStore } from '~stores/session';
 

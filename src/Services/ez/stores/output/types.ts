@@ -1,6 +1,6 @@
 // === OVERVIEW TYPES ===
 
-/* Overview section - simulation summary statistics (SSE: data_overview) */
+// Overview section - simulation summary statistics (SSE: data_overview)
 export interface EZOutputOverviewData {
   totalPersonCount: number;
   totalLegCount: number;
@@ -12,7 +12,7 @@ export interface EZOutputOverviewData {
 
 // === EMISSIONS TYPES ===
 
-/* Emissions Paragraph 1 - pollutant comparison (SSE: data_emissions_paragraph1) */
+// Emissions Paragraph 1 - pollutant comparison (SSE: data_emissions_paragraph1)
 export interface EZEmissionsParagraph1Data {
   co2Baseline: number;
   co2PostPolicy: number;
@@ -25,7 +25,7 @@ export interface EZEmissionsParagraph1Data {
   modeShiftPercentage: number;
 }
 
-/* Emissions Paragraph 2 - air quality and vehicle fleet (SSE: data_emissions_paragraph2) */
+// Emissions Paragraph 2 - air quality and vehicle fleet (SSE: data_emissions_paragraph2)
 export interface EZEmissionsParagraph2Data {
   pm25PostPolicy: number;
   zoneAreaKm2: number;
@@ -38,13 +38,13 @@ export interface EZEmissionsParagraph2Data {
   heavyVehicleSharePostPolicy: number;
 }
 
-/* Emissions Bar Chart - pollutant arrays (SSE: data_emissions_bar_chart) [CO2, NOx, PM2.5, PM10] */
+// Emissions Bar Chart - pollutant arrays (SSE: data_emissions_bar_chart) [CO2, NOx, PM2.5, PM10]
 export interface EZEmissionsBarChartData {
   baselineEmissions: number[];
   postPolicyEmissions: number[];
 }
 
-/* Emissions Pie Charts - vehicle type contributions (SSE: data_emissions_pie_charts) [Electric, Standard, Heavy] */
+// Emissions Pie Charts - vehicle type contributions (SSE: data_emissions_pie_charts) [Electric, Standard, Heavy]
 export interface EZEmissionsPieChartsData {
   vehicleShareBaseline: number[];
   vehicleSharePostPolicy: number[];
@@ -52,7 +52,7 @@ export interface EZEmissionsPieChartsData {
 
 // === PEOPLE RESPONSE TYPES ===
 
-/* People Response Paragraph 1 - behavioral breakdown percentages (SSE: data_people_response_paragraph1) */
+// People Response Paragraph 1 - behavioral breakdown percentages (SSE: data_people_response_paragraph1)
 export interface EZPeopleResponseParagraph1Data {
   paidPenaltyPercentage: number;
   reroutedPercentage: number;
@@ -65,7 +65,7 @@ export interface EZPeopleResponseParagraph1Data {
   totalAffectedTrips: number;
 }
 
-/* People Response Paragraph 2 - time impacts per response type (SSE: data_people_response_paragraph2) */
+// People Response Paragraph 2 - time impacts per response type (SSE: data_people_response_paragraph2)
 export interface EZPeopleResponseParagraph2Data {
   averageTimePaidPenalty: number;
   averageTimeRerouted: number;
@@ -75,19 +75,19 @@ export interface EZPeopleResponseParagraph2Data {
   averageTimeSwitchedToBiking: number;
 }
 
-/* People Response Breakdown Chart - stacked bar percentages (SSE: data_people_response_breakdown) */
+// People Response Breakdown Chart - stacked bar percentages (SSE: data_people_response_breakdown)
 export interface EZPeopleResponseBreakdownChartData {
   responsePercentages: number[];
 }
 
-/* People Response Time Impact Chart - time deltas per response (SSE: data_people_response_time_impact) */
+// People Response Time Impact Chart - time deltas per response (SSE: data_people_response_time_impact)
 export interface EZPeopleResponseTimeImpactChartData {
   averageTimeDeltas: number[];
 }
 
 // === TRIP LEGS TYPES ===
 
-/* Single trip leg performance record (REST: GET /api/simulation/{requestId}/trip-legs) */
+// Single trip leg performance record (REST: GET /api/simulation/{requestId}/trip-legs)
 export interface EZTripLegRecord {
   legId: string;
   personId: string;
@@ -98,7 +98,7 @@ export interface EZTripLegRecord {
   impact: string;
 }
 
-/* Pagination info from REST API response */
+// Pagination info from REST API response
 export interface EZTripLegsPaginationInfo {
   currentPage: number;
   pageSize: number;
@@ -145,13 +145,13 @@ export interface EZTripLegsTableConfig {
 
 // === MAP VISUALIZATION TYPES ===
 
-/* Point data for heatmap/hexagon visualization */
+// Point data for heatmap/hexagon visualization
 export interface MapPointData {
   position: [number, number]; // [longitude, latitude]
   weight: number; // Weight/intensity value for aggregation
 }
 
-/* Path data for trip leg visualization */
+// Path data for trip leg visualization
 export interface MapPathData {
   id: string;
   path: [number, number][]; // Array of [longitude, latitude] coordinates
@@ -160,7 +160,7 @@ export interface MapPathData {
   impact: string;
 }
 
-/* Emissions map data organized by pollutant type */
+// Emissions map data organized by pollutant type
 export interface EmissionsMapData {
   CO2: MapPointData[];
   NOx: MapPointData[];
@@ -168,7 +168,7 @@ export interface EmissionsMapData {
   PM10: MapPointData[];
 }
 
-/* People response map data organized by response type and view */
+// People response map data organized by response type and view
 export interface PeopleResponseMapData {
   origin: {
     paidPenalty: MapPointData[];

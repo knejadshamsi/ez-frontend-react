@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { checkOverlap } from '../vehicleUtils';
-import { TimeBlock, TimeRange, ActiveBlock, DragData, UseBlockInteractionsParams, Vehicle } from '../types';
+import { checkOverlap } from '../policyConversions';
+import { TimeBlock, TimeRange, ActiveBlock, DragData, UseBlockInteractionsParams } from '../types';
 import { VehicleTypeId } from '~ez/stores/types';
 import { TIME_COLUMNS, DEFAULT_BLOCK_SPAN, DEFAULT_PENALTY, DEFAULT_INTERVAL } from '../constants';
 

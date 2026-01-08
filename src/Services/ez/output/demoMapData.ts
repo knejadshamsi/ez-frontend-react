@@ -188,11 +188,3 @@ export const loadDemoMapData = (mapType: MapType): void => {
       break;
   }
 };
-
-export const preloadAllDemoMapData = (): void => {
-  const store = useEZOutputMapStore.getState();
-
-  store.setEmissionsMapData(generateDemoEmissionsMapData());
-  store.setPeopleResponseMapData(generateDemoPeopleResponseMapData());
-  store.setTripLegsMapData(generateDemoTripLegsMapData());
-};

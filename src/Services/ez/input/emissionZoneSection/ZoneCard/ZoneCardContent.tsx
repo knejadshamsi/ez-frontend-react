@@ -1,7 +1,7 @@
 import { ColorPicker } from 'antd';
 import { EyeInvisibleOutlined, EyeOutlined, CopyOutlined, DeleteOutlined, MinusOutlined } from '@ant-design/icons';
 import styles from './ZoneCard.module.less';
-import { colorShader, HIDDEN_COLOR } from '~ez/utils/colorUtils';
+import { colorShader, HIDDEN_COLOR } from '~utils/colors';
 
 interface ZoneCardContentProps {
   zoneId: string;

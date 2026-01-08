@@ -4,7 +4,7 @@ import ZoneCardList from './ZoneCard/ZoneCardList';
 import styles from './EmissionZoneSection.module.less';
 import { useAPIPayloadStore } from '~store';
 import { useEZSessionStore } from '~stores/session';
-import { colorShader, HIDDEN_COLOR } from '~ez/utils/colorUtils';
+import { colorShader, HIDDEN_COLOR } from '~utils/colors';
 
 const EmissionZoneSection = () => {
 

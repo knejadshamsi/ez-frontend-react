@@ -4,9 +4,7 @@ import { useEZSessionStore } from '~stores/session'
 import { useAPIPayloadStore, useEZServiceStore } from '~store'
 
 import { InputContainer } from './inputContainer'
-import { createAPIRequest, validateAPIRequest } from '~ez/api/apiRequestFactory'
-
-import { startSimulation } from '~ez/api/startSimulation'
+import { createAPIRequest, validateAPIRequest, startSimulation } from '~ez/api'
 import { hasOutputData } from '~stores/output'
 
 import { Button, Input, Modal, message } from 'antd'

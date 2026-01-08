@@ -1,9 +1,9 @@
-import type { EmissionsMapData, PeopleResponseMapData, MapPointData } from './types';
+import type { EmissionsMapData, PeopleResponseMapData, MapPointData } from '~stores/output/types';
 
-// === MAP DATA UTILITIES ===
-
-/* Get emissions points for the currently selected pollutant */
-export const getEmissionsPointsForPollutant = (
+/**
+ * Selects emissions map points for the specified pollutant
+ */
+export const selectEmissionsMapPoints = (
   data: EmissionsMapData | null,
   pollutant: keyof EmissionsMapData
 ): MapPointData[] => {
@@ -11,8 +11,10 @@ export const getEmissionsPointsForPollutant = (
   return data[pollutant] || [];
 };
 
-/* Get people response points for current view and response type */
-export const getPeopleResponsePoints = (
+/**
+ * Selects people response map points for the specified view and response type
+ */
+export const selectPeopleResponseMapPoints = (
   data: PeopleResponseMapData | null,
   view: 'origin' | 'destination',
   responseType: string

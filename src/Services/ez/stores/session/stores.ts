@@ -23,12 +23,52 @@ import {
   DEFAULT_CAR_DISTRIBUTION_CATEGORIES,
 } from './defaults';
 import { useAPIPayloadStore } from '../index';
-import {
-  redistributeOnDisable,
-  redistributeOnEnable,
-  countEnabledCategories,
-  MINIMUM_PERCENTAGE
-} from '~ez/input/simulationOptions/basicSettings/utils/carDistributionUtils';
+import type { CarDistribution } from '../types';
+
+const MINIMUM_PERCENTAGE = 5;
+
+const findBiggestCategory = (
+  distribution: CarDistribution,
+  enabledCategories: Record<string, boolean>,
+  excludeCategory?: string
+): { key: string; value: number } => {
+  return Object.entries(distribution)
+    .filter(([key]) => enabledCategories[key] && key !== excludeCategory)
+    .reduce(
+      (max, [key, value]) => (value > max.value ? { key, value } : max),
+      { key: '', value: 0 }
+    );
+};
+
+const redistributeOnDisable = (
+  distribution: CarDistribution,
+  disabledCategory: string,
+  enabledCategories: Record<string, boolean>
+): CarDistribution => {
+  const removedPercentage = distribution[disabledCategory];
+  const biggest = findBiggestCategory(distribution, enabledCategories, disabledCategory);
+
+  return {
+    ...distribution,
+    [biggest.key]: distribution[biggest.key] + removedPercentage,
+    [disabledCategory]: 0
+  };
+};
+
+const redistributeOnEnable = (
+  distribution: CarDistribution,
+  enabledCategory: string,
+  enabledCategories: Record<string, boolean>,
+  minimumPercentage: number = MINIMUM_PERCENTAGE
+): CarDistribution => {
+  const biggest = findBiggestCategory(distribution, enabledCategories);
+
+  return {
+    ...distribution,
+    [biggest.key]: distribution[biggest.key] - minimumPercentage,
+    [enabledCategory]: minimumPercentage
+  };
+};
 
 // === SESSION STORE ===
 
@@ -134,7 +174,7 @@ export const useEZSessionStore = create<EZSessionStore>((set, get) => ({
       // === DISABLING ===
 
       // Check: at least 1 must remain enabled
-      const enabledCount = countEnabledCategories(state.carDistributionCategories);
+      const enabledCount = Object.values(state.carDistributionCategories).filter(v => v).length;
 
       if (enabledCount <= 1) {
         // Do nothing - component will handle warning message

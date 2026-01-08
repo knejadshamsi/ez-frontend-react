@@ -17,7 +17,7 @@ export {
   type SimulationError,
   type SimulationStreamConfig,
 } from './sse';
-export { startSimulation } from './startSimulation';
+export { startSimulation, loadScenario } from './startSimulation';
 export {
   fetchMapData,
   fetchEmissionsMapData,
@@ -26,3 +26,9 @@ export {
 } from './mapDataFetch';
 export { fetchTripLegsPage } from './tripLegsFetch';
 export { getBackendUrl, isBackendConfigured } from './config';
+export {
+  createAPIRequest,
+  validateAPIRequest,
+  type APIRequest,
+} from './apiRequestFactory';
+export { retryComponentData } from './retryComponent';

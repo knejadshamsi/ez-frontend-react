@@ -1,8 +1,8 @@
 import { Spin, Alert, Button } from 'antd';
 import { useEZOutputPeopleResponseStore } from '~stores/output';
 import { useEZSessionStore } from '~stores/session';
-import { retryComponentData } from '../../api/retryComponent';
-import { generatePeopleResponseParagraph2Text } from '../utils/peopleResponseTextGenerator';
+import { retryComponentData } from '~ez/api';
+import { generatePeopleResponseParagraph2Text } from '~ez/output/utils/peopleResponseTextGenerator';
 import { HighlightedText } from '../reusables';
 import outputStyles from '../Output.module.less';
 

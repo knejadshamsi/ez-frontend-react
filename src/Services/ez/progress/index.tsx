@@ -13,7 +13,7 @@ import {
 import { SuccessState, ErrorState, RunningState } from './states';
 import styles from './Progress.module.less';
 
-export { useProgressStore, showProgress, showProgressError, closeProgress } from './store';
+export { useProgressStore, showProgress, showProgressError } from './store';
 export { decodeProgressAlert } from './decoder';
 
 export const Progress = () => {

@@ -80,5 +80,3 @@ export const MapContainer = ({
     </div>
   );
 };
-
-export default MapContainer;

@@ -8,7 +8,7 @@ import {
   populationSources,
   networkSources,
   publicTransportSources,
-} from '~ez/data/sources'
+} from './sources'
 
 type SourceType = 'population' | 'network' | 'publicTransport'
 type SourceField = 'year' | 'name'

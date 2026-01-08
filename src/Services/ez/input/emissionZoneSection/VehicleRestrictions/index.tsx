@@ -1,12 +1,10 @@
 import { useRef } from 'react';
 import { Popover } from 'antd';
 import { useEZSessionStore } from '~stores/session';
-import { colorShader, HIDDEN_COLOR } from '~ez/utils/colorUtils';
+import { colorShader, HIDDEN_COLOR } from '~utils/colors';
 import BlockEditor from './BlockEditor';
 import { TimeHeader, VehicleRow } from './SchedulerGrid';
-import { useSchedulerState } from './hooks/useSchedulerState';
-import { useBlockInteractions } from './hooks/useBlockInteractions';
-import { useContainerResize } from './hooks/useContainerResize';
+import { useSchedulerState, useBlockInteractions, useContainerResize } from './hooks';
 import { HEADER_HEIGHT, ROW_HEIGHT, VEHICLE_COLUMN_WIDTH, TIME_COLUMNS } from './constants';
 import { PolicySectionProps, VehicleTypeId } from './types';
 import styles from '../zoneSettings/zoneSettings.module.less';
