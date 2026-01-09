@@ -19,7 +19,7 @@ import { useEZSessionStore } from './session';
 import { generateDefaultName, generateDuplicateName } from '~utils/zoneNames';
 
 // ============= DEFAULT VALUE =============
-const createInitialPayload = (): APIPayload => ({
+export const createInitialPayload = (): APIPayload => ({
   zones: [{
     id: DEFAULT_ZONE_ID,
     coords: null,
@@ -31,15 +31,15 @@ const createInitialPayload = (): APIPayload => ({
   sources: {
     population: {
       year: 2024,
-      name: 'telus-12-2024'
+      name: 'montreal-polytechnique-pipeline-2024'
     },
     network: {
-      year: 2024,
-      name: 'osm-2024'
+      year: 2025,
+      name: 'osm-2025'
     },
     publicTransport: {
       year: 2024,
-      name: 'gtfs-2024'
+      name: 'stm-gtfs-2024'
     }
   },
   simulationOptions: {
@@ -389,3 +389,6 @@ export const useAPIPayloadStore = create<APIPayloadStore>((set, get) => ({
 
 // ============= DRAWING STATE STORE =============
 export { useDrawingStateStore } from './drawingState';
+
+// ============= RESET =============
+export { resetAllEZStores } from './reset';

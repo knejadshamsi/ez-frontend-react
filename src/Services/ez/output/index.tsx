@@ -61,7 +61,7 @@ export const OutputView = () => {
               instance.destroy();
             }}
           >
-            Reset All
+            Reset
           </Button>
           <OkBtn />
         </>

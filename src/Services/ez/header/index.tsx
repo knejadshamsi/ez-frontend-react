@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Typography, Button, message } from 'antd';
-import { QuestionCircleOutlined, LogoutOutlined, SyncOutlined } from '@ant-design/icons';
-import { useServiceStore } from '~globalStores';
-import { useEZSessionStore } from '~stores/session';
+import { QuestionCircleOutlined, SyncOutlined, CloseOutlined } from '@ant-design/icons';
 import { useEZServiceStore } from '~store';
-import { resetAllEZOutputStores } from '~stores/output';
 import { checkBackendHealth, getBackendUrl } from '~ez/api';
+import { handleExit } from '~ez/exitHandler';
 import styles from './header.module.less';
 
 const { Title } = Typography;
@@ -15,12 +13,12 @@ export default function EzHeader() {
   const [retrying, setRetrying] = useState(false);
 
   const ezState = useEZServiceStore((state) => state.state);
-  const setState = useEZServiceStore((state) => state.setState);
   const isEzBackendAlive = useEZServiceStore((state) => state.isEzBackendAlive);
-  const resetService = useServiceStore((state) => state.resetService);
 
-  const setScenarioTitle = useEZSessionStore((state) => state.setScenarioTitle);
-  const setRequestId = useEZSessionStore((state) => state.setRequestId);
+  const handleExitClick = () => {
+    console.log('[EZ Header] Exit button clicked');
+    handleExit();
+  };
 
   const [stepTitle, setStepTitle] = useState('Welcome');
 
@@ -86,14 +84,6 @@ export default function EzHeader() {
     }
   };
 
-  const exitHandler = () => {
-    setState('WELCOME');
-    setScenarioTitle('New Scenario');
-    setRequestId('');
-    resetAllEZOutputStores();
-    resetService();
-  };
-
   return (
     <div className={styles.headerContainer}>
       {contextHolder}
@@ -125,9 +115,13 @@ export default function EzHeader() {
         Help
         <QuestionCircleOutlined className={styles.buttonIcon} />
       </Button>
-      <Button title="Exit" className={styles.headerButton} onClick={exitHandler}>
+      <Button
+        title="Exit"
+        className={styles.headerButton}
+        onClick={handleExitClick}
+      >
         Exit
-        <LogoutOutlined className={styles.buttonIcon} />
+        <CloseOutlined className={styles.buttonIcon} />
       </Button>
     </div>
   );

@@ -9,6 +9,7 @@ import { ParameterSelectionView } from './input/ParameterSelectionView';
 import { OutputView } from './output';
 import { Progress } from './progress';
 import { DrawingControls } from './input/drawingControls';
+import ExitModal from './components/ExitModal';
 
 import styles from './index.module.less';
 
@@ -44,6 +45,7 @@ const EzService = () => {
       </Drawer>
       <Progress />
       <DrawingControls />
+      <ExitModal />
     </>
   );
 };

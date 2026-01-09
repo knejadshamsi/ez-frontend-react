@@ -1,6 +1,6 @@
 // === SESSION TYPES ===
 
-/* Simulation area display configuration */
+// Simulation area display configuration
 export type BorderStyle = 'dashed' | 'solid' | 'dotted';
 
 export interface SimulationAreaDisplayConfig {
@@ -8,7 +8,7 @@ export interface SimulationAreaDisplayConfig {
   fillOpacity: number; // 0 = transparent, 51 = lightly colored, 128 = fully colored
 }
 
-/* Zone session data for individual emission zones */
+// Zone session data for individual emission zones
 export interface ZoneSessionData {
   name: string;
   color: string;
@@ -17,7 +17,7 @@ export interface ZoneSessionData {
   scale: [number, string];
 }
 
-/* Car distribution categories enable/disable state */
+// Car distribution categories enable/disable state
 export interface CarDistributionCategories {
   zeroEmission: boolean;
   nearZeroEmission: boolean;
@@ -27,7 +27,13 @@ export interface CarDistributionCategories {
   [key: string]: boolean;
 }
 
-/* Main session store interface */
+// Exit warning information
+export interface ExitWarning {
+  title: string;
+  message: string;
+}
+
+// Main session store interface
 export interface EZSessionStore {
   scenarioTitle: string;
   scenarioDescription: string;
@@ -40,6 +46,8 @@ export interface EZSessionStore {
   isNewSimulation: boolean;
   simulationAreaDisplay: SimulationAreaDisplayConfig;
   carDistributionCategories: CarDistributionCategories;
+  exitState: 'idle' | 'await_confirmation' | 'resetting';
+  exitWarning: ExitWarning | null;
 
   setScenarioTitle: (title: string) => void;
   setScenarioDescription: (description: string) => void;
@@ -55,21 +63,23 @@ export interface EZSessionStore {
   setIsNewSimulation: (value: boolean) => void;
   setSimulationAreaDisplay: (config: Partial<SimulationAreaDisplayConfig>) => void;
   toggleCarDistributionCategory: (category: string) => void;
+  setExitState: (state: 'idle' | 'await_confirmation' | 'resetting') => void;
+  setExitWarning: (warning: ExitWarning | null) => void;
   reset: () => void;
 }
 
 // === OUTPUT FILTERS TYPES ===
 
-/* Visualization type for emissions map */
+// Visualization type for emissions map
 export type VisualizationType = 'heatmap' | 'hexagon';
 
-/* Pollutant type for emissions display */
+// Pollutant type for emissions display
 export type PollutantType = 'CO2' | 'NOx' | 'PM2.5' | 'PM10';
 
-/* View layer for people response map */
+// View layer for people response map
 export type ResponseLayerView = 'origin' | 'destination';
 
-/* Behavioral response categories */
+// Behavioral response categories
 export type BehavioralResponseType =
   | 'paidPenalty'
   | 'rerouted'
@@ -79,35 +89,35 @@ export type BehavioralResponseType =
   | 'switchedToBiking'
   | 'cancelledTrip';
 
-/* Output filters store interface */
+// Output filters store interface
 export interface EZOutputFiltersStore {
-  /* Map visibility states */
+  // Map visibility states
   isEmissionsMapVisible: boolean;
   isPeopleResponseMapVisible: boolean;
   isTripLegsMapVisible: boolean;
 
-  /* Emissions filter settings */
+  // Emissions filter settings
   selectedVisualizationType: VisualizationType;
   selectedPollutantType: PollutantType;
 
-  /* People response filter settings */
+  // People response filter settings
   selectedResponseLayerView: ResponseLayerView;
   selectedBehavioralResponseType: BehavioralResponseType;
 
-  /* Trip legs filter settings */
+  // Trip legs filter settings
   visibleTripLegIds: Set<string>;
 
-  /* Emissions map actions */
+  // Emissions map actions
   toggleEmissionsMapVisibility: () => void;
   setSelectedVisualizationType: (type: VisualizationType) => void;
   setSelectedPollutantType: (type: PollutantType) => void;
 
-  /* People response map actions */
+  // People response map actions
   togglePeopleResponseMapVisibility: () => void;
   setSelectedResponseLayerView: (view: ResponseLayerView) => void;
   setSelectedBehavioralResponseType: (type: BehavioralResponseType) => void;
 
-  /* Trip legs map actions */
+  // Trip legs map actions
   toggleTripLegsMapVisibility: () => void;
   toggleTripLegVisibility: (legId: string) => void;
   showAllTripLegs: (legIds: string[]) => void;

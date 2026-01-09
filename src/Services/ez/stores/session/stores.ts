@@ -9,6 +9,7 @@ import type {
   ResponseLayerView,
   BehavioralResponseType,
 } from './types';
+import type { ExitWarning } from './types';
 import {
   DEFAULT_SCENARIO_TITLE,
   DEFAULT_SCENARIO_DESCRIPTION,
@@ -72,7 +73,9 @@ const redistributeOnEnable = (
 
 // === SESSION STORE ===
 
-const createInitialState = () => ({
+export type ExitState = 'idle' | 'await_confirmation' | 'resetting';
+
+export const createInitialSessionState = () => ({
   scenarioTitle: DEFAULT_SCENARIO_TITLE,
   scenarioDescription: DEFAULT_SCENARIO_DESCRIPTION,
   requestId: DEFAULT_REQUEST_ID,
@@ -86,10 +89,12 @@ const createInitialState = () => ({
   isNewSimulation: true,
   simulationAreaDisplay: { ...DEFAULT_SIMULATION_AREA_DISPLAY },
   carDistributionCategories: { ...DEFAULT_CAR_DISTRIBUTION_CATEGORIES },
+  exitState: 'idle' as ExitState,
+  exitWarning: null as ExitWarning | null,
 });
 
 export const useEZSessionStore = create<EZSessionStore>((set, get) => ({
-  ...createInitialState(),
+  ...createInitialSessionState(),
 
   setScenarioTitle: (scenarioTitle: string) =>
     set({ scenarioTitle: scenarioTitle.slice(0, 50) }),
@@ -221,8 +226,19 @@ export const useEZSessionStore = create<EZSessionStore>((set, get) => ({
     }
   },
 
+  setExitState: (exitState: ExitState) =>
+    set({ exitState }),
+
+  setExitWarning: (exitWarning: ExitWarning | null) =>
+    set({ exitWarning }),
+
   reset: () => {
-    set(createInitialState());
+    const { exitState, exitWarning } = get();
+    set({
+      ...createInitialSessionState(),
+      exitState,
+      exitWarning
+    });
   },
 }));
 
