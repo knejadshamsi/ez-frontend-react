@@ -7,11 +7,33 @@
   }
 }
 
+.titleContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
 .title {
   font-size: 28px;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 0;
   color: #000;
+}
+
+.copyButton {
+  border-color: #000 !important;
+  color: #000 !important;
+
+  &:hover {
+    border-color: #333 !important;
+    color: #333 !important;
+  }
+
+  &:active {
+    border-color: #000 !important;
+    color: #000 !important;
+  }
 }
 
 .description {
@@ -222,4 +244,10 @@
 
 .sectionErrorAlert {
   margin-bottom: 20px;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }

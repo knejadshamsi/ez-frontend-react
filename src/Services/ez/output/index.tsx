@@ -1,4 +1,4 @@
-import { Divider, Button, Modal } from 'antd';
+import { Divider, Button, Modal, Space } from 'antd';
 import { ArrowLeftOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import {
   Chart as ChartJS,
@@ -49,22 +49,37 @@ export const OutputView = () => {
       onOk() {
         setState('PARAMETER_SELECTION');
       },
-      footer: (_, { OkBtn, CancelBtn }) => (
-        <>
-          <CancelBtn />
-          <Button
-            danger
-            onClick={() => {
-              resetApiPayload();
-              resetSession();
-              setState('PARAMETER_SELECTION');
-              instance.destroy();
-            }}
-          >
-            Reset
+      footer: () => (
+        <div className={outputStyles.modalFooter}>
+          <Button size="small" onClick={() => instance.destroy()}>
+            Cancel
           </Button>
-          <OkBtn />
-        </>
+          <Space size={8}>
+            <Button
+              size="small"
+              danger
+              ghost
+              onClick={() => {
+                resetApiPayload();
+                resetSession();
+                setState('PARAMETER_SELECTION');
+                instance.destroy();
+              }}
+            >
+              Reset
+            </Button>
+            <Button
+              size="small"
+              type="primary"
+              onClick={() => {
+                setState('PARAMETER_SELECTION');
+                instance.destroy();
+              }}
+            >
+              Keep Inputs
+            </Button>
+          </Space>
+        </div>
       ),
     });
   };
