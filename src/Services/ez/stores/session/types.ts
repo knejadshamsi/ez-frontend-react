@@ -107,6 +107,10 @@ export interface EZOutputFiltersStore {
   // Trip legs filter settings
   visibleTripLegIds: Set<string>;
 
+  // Input layer visibility states (output view only)
+  inputZoneLayerOpacity: 'hidden' | 'low' | 'medium' | 'normal';
+  inputSimulationAreaLayerOpacity: 'hidden' | 'low' | 'medium' | 'normal';
+
   // Emissions map actions
   toggleEmissionsMapVisibility: () => void;
   setSelectedVisualizationType: (type: VisualizationType) => void;
@@ -122,6 +126,10 @@ export interface EZOutputFiltersStore {
   toggleTripLegVisibility: (legId: string) => void;
   showAllTripLegs: (legIds: string[]) => void;
   hideAllTripLegs: () => void;
+
+  // Input layer actions
+  cycleInputZoneLayerOpacity: () => void;
+  cycleInputSimulationAreaLayerOpacity: () => void;
 
   reset: () => void;
 }

@@ -15,8 +15,8 @@ import { validatePolygon } from '~utils/polygonValidation';
 import { coordsToGeoJSON } from '~utils/geoJson';
 import { hexToRgb } from '~utils/colors';
 import { selectEmissionsMapPoints, selectPeopleResponseMapPoints } from '~utils/mapDataSelectors';
+import { mapZoneOpacityToAlpha, mapSimulationAreaOpacityToAlpha } from '~utils/opacityMapping';
 import type { Coordinate, EZStateType } from './stores/types';
-import type { FeatureCollection } from 'geojson';
 
 // Helper interface and function for polygon completion
 interface PolygonCompletionConfig {
@@ -33,9 +33,10 @@ const handlePolygonCompletion = (
   setNotification: (msg: string, type: 'error' | 'success') => void,
   setDrawToolGeoJson: (data: any) => void,
   setState: (state: EZStateType) => void,
-  resetDrawingState: () => void
+  resetDrawingState: () => void,
+  ezState: EZStateType
 ): void => {
-  const { coords, activeId, updateFn, useSimConstraints, shouldClearAfterSave } = config;
+  const { coords, activeId, updateFn, useSimConstraints, shouldClearAfterSave, entityType } = config;
 
   if (coords && coords[0] && coords[0].length >= 4) {
     const validation = validatePolygon(coords, useSimConstraints);
@@ -47,6 +48,13 @@ const handlePolygonCompletion = (
     }
 
     updateFn(activeId, { coords });
+
+    // Reset scale to 100% when redrawing emission zone
+    if (entityType === 'zone' && ezState === 'REDRAW_EM_ZONE') {
+      const sessionZones = useEZSessionStore.getState().zones;
+      const currentScale = sessionZones[activeId]?.scale || [100, 'center'];
+      useEZSessionStore.getState().setZoneProperty(activeId, 'scale', [100, currentScale[1]]);
+    }
 
     if (shouldClearAfterSave) {
       setDrawToolGeoJson({ type: 'FeatureCollection', features: [] });
@@ -89,6 +97,8 @@ export function useLayers() {
   const selectedResponseLayerView = useEZOutputFiltersStore((state) => state.selectedResponseLayerView);
   const selectedBehavioralResponseType = useEZOutputFiltersStore((state) => state.selectedBehavioralResponseType);
   const visibleTripLegIds = useEZOutputFiltersStore((state) => state.visibleTripLegIds);
+  const inputZoneLayerOpacity = useEZOutputFiltersStore((state) => state.inputZoneLayerOpacity);
+  const inputSimulationAreaLayerOpacity = useEZOutputFiltersStore((state) => state.inputSimulationAreaLayerOpacity);
 
   // Drawing state
   const visibleZoneIds = useDrawingStateStore((state) => state.visibleZoneIds);
@@ -145,7 +155,7 @@ export function useLayers() {
       hideAllAreas();
       setOtherLayersExpanded(false);
     }
-  }, [ezState, activeService, hideAllZones, hideAllAreas, setOtherLayersExpanded]);
+  }, [ezState, activeService, isPolygonMode, hideAllZones, hideAllAreas, setOtherLayersExpanded]);
 
   // Consolidated edit handler for both zones and areas (handles DRAW and EDIT modes)
   const handlePolygonEdit = useCallback(({ updatedData, editType, editContext }: any) => {
@@ -174,14 +184,15 @@ export function useLayers() {
             coords,
             activeId,
             updateFn: isZoneMode ? updateZone : updateCustomSimulationArea,
-            useSimConstraints: !isZoneMode, // Areas use stricter constraints (1-6 km²)
+            useSimConstraints: !isZoneMode, // Areas use stricter constraints
             shouldClearAfterSave: !isZoneMode, // Only areas clear GeoJSON after save
             entityType: isZoneMode ? 'zone' : 'area'
           },
           setNotification,
           setDrawToolGeoJson,
           setState,
-          resetDrawingState
+          resetDrawingState,
+          ezState
         );
       }
     }
@@ -426,7 +437,68 @@ export function useLayers() {
       })()
     : null;
 
+  const outputZoneDisplayLayer = isResultView && inputZoneLayerOpacity !== 'hidden'
+    ? (() => {
+        const alphaValue = mapZoneOpacityToAlpha(inputZoneLayerOpacity);
+        if (alphaValue === null) return null;
+
+        const filteredZones = apiZones
+          .filter(zone => {
+            const sessionData = sessionZones[zone.id];
+            return zone.coords && sessionData && !sessionData.hidden;
+          })
+          .map(zone => ({
+            coords: zone.coords!,
+            color: sessionZones[zone.id].color
+          }));
+
+        if (filteredZones.length === 0) return null;
+
+        return createZoneDisplayLayer({
+          zones: filteredZones,
+          fillOpacityOverride: alphaValue
+        });
+      })()
+    : null;
+
+  const outputSimulationAreaDisplayLayer = isResultView && inputSimulationAreaLayerOpacity !== 'hidden'
+    ? (() => {
+        const alphaValue = mapSimulationAreaOpacityToAlpha(
+          inputSimulationAreaLayerOpacity,
+          simulationAreaDisplay.fillOpacity || 51
+        );
+        if (alphaValue === null) return null;
+
+        const filteredAreas = [
+          ...customSimulationAreas
+            .filter(area => area.coords !== null)
+            .map(area => ({
+              coords: area.coords!,
+              color: area.color,
+              type: 'custom' as const
+            })),
+          ...scaledSimulationAreas
+            .filter(area => area.coords && area.coords.length > 0)
+            .map(area => ({
+              coords: area.coords,
+              color: area.color,
+              type: 'scaled' as const
+            }))
+        ];
+
+        if (filteredAreas.length === 0) return null;
+
+        return createSimulationAreaDisplayLayer({
+          areas: filteredAreas,
+          borderStyle: simulationAreaDisplay.borderStyle,
+          fillOpacity: alphaValue
+        });
+      })()
+    : null;
+
   return [
+    outputSimulationAreaDisplayLayer,
+    outputZoneDisplayLayer,
     drawingLayers.areaLayer,
     simulationAreaDisplayLayer,
     drawingLayers.zoneLayer,

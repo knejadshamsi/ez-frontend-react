@@ -1,9 +1,10 @@
 import { Spin, Alert, Button, message } from 'antd';
 import { useEZOutputOverviewStore } from '~stores/output';
-import { useEZSessionStore } from '~stores/session';
-import { useEZServiceStore } from '~store';
+import { useEZSessionStore, useEZOutputFiltersStore } from '~stores/session';
+import { useEZServiceStore, useAPIPayloadStore } from '~store';
 import { retryComponentData } from '~ez/api';
 import { CopyRequestIdButton } from '../components/CopyRequestIdButton';
+import { InputLayerToggleButton } from './InputLayerToggleButton';
 import outputStyles from './Output.module.less';
 
 /**
@@ -17,6 +18,18 @@ export const Overview = () => {
   const overviewError = useEZOutputOverviewStore((state) => state.overviewError);
   const requestId = useEZSessionStore((state) => state.requestId);
   const isEzBackendAlive = useEZServiceStore((state) => state.isEzBackendAlive);
+
+  const inputZoneLayerOpacity = useEZOutputFiltersStore((state) => state.inputZoneLayerOpacity);
+  const inputSimulationAreaLayerOpacity = useEZOutputFiltersStore((state) => state.inputSimulationAreaLayerOpacity);
+  const cycleZoneOpacity = useEZOutputFiltersStore((state) => state.cycleInputZoneLayerOpacity);
+  const cycleAreaOpacity = useEZOutputFiltersStore((state) => state.cycleInputSimulationAreaLayerOpacity);
+
+  const customSimulationAreas = useAPIPayloadStore((state) => state.payload.customSimulationAreas);
+  const scaledSimulationAreas = useAPIPayloadStore((state) => state.payload.scaledSimulationAreas);
+
+  const hasSimulationAreas =
+    customSimulationAreas.some(area => area.coords !== null) ||
+    scaledSimulationAreas.some(area => area.coords && area.coords.length > 0);
 
   const handleRetry = async () => {
     if (requestId) {
@@ -56,18 +69,34 @@ export const Overview = () => {
       {contextHolder}
       <div className={outputStyles.titleContainer}>
         <h1 className={outputStyles.title}>Output</h1>
-        {isEzBackendAlive && requestId && (
-          <CopyRequestIdButton
-            requestId={requestId}
-            showText={true}
-            text="ID"
-            size="small"
-            type="default"
-            ghost={true}
-            messageApi={messageApi}
-            className={outputStyles.copyButton}
+        <div className={outputStyles.titleButtonGroup}>
+          {hasSimulationAreas && (
+            <InputLayerToggleButton
+              layerType="area"
+              opacityState={inputSimulationAreaLayerOpacity}
+              onCycle={cycleAreaOpacity}
+              className={outputStyles.layerToggleButton}
+            />
+          )}
+          <InputLayerToggleButton
+            layerType="zone"
+            opacityState={inputZoneLayerOpacity}
+            onCycle={cycleZoneOpacity}
+            className={outputStyles.layerToggleButton}
           />
-        )}
+          {isEzBackendAlive && requestId && (
+            <CopyRequestIdButton
+              requestId={requestId}
+              showText={true}
+              text="ID"
+              size="small"
+              type="default"
+              ghost={true}
+              messageApi={messageApi}
+              className={outputStyles.copyButton}
+            />
+          )}
+        </div>
       </div>
       <p className={outputStyles.description}>
         The simulation included{' '}

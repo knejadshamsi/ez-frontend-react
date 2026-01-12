@@ -10,6 +10,7 @@ import type {
   BehavioralResponseType,
 } from './types';
 import type { ExitWarning } from './types';
+import { OPACITY_STATES } from '~utils/opacityMapping';
 import {
   DEFAULT_SCENARIO_TITLE,
   DEFAULT_SCENARIO_DESCRIPTION,
@@ -253,6 +254,8 @@ const createInitialFiltersState = () => ({
   selectedResponseLayerView: DEFAULT_RESPONSE_VIEW,
   selectedBehavioralResponseType: DEFAULT_BEHAVIORAL_RESPONSE,
   visibleTripLegIds: new Set<string>(),
+  inputZoneLayerOpacity: OPACITY_STATES.HIDDEN,
+  inputSimulationAreaLayerOpacity: OPACITY_STATES.HIDDEN,
 });
 
 export const useEZOutputFiltersStore = create<EZOutputFiltersStore>((set) => ({
@@ -295,6 +298,22 @@ export const useEZOutputFiltersStore = create<EZOutputFiltersStore>((set) => ({
 
   hideAllTripLegs: () =>
     set({ visibleTripLegIds: new Set<string>() }),
+
+  cycleInputZoneLayerOpacity: () =>
+    set((state) => {
+      const cycle = [OPACITY_STATES.HIDDEN, OPACITY_STATES.LOW, OPACITY_STATES.MEDIUM, OPACITY_STATES.NORMAL];
+      const currentIndex = cycle.indexOf(state.inputZoneLayerOpacity);
+      const nextIndex = (currentIndex + 1) % cycle.length;
+      return { inputZoneLayerOpacity: cycle[nextIndex] };
+    }),
+
+  cycleInputSimulationAreaLayerOpacity: () =>
+    set((state) => {
+      const cycle = [OPACITY_STATES.HIDDEN, OPACITY_STATES.LOW, OPACITY_STATES.MEDIUM, OPACITY_STATES.NORMAL];
+      const currentIndex = cycle.indexOf(state.inputSimulationAreaLayerOpacity);
+      const nextIndex = (currentIndex + 1) % cycle.length;
+      return { inputSimulationAreaLayerOpacity: cycle[nextIndex] };
+    }),
 
   reset: () => {
     set(createInitialFiltersState());
