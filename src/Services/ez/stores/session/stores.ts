@@ -143,8 +143,29 @@ export const useEZSessionStore = create<EZSessionStore>((set, get) => ({
 
   nextAvailableColor: () => {
     const state = get();
-    const randomIndex = Math.floor(Math.random() * state.colorPalette.length);
-    return state.colorPalette[randomIndex];
+
+    // Get the ordered zones array from API payload store
+    const apiPayloadZones = useAPIPayloadStore.getState().payload.zones;
+
+    // Get the last zone's ID (most recently added)
+    const lastZone = apiPayloadZones[apiPayloadZones.length - 1];
+    const lastZoneId = lastZone.id;
+
+    // Get the last zone's color from session store
+    const lastZoneColor = state.zones[lastZoneId]?.color;
+
+    // If we can't find the last zone's color, pick any color (safety fallback)
+    if (!lastZoneColor) {
+      const randomIndex = Math.floor(Math.random() * state.colorPalette.length);
+      return state.colorPalette[randomIndex];
+    }
+
+    // Filter out the last zone's color from available colors
+    const availableColors = state.colorPalette.filter(color => color !== lastZoneColor);
+
+    // Pick randomly from remaining colors
+    const randomIndex = Math.floor(Math.random() * availableColors.length);
+    return availableColors[randomIndex];
   },
 
   setSseCleanup: (sseCleanup: (() => void) | null) =>
