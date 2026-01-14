@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Typography, Button, message } from 'antd';
-import { QuestionCircleOutlined, SyncOutlined, CloseOutlined } from '@ant-design/icons';
+import { Typography, message } from 'antd';
+import { SyncOutlined, CloseOutlined, GlobalOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
+import '~ez/locales';
 import { useEZServiceStore } from '~store';
 import { checkBackendHealth, getBackendUrl } from '~ez/api';
 import { handleExit } from '~ez/exitHandler';
@@ -9,52 +11,58 @@ import styles from './header.module.less';
 const { Title } = Typography;
 
 export default function EzHeader() {
+  const { t, i18n } = useTranslation('ez-root');
   const [messageApi, contextHolder] = message.useMessage();
   const [retrying, setRetrying] = useState(false);
 
   const ezState = useEZServiceStore((state) => state.state);
   const isEzBackendAlive = useEZServiceStore((state) => state.isEzBackendAlive);
 
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'en' ? 'fr' : 'en';
+    i18n.changeLanguage(newLang);
+  };
+
   const handleExitClick = () => {
     console.log('[EZ Header] Exit button clicked');
     handleExit();
   };
 
-  const [stepTitle, setStepTitle] = useState('Welcome');
+  const [stepTitle, setStepTitle] = useState(t('stepTitles.welcome'));
 
   useEffect(() => {
     switch (ezState) {
       case 'WELCOME':
-        setStepTitle('Welcome');
+        setStepTitle(t('stepTitles.welcome'));
         break;
       case 'PARAMETER_SELECTION':
-        setStepTitle('Parameter Selection');
+        setStepTitle(t('stepTitles.parameterSelection'));
         break;
       case 'DRAW_EM_ZONE':
-        setStepTitle('Draw Emission Zone');
+        setStepTitle(t('stepTitles.drawEmissionZone'));
         break;
       case 'EDIT_EM_ZONE':
-        setStepTitle('Edit Emission Zone');
+        setStepTitle(t('stepTitles.editEmissionZone'));
         break;
       case 'REDRAW_EM_ZONE':
-        setStepTitle('Redraw Emission Zone');
+        setStepTitle(t('stepTitles.redrawEmissionZone'));
         break;
       case 'DRAW_SIM_AREA':
-        setStepTitle('Draw Simulation Area');
+        setStepTitle(t('stepTitles.drawSimulationArea'));
         break;
       case 'EDIT_SIM_AREA':
-        setStepTitle('Edit Simulation Area');
+        setStepTitle(t('stepTitles.editSimulationArea'));
         break;
       case 'AWAIT_RESULTS':
-        setStepTitle('Processing');
+        setStepTitle(t('stepTitles.processing'));
         break;
       case 'RESULT_VIEW':
-        setStepTitle('View Results');
+        setStepTitle(t('stepTitles.viewResults'));
         break;
       default:
         break;
     }
-  }, [ezState]);
+  }, [ezState, t]);
 
   const handleRetryConnection = async () => {
     setRetrying(true);
@@ -73,13 +81,13 @@ export default function EzHeader() {
       setRetrying(false);
 
       if (isAlive) {
-        messageApi.success('Connected to live backend');
+        messageApi.success(t('retryConnection.success'));
       } else {
-        messageApi.error('Failed to connect to backend');
+        messageApi.error(t('retryConnection.failed'));
       }
     } catch (error) {
       setRetrying(false);
-      const errorMessage = error instanceof Error ? error.message : 'Backend configuration error';
+      const errorMessage = error instanceof Error ? error.message : t('retryConnection.configError');
       messageApi.error(errorMessage);
     }
   };
@@ -94,35 +102,38 @@ export default function EzHeader() {
         {!isEzBackendAlive && (
           <div className={styles.demoModeWrapper}>
             <div className={styles.demoBadgeContainer}>
-              <span>DEMO MODE</span>
+              <span>{t('demoMode.label')}</span>
             </div>
-            <Button
-              type="text"
-              size="small"
-              icon={<SyncOutlined spin={retrying} />}
+            <button
               onClick={handleRetryConnection}
-              loading={retrying}
-              title="Retry connection to live backend"
+              title={t('retryConnection.tooltip')}
               className={styles.retryButton}
-            />
+              disabled={retrying}
+            >
+              <SyncOutlined spin={retrying} />
+            </button>
           </div>
         )}
       </div>
       <div className={styles.stepTitleContainer}>
         <span className={styles.stepTitle}>{stepTitle}</span>
       </div>
-      <Button title="Help" className={styles.headerButton}>
-        Help
-        <QuestionCircleOutlined className={styles.buttonIcon} />
-      </Button>
-      <Button
-        title="Exit"
+      <button
+        title={t('header.toggleLanguage')}
         className={styles.headerButton}
+        onClick={toggleLanguage}
+      >
+        <GlobalOutlined />
+        <span>{i18n.language === 'en' ? 'En' : 'Fr'}</span>
+      </button>
+      <button
+        title={t('header.exit')}
+        className={`${styles.headerButton} ${i18n.language === 'fr' ? styles.headerButtonFr : ''}`}
         onClick={handleExitClick}
       >
-        Exit
-        <CloseOutlined className={styles.buttonIcon} />
-      </Button>
+        <CloseOutlined />
+        <span>{t('header.exit')}</span>
+      </button>
     </div>
   );
 }

@@ -20,6 +20,7 @@
     "paths": {
       "~/*": ["*"],
       "~globalStores": ["globalStores"],
+      "~i18nConfig": ["i18n/config"],
       "~ez/*": ["Services/ez/*"],
       "~store": ["Services/ez/stores"],
       "~stores/*": ["Services/ez/stores/*"],

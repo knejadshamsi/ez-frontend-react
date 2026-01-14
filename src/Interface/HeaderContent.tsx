@@ -1,4 +1,6 @@
 import { Menu, Button } from "antd";
+import { GlobalOutlined } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 import { useServiceStore } from '~globalStores';
 import { checkBackendHealth } from '../Services/ez/api/healthCheck';
 import { useNotificationStore } from '../Services/CustomNotification';
@@ -6,17 +8,23 @@ import ZeleHeader from '../Services/Zele/zeleHeader';
 import EzHeader from '../Services/ez/header';
 
 export default function HeaderContent() {
+  const { i18n } = useTranslation();
 
   const serviceState = useServiceStore((state) => state.activeService);
   const setActiveService = useServiceStore((state) => state.setActiveService);
   const setNotification = useNotificationStore((state) => state.setNotification);
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'en' ? 'fr' : 'en';
+    i18n.changeLanguage(newLang);
+  };
 
   const handleEzClick = () => {
     
     setActiveService("EZ");
 
     if (process.env.REACT_APP_EZ_BACKEND_URL) {
-      const healthEndpoint = `${process.env.REACT_APP_EZ_BACKEND_URL}/alive`;
+      const healthEndpoint = `${process.env.REACT_APP_EZ_BACKEND_URL}/health`;
 
       checkBackendHealth(healthEndpoint).then((isAlive) => {
         if (!isAlive) {
@@ -51,7 +59,9 @@ export default function HeaderContent() {
       {serviceState === "REST" && (
         <>
           <Menu mode="horizontal" items={menuItems} className="headerMenu" />
-          <Button className="headerButton">En</Button>
+          <Button className="headerButton" onClick={toggleLanguage} icon={<GlobalOutlined />}>
+            {i18n.language === 'en' ? 'En' : 'Fr'}
+          </Button>
         </>
       )}
       {serviceState === "ZELE" && (<ZeleHeader />)}

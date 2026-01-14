@@ -1,5 +1,9 @@
 import { polygon, area, booleanWithin } from '@turf/turf';
 import { Coordinate } from '~stores/types';
+import i18n from '~i18nConfig';
+import '~ez/locales';
+
+const t = i18n.t.bind(i18n);
 
 // Montreal area boundary polygon
 const MTL_AREA = polygon([
@@ -77,7 +81,7 @@ export const validatePolygon = (
     if (!isWithinBoundary) {
       return {
         isValid: false,
-        error: 'The drawn area must be entirely within the Montreal region boundary.',
+        error: t('ez-root:validation.outsideBoundary'),
         errorType: 'boundary'
       };
     }
@@ -95,7 +99,10 @@ export const validatePolygon = (
     if (areaInSqMeters < constraints.MIN_AREA_SQ_M) {
       return {
         isValid: false,
-        error: `The drawn area is too small. Minimum area: ${constraints.MIN_AREA_SQ_KM} km² (current: ${areaInSqKm.toFixed(2)} km²)`,
+        error: t('ez-root:validation.areaTooSmall', {
+          min: constraints.MIN_AREA_SQ_KM,
+          current: areaInSqKm.toFixed(2)
+        }),
         errorType: 'area_too_small',
         areaInSqKm
       };
@@ -105,7 +112,10 @@ export const validatePolygon = (
     if (areaInSqMeters > constraints.MAX_AREA_SQ_M) {
       return {
         isValid: false,
-        error: `The drawn area is too large. Maximum area: ${constraints.MAX_AREA_SQ_KM} km² (current: ${areaInSqKm.toFixed(2)} km²)`,
+        error: t('ez-root:validation.areaTooLarge', {
+          max: constraints.MAX_AREA_SQ_KM,
+          current: areaInSqKm.toFixed(2)
+        }),
         errorType: 'area_too_large',
         areaInSqKm
       };
@@ -120,7 +130,7 @@ export const validatePolygon = (
     console.error('[Polygon Validation] Error during validation:', error);
     return {
       isValid: false,
-      error: 'Failed to validate polygon. Please try drawing again.',
+      error: t('ez-root:validation.validationFailed'),
       errorType: 'boundary'
     };
   }

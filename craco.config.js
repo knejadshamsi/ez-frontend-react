@@ -6,6 +6,7 @@ module.exports = {
     alias: {
       '~': path.resolve(__dirname, 'src'),
       '~globalStores': path.resolve(__dirname, 'src/globalStores'),
+      '~i18nConfig': path.resolve(__dirname, 'src/i18n/config'),
       '~ez': path.resolve(__dirname, 'src/Services/ez'),
       '~store': path.resolve(__dirname, 'src/Services/ez/stores/index'),
       '~stores/*': path.resolve(__dirname, 'src/Services/ez/stores/*'),

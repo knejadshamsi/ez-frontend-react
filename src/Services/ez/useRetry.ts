@@ -1,11 +1,14 @@
 import { useEffect } from 'react';
 import type { MessageInstance } from 'antd/es/message/interface';
-
+import i18n from '~i18nConfig';
+import '~ez/locales';
 import { useEZServiceStore } from '~store';
 import { useEZSessionStore } from '~stores/session';
 import { useEZOutputFiltersStore } from '~stores/session';
 import { useProgressStore } from './progress/store';
 import { resetAllEZOutputStores } from '~stores/output';
+
+const t = i18n.t.bind(i18n);
 
 export const useBackendAliveWatcher = (messageApi: MessageInstance): void => {
   const ezState = useEZServiceStore((state) => state.state);
@@ -39,10 +42,10 @@ export const useBackendAliveWatcher = (messageApi: MessageInstance): void => {
 
     if (isNewSimulation) {
       setState('PARAMETER_SELECTION');
-      messageApi.success('Connection established! Backend is now online. Please start your simulation again.');
+      messageApi.success(t('ez-root:connectionMessages.backendOnlineNewSim'));
     } else {
       setState('WELCOME');
-      messageApi.success('Connection established! Backend is now online. Please load your scenario again.');
+      messageApi.success(t('ez-root:connectionMessages.backendOnlineLoadScenario'));
     }
   }, [
     isEzBackendAlive,

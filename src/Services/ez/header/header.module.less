@@ -22,10 +22,6 @@
   text-transform: uppercase;
 }
 
-.demoBadge {
-  margin-top: -8px;
-}
-
 .demoModeWrapper {
   display: flex;
   flex-direction: row;
@@ -50,15 +46,24 @@
   padding: 0;
   width: 16px;
   height: 16px;
-  min-width: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #ff4d4f;
   margin-left: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: color 0.2s;
 
   &:hover {
     color: #ff7875;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
   }
 }
 
@@ -78,9 +83,31 @@
 
 .headerButton {
   margin-left: 15px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  padding: 6px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  transition: color 0.2s, border-color 0.2s;
+
+  &:hover {
+    color: #1890ff;
+    border-color: #1890ff;
+  }
+
+  > span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
-.buttonIcon {
-  vertical-align: text-bottom;
-  padding-bottom: 1px;
+.headerButtonFr {
+  padding: 6px 8px;
 }

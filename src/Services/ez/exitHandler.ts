@@ -1,3 +1,5 @@
+import i18n from '~i18nConfig';
+import '~ez/locales';
 import { useEZServiceStore, useAPIPayloadStore, useDrawToolStore, createInitialPayload } from '~store';
 import { useEZSessionStore, createInitialSessionState } from '~stores/session';
 import { hasOutputData } from '~stores/output';
@@ -5,7 +7,7 @@ import type { EZStateType } from '~stores/types';
 import type { ExitWarning } from '~stores/session/types';
 import { DEFAULT_ZONE_ID } from '~stores/types';
 
-// ===== HELPER FUNCTIONS =====
+const t = i18n.t.bind(i18n);
 
 // Checks if input has changed from default state
 const hasInputChangedFromDefault = (): boolean => {
@@ -46,19 +48,16 @@ const hasConfiguredZones = (): boolean => {
 const getExitWarning = (ezState: EZStateType): ExitWarning | null => {
   const isEzBackendAlive = useEZServiceStore.getState().isEzBackendAlive;
 
-  // GATE 1: Check if demo mode
   if (!isEzBackendAlive) {
-    // In demo mode, only warn if input actually changed from default
     if (hasInputChangedFromDefault()) {
       return {
-        title: 'Input Data Will Be Lost',
-        message: 'You have configured input parameters. All input data will be lost. Continue?',
+        title: t('ez-root:exitWarnings.inputDataLost.title'),
+        message: t('ez-root:exitWarnings.inputDataLost.message'),
       };
     }
     return null;
   }
 
-  // Live mode - use state-based warnings
   switch (ezState) {
     case 'WELCOME':
       return null;
@@ -66,53 +65,53 @@ const getExitWarning = (ezState: EZStateType): ExitWarning | null => {
     case 'PARAMETER_SELECTION':
       if (hasConfiguredZones()) {
         return {
-          title: 'Unsaved Configuration',
-          message: 'You have configured emission zones and parameters. Session will be lost. Continue?',
+          title: t('ez-root:exitWarnings.unsavedConfiguration.title'),
+          message: t('ez-root:exitWarnings.unsavedConfiguration.message'),
         };
       }
       return null;
 
     case 'DRAW_EM_ZONE':
       return {
-        title: 'Unsaved Emission Zone',
-        message: 'You have an unsaved emission zone. Session will be lost. Continue?',
+        title: t('ez-root:exitWarnings.unsavedEmissionZone.title'),
+        message: t('ez-root:exitWarnings.unsavedEmissionZone.message'),
       };
 
     case 'EDIT_EM_ZONE':
       return {
-        title: 'Unsaved Changes',
-        message: 'You have unsaved changes to the emission zone. Session will be lost. Continue?',
+        title: t('ez-root:exitWarnings.unsavedChangesZone.title'),
+        message: t('ez-root:exitWarnings.unsavedChangesZone.message'),
       };
 
     case 'REDRAW_EM_ZONE':
       return {
-        title: 'Zone Redraw in Progress',
-        message: 'You are redrawing an emission zone. Session will be lost. Continue?',
+        title: t('ez-root:exitWarnings.zoneRedrawInProgress.title'),
+        message: t('ez-root:exitWarnings.zoneRedrawInProgress.message'),
       };
 
     case 'DRAW_SIM_AREA':
       return {
-        title: 'Unsaved Simulation Area',
-        message: 'You have an unsaved simulation area. Session will be lost. Continue?',
+        title: t('ez-root:exitWarnings.unsavedSimulationArea.title'),
+        message: t('ez-root:exitWarnings.unsavedSimulationArea.message'),
       };
 
     case 'EDIT_SIM_AREA':
       return {
-        title: 'Unsaved Changes',
-        message: 'You have unsaved changes to the simulation area. Session will be lost. Continue?',
+        title: t('ez-root:exitWarnings.unsavedChangesArea.title'),
+        message: t('ez-root:exitWarnings.unsavedChangesArea.message'),
       };
 
     case 'AWAIT_RESULTS':
       return {
-        title: 'Simulation in Progress',
-        message: 'The simulation is currently running and will be aborted. All progress will be lost. Continue?',
+        title: t('ez-root:exitWarnings.simulationInProgress.title'),
+        message: t('ez-root:exitWarnings.simulationInProgress.message'),
       };
 
     case 'RESULT_VIEW':
       if (hasOutputData()) {
         return {
-          title: 'Session Will Be Lost',
-          message: 'Session will be lost. Make sure to save your request ID before exiting. Continue?',
+          title: t('ez-root:exitWarnings.sessionWillBeLost.title'),
+          message: t('ez-root:exitWarnings.sessionWillBeLost.message'),
         };
       }
       return null;
