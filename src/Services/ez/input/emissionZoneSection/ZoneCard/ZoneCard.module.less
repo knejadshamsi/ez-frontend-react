@@ -10,6 +10,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  filter: brightness(0.97);
 }
 
 .cardContainer:hover {
@@ -21,19 +22,21 @@
   outline: 2px solid #2196f3;
   outline-offset: 2px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  filter: brightness(1);
   animation: zoneCardActivate 0.3s ease-out;
+}
+
+.cardContainer.selected.dragging {
+  animation: none;
 }
 
 @keyframes zoneCardActivate {
   0% {
-    transform: scale(0.98);
+    filter: brightness(0.97);
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
   }
-  50% {
-    transform: scale(1.02);
-  }
   100% {
-    transform: scale(1);
+    filter: brightness(1);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   }
 }
@@ -95,7 +98,7 @@
 }
 
 .hiddenIcon:hover {
-  transform: scale(1.1);
+  background-color: rgba(0, 0, 0, 0.08);
 }
 
 .actionToolbar {
@@ -118,18 +121,17 @@
   transition: all 0.2s ease-in-out;
   font-size: 12px;
   color: #666;
-  min-width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
 }
 
 .toolbarIcon:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(0, 0, 0, 0.1);
   color: #333;
-  transform: scale(1.1);
 }
 
 .toolbarIcon:active {
-  transform: scale(0.95);
+  background-color: rgba(0, 0, 0, 0.15);
 }
 
 .dragging {
@@ -146,7 +148,7 @@
 }
 
 .colorTrigger:hover {
-  transform: scale(1.15);
+  filter: brightness(0.85);
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
 }
 

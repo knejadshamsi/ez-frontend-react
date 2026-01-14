@@ -1,8 +1,10 @@
-import { VEHICLE_TYPES, VehicleRowProps } from '../types';
+import { VehicleRowProps, getVehicleTypeLabel } from '../types';
 import { RestrictionBlock } from './RestrictionBlock';
 import { colorShader } from '~utils/colors';
 import { HEADER_HEIGHT, ROW_HEIGHT, VEHICLE_COLUMN_WIDTH } from '../constants';
 import { useEZSessionStore } from '~stores/session';
+import { useTranslation } from 'react-i18next';
+import '../../locales';
 
 export const VehicleRow = ({
   vehicle,
@@ -17,6 +19,7 @@ export const VehicleRow = ({
   onBlockMouseDown,
   onBlockDoubleClick
 }: VehicleRowProps) => {
+  const { t } = useTranslation('ez-emission-zone-section');
   const rowY = HEADER_HEIGHT + rowIndex * ROW_HEIGHT;
 
   const sessionStore = useEZSessionStore();
@@ -53,7 +56,7 @@ export const VehicleRow = ({
         style={{ cursor: 'pointer', textDecoration: isEnabled ? 'none' : 'line-through' }}
         onClick={handleVehicleNameClick}
       >
-        {VEHICLE_TYPES[vehicle.type]?.label || vehicle.type}
+        {getVehicleTypeLabel(vehicle.type, t)}
       </text>
 
       <defs>

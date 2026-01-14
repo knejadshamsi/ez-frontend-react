@@ -1,13 +1,15 @@
 import { Button, Divider } from 'antd';
+import { useTranslation } from 'react-i18next';
 import ZoneSettings from './zoneSettings';
 import ZoneCardList from './ZoneCard/ZoneCardList';
 import styles from './EmissionZoneSection.module.less';
 import { useAPIPayloadStore } from '~store';
 import { useEZSessionStore } from '~stores/session';
 import { colorShader, HIDDEN_COLOR } from '~utils/colors';
+import './locales';
 
 const EmissionZoneSection = () => {
-
+  const { t } = useTranslation('ez-emission-zone-section');
   const apiZones = useAPIPayloadStore(state => state.payload.zones);
   const sessionZones = useEZSessionStore(state => state.zones);
   const activeZone = useEZSessionStore(state => state.activeZone);
@@ -26,7 +28,7 @@ const EmissionZoneSection = () => {
   return (
     <>
       <Divider orientationMargin={10} orientation="left" className={`${styles.divider} ${styles.boldText}`}>
-        <strong>1. CONFIGURE EMISSION ZONES</strong>
+        <strong>{t('section.title')}</strong>
       </Divider>
 
       {apiZones.length > 0 && (
@@ -52,7 +54,7 @@ const EmissionZoneSection = () => {
             }}
             id="single-zone-add-button"
           >
-            Add More Zones
+            {t('section.addMoreZones')}
           </Button>
         </div>
       )}

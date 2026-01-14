@@ -1,8 +1,11 @@
 import { DeleteOutlined, StopOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import styles from './styles/blockEditor.module.less';
 import { TimeBlock, BlockEditorProps } from './types';
+import '../locales';
 
 const BlockEditor = ({ activeBlock, onUpdate, onDelete }: BlockEditorProps) => {
+  const { t } = useTranslation('ez-emission-zone-section');
   if (!activeBlock || !activeBlock.vehicle || !activeBlock.block) return null;
 
   const { vehicle, block } = activeBlock;
@@ -18,14 +21,14 @@ const BlockEditor = ({ activeBlock, onUpdate, onDelete }: BlockEditorProps) => {
   return (
     <div className={styles.editorContainer}>
       <div className={styles.editorHeader}>
-        <h3 className={styles.editorTitle}>Settings</h3>
+        <h3 className={styles.editorTitle}>{t('vehicleRestrictions.blockEditor.settings')}</h3>
         <button className={styles.deleteButton} onClick={handleDelete}>
           <DeleteOutlined className={styles.deleteIcon} />
         </button>
       </div>
 
       <div className={styles.typeSection}>
-        <label className={styles.label}>Type</label>
+        <label className={styles.label}>{t('vehicleRestrictions.blockEditor.type')}</label>
         <div className={styles.typeButtons}>
           <button
             className={`${styles.typeButton} ${block.type === 'restricted' ? styles.restricted : ''}`}
@@ -33,7 +36,7 @@ const BlockEditor = ({ activeBlock, onUpdate, onDelete }: BlockEditorProps) => {
           >
             <div className={styles.buttonContent}>
               <ExclamationCircleOutlined className={styles.typeIcon} />
-              <span>Restrict</span>
+              <span>{t('vehicleRestrictions.blockEditor.restrict')}</span>
             </div>
           </button>
 
@@ -43,7 +46,7 @@ const BlockEditor = ({ activeBlock, onUpdate, onDelete }: BlockEditorProps) => {
           >
             <div className={styles.buttonContent}>
               <StopOutlined className={styles.typeIcon} />
-              <span>Ban</span>
+              <span>{t('vehicleRestrictions.blockEditor.ban')}</span>
             </div>
           </button>
         </div>
@@ -52,7 +55,7 @@ const BlockEditor = ({ activeBlock, onUpdate, onDelete }: BlockEditorProps) => {
       {block.type === 'restricted' && (
         <div className={styles.penaltyContainer}>
           <div className={styles.inputGroup}>
-            <label className={styles.inputLabel}>Penalty</label>
+            <label className={styles.inputLabel}>{t('vehicleRestrictions.blockEditor.penalty')}</label>
             <input
               type="number"
               min="1"
@@ -64,7 +67,7 @@ const BlockEditor = ({ activeBlock, onUpdate, onDelete }: BlockEditorProps) => {
           </div>
 
           <div className={styles.inputGroup}>
-            <label className={styles.inputLabel}>Interval (s)</label>
+            <label className={styles.inputLabel}>{t('vehicleRestrictions.blockEditor.interval')}</label>
             <input
               type="number"
               min="1"

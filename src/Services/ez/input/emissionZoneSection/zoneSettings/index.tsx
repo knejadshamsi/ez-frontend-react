@@ -4,14 +4,17 @@ import type { TripType } from '~stores/types';
 import { colorShader, HIDDEN_COLOR } from '~utils/colors';
 import { InlineNameEditor } from '~ez/components/InlineNameEditor';
 
-import { Button, Tag } from 'antd';
+import { Button, Tag, Tooltip } from 'antd';
 import { EyeInvisibleOutlined, FormOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 
 import PolicySection from '../VehicleRestrictions';
 
 import styles from './zoneSettings.module.less';
+import '../locales';
 
 const ZoneSettings = ({ zoneId }) => {
+  const { t } = useTranslation('ez-emission-zone-section');
   const apiZones = useAPIPayloadStore(state => state.payload.zones);
   const sessionZones = useEZSessionStore(state => state.zones);
   const updateZone = useAPIPayloadStore(state => state.updateZone);
@@ -29,6 +32,15 @@ const ZoneSettings = ({ zoneId }) => {
     journey: apiZone?.trip || ['start'] as TripType[]
   };
 
+  const getJourneyLabel = (type: TripType): string => {
+    const labels = {
+      start: t('zoneSettings.journeys.startsWithin'),
+      pass: t('zoneSettings.journeys.passesThrough'),
+      end: t('zoneSettings.journeys.endsWithin')
+    };
+    return labels[type];
+  };
+
   return (
     <div className={styles.zoneSettingContainer}>
       {zone.hidden && (
@@ -37,13 +49,13 @@ const ZoneSettings = ({ zoneId }) => {
           color="default"
           style={{ marginBottom: '12px', fontSize: '13px' }}
         >
-          This zone is hidden and will be excluded from simulation
+          {t('zoneSettings.hiddenTag')}
         </Tag>
       )}
 
       <div className={styles.nameRow}>
         <InlineNameEditor
-          value={zone.name || `Zone ${zoneId}`}
+          value={zone.name || t('zoneSettings.defaultZoneName', { zoneId })}
           onSave={(newName) => setZoneProperty(zoneId, 'name', newName)}
           disabled={zone.hidden}
         />
@@ -62,9 +74,9 @@ const ZoneSettings = ({ zoneId }) => {
       >
         <div className={styles.zoneBoundariesGrid}>
           <div>
-            <span className={styles.sectionHeader}><strong>BOUNDARIES</strong></span>
+            <span className={styles.sectionHeader}><strong>{t('zoneSettings.boundaries.title')}</strong></span>
             <span className={styles.boundariesText}>
-              Geographic boundaries for this emission zone
+              {t('zoneSettings.boundaries.description')}
             </span>
           </div>
           {!zone.coordinates ? (
@@ -75,7 +87,7 @@ const ZoneSettings = ({ zoneId }) => {
               className={styles.btn}
               disabled={zone.hidden}
             >
-              Draw zone
+              {t('zoneSettings.boundaries.draw')}
             </Button>
           ) : (
             <div style={{
@@ -108,17 +120,19 @@ const ZoneSettings = ({ zoneId }) => {
                 type="primary"
                 style={{ flex: 1 }}
               >
-                Redraw zone
+                {t('zoneSettings.boundaries.redraw')}
               </Button>
-              <Button
-                onClick={() => {
-                  setState('EDIT_EM_ZONE');
-                }}
-                disabled={zone.hidden}
-                type="default"
-                icon={<FormOutlined />}
-                className={styles.editZoneButton}
-              />
+              <Tooltip title={t('zoneSettings.boundaries.editTooltip')}>
+                <Button
+                  onClick={() => {
+                    setState('EDIT_EM_ZONE');
+                  }}
+                  disabled={zone.hidden}
+                  type="default"
+                  icon={<FormOutlined />}
+                  className={styles.editZoneButton}
+                />
+              </Tooltip>
             </div>
           )}
         </div>
@@ -137,9 +151,9 @@ const ZoneSettings = ({ zoneId }) => {
             : (zone.color ? colorShader(zone.color, 1.75) : undefined)}`
         }}
       >
-        <span className={styles.sectionHeader}><strong>JOURNEYS</strong></span>
+        <span className={styles.sectionHeader}><strong>{t('zoneSettings.journeys.title')}</strong></span>
         <div className={styles.boundariesText}>
-          Include Agents in the simulation
+          {t('zoneSettings.journeys.description')}
         </div>
         <div className={styles.journeyButtonGroup}>
           {(['start', 'pass', 'end'] as TripType[]).map(option => (
@@ -173,7 +187,7 @@ const ZoneSettings = ({ zoneId }) => {
                 updateZone(zoneId, { trip: newJourneys });
               }}
             >
-              {option === 'start' ? 'Starts within' : option === 'pass' ? 'Passes through' : 'Ends within'}
+              {getJourneyLabel(option)}
             </button>
           ))}
         </div>

@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { Popover } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { useEZSessionStore } from '~stores/session';
 import { colorShader, HIDDEN_COLOR } from '~utils/colors';
 import BlockEditor from './BlockEditor';
@@ -8,8 +9,10 @@ import { useSchedulerState, useBlockInteractions, useContainerResize } from './h
 import { HEADER_HEIGHT, ROW_HEIGHT, VEHICLE_COLUMN_WIDTH, TIME_COLUMNS } from './constants';
 import { PolicySectionProps, VehicleTypeId } from './types';
 import styles from '../zoneSettings/zoneSettings.module.less';
+import '../locales';
 
 const PolicySection = ({ zoneId }: PolicySectionProps) => {
+  const { t } = useTranslation('ez-emission-zone-section');
   const sessionZones = useEZSessionStore(state => state.zones);
   const sessionZone = sessionZones[zoneId];
   const zoneColor = sessionZone?.color || '#CCCCCC';
@@ -75,12 +78,12 @@ const PolicySection = ({ zoneId }: PolicySectionProps) => {
       }}
     >
       <span className={styles.sectionHeader}>
-        <strong>VEHICLE RESTRICTIONS</strong>
+        <strong>{t('vehicleRestrictions.title')}</strong>
       </span>
 
       <div className={styles.schedulerContainer}>
         <div className={styles.boundariesText}>
-          Double-click to add restrictions for vehicle emission groups. Click icon to edit, drag edges to resize, drag center to move. Click vehicle type name to enable/disable categories globally.
+          {t('vehicleRestrictions.instructions')}
         </div>
 
         <div className={styles.svgGrid} ref={containerRef}>

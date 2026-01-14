@@ -127,3 +127,15 @@ export const VEHICLE_TYPES: Record<VehicleTypeId, VehicleTypeInfo> = {
   midEmission: { label: 'Mid Em.', color: VEHICLE_TYPE_COLORS.midEmission },
   highEmission: { label: 'High Em.', color: VEHICLE_TYPE_COLORS.highEmission }
 };
+
+// Helper function to get localized vehicle type label
+export const getVehicleTypeLabel = (vehicleType: VehicleTypeId, t: (key: string) => string): string => {
+  const labelKeys: Record<VehicleTypeId, string> = {
+    zeroEmission: 'vehicleRestrictions.vehicleTypes.zeroEmission',
+    nearZeroEmission: 'vehicleRestrictions.vehicleTypes.nearZeroEmission',
+    lowEmission: 'vehicleRestrictions.vehicleTypes.lowEmission',
+    midEmission: 'vehicleRestrictions.vehicleTypes.midEmission',
+    highEmission: 'vehicleRestrictions.vehicleTypes.highEmission',
+  };
+  return t(labelKeys[vehicleType]);
+};

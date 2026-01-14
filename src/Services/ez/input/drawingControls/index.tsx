@@ -1,11 +1,13 @@
 import { Button, Checkbox, Divider } from 'antd';
 import { CloseOutlined, CheckOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { useServiceStore } from '~globalStores';
 import { useEZServiceStore, useAPIPayloadStore, useDrawToolStore, useDrawingStateStore } from '~store';
 import { useEZSessionStore } from '~stores/session';
 import { useNotificationStore } from '~/Services/CustomNotification';
 import { validatePolygon } from '~utils/polygonValidation';
 import { geoJsonToCoords } from '~utils/geoJson';
+import './locales';
 import styles from './DrawingControls.module.less';
 
 interface LayerItem {
@@ -18,9 +20,10 @@ interface LayerGroupProps {
   title: string;
   items: LayerItem[];
   type: 'zones' | 'areas';
+  showAllLabel: string;
 }
 
-const LayerGroup = ({ title, items, type }: LayerGroupProps) => {
+const LayerGroup = ({ title, items, type, showAllLabel }: LayerGroupProps) => {
   const visibleIds = useDrawingStateStore(state =>
     type === 'zones' ? state.visibleZoneIds : state.visibleAreaIds
   );
@@ -52,7 +55,7 @@ const LayerGroup = ({ title, items, type }: LayerGroupProps) => {
           checked={allVisible}
           onChange={handleToggleAll}
         >
-          Show All
+          {showAllLabel}
         </Checkbox>
       </div>
 
@@ -93,7 +96,9 @@ const getOtherAreas = (
   customAreas: any[],
   scaledAreas: any[],
   zones: any[],
-  sessionZones: any
+  sessionZones: any,
+  scaledSuffix: string,
+  unknownLabel: string
 ): LayerItem[] => {
   const custom = customAreas
     .filter(area => {
@@ -115,10 +120,10 @@ const getOtherAreas = (
       return area.coords && area.coords.length > 0;
     })
     .map(area => {
-      const zoneName = sessionZones[area.zoneId]?.name || 'Unknown';
+      const zoneName = sessionZones[area.zoneId]?.name || unknownLabel;
       return {
         id: area.id,
-        name: `${zoneName} (${area.scale[0]}% scaled)`,
+        name: `${zoneName} (${area.scale[0]}${scaledSuffix})`,
         color: area.color,
       };
     });
@@ -127,6 +132,7 @@ const getOtherAreas = (
 };
 
 export const DrawingControls = () => {
+  const { t } = useTranslation('ez-drawing-controls');
   const activeService = useServiceStore(state => state.activeService);
   const ezState = useEZServiceStore(state => state.state);
   const setState = useEZServiceStore(state => state.setState);
@@ -143,6 +149,7 @@ export const DrawingControls = () => {
   const resetDrawTool = useDrawToolStore(state => state.reset);
   const resetDrawingState = useDrawingStateStore(state => state.reset);
   const setNotification = useNotificationStore(state => state.setNotification);
+  const setZoneProperty = useEZSessionStore(state => state.setZoneProperty);
 
   const isDrawMode = ezState === 'DRAW_EM_ZONE' || ezState === 'DRAW_SIM_AREA' || ezState === 'REDRAW_EM_ZONE';
   const isEditMode = ezState === 'EDIT_EM_ZONE' || ezState === 'EDIT_SIM_AREA';
@@ -168,7 +175,7 @@ export const DrawingControls = () => {
       const coords = geoJsonToCoords(drawToolGeoJson);
 
       if (!coords) {
-        setNotification('Invalid polygon data', 'error');
+        setNotification(t('errors.invalidPolygonData'), 'error');
         return;
       }
 
@@ -181,6 +188,9 @@ export const DrawingControls = () => {
 
       if (isZoneMode && activeZone) {
         updateZone(activeZone, { coords });
+        // Reset scale to 100% since emission zone coords changed
+        const currentScale = sessionZones[activeZone]?.scale || [100, 'center'];
+        setZoneProperty(activeZone, 'scale', [100, currentScale[1]]);
       } else if (activeCustomArea) {
         updateCustomSimulationArea(activeCustomArea, { coords });
       }
@@ -202,7 +212,9 @@ export const DrawingControls = () => {
     customSimulationAreas,
     scaledSimulationAreas,
     zones,
-    sessionZones
+    sessionZones,
+    t('scaledAreaSuffix'),
+    t('fallbacks.unknownZone')
   );
 
   return (
@@ -210,8 +222,8 @@ export const DrawingControls = () => {
       <div className={styles.instructionsContainer}>
         <div className={styles.instructions}>
           {isDrawMode
-            ? 'Click to place points. Complete the polygon or double click to save.'
-            : 'Drag vertices to move them. Click and drag on polygon lines to add new vertices. Right-click vertices to remove them.'}
+            ? t('instructions.drawMode')
+            : t('instructions.editMode')}
         </div>
         {isDrawMode ? (
           <Button
@@ -220,7 +232,7 @@ export const DrawingControls = () => {
             size="small"
             block
           >
-            Cancel
+            {t('buttons.cancel')}
           </Button>
         ) : (
           <div className={styles.buttonGroup}>
@@ -230,7 +242,7 @@ export const DrawingControls = () => {
               size="small"
               className={styles.cancelButton}
             >
-              Cancel
+              {t('buttons.cancel')}
             </Button>
             <Button
               onClick={handleDone}
@@ -239,7 +251,7 @@ export const DrawingControls = () => {
               type="primary"
               className={styles.doneButton}
             >
-              Done
+              {t('buttons.done')}
             </Button>
           </div>
         )}
@@ -247,21 +259,23 @@ export const DrawingControls = () => {
 
       {(otherZones.length > 0 || otherAreas.length > 0) && (
         <>
-          <Divider orientation="left">Previous Polygons</Divider>
+          <Divider orientation="left">{t('sections.previousPolygons')}</Divider>
           <div className={styles.layersContainer}>
             {otherZones.length > 0 && (
               <LayerGroup
-                title="EMISSION ZONES"
+                title={t('sections.emissionZones')}
                 items={otherZones}
                 type="zones"
+                showAllLabel={t('layerVisibility.showAll')}
               />
             )}
 
             {otherAreas.length > 0 && (
               <LayerGroup
-                title="SIMULATION AREAS"
+                title={t('sections.simulationAreas')}
                 items={otherAreas}
                 type="areas"
+                showAllLabel={t('layerVisibility.showAll')}
               />
             )}
           </div>
