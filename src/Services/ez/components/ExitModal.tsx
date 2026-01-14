@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { Modal, Space, message, Button } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
+import './locales';
 import { useEZSessionStore } from '~stores/session';
 import { useEZServiceStore } from '~store';
 import { hasOutputData } from '~stores/output';
@@ -10,6 +12,7 @@ import { useServiceStore } from '~globalStores';
 import { CopyRequestIdButton } from './CopyRequestIdButton';
 
 export default function ExitModal() {
+  const { t } = useTranslation('ez-components');
   const [modal, modalContextHolder] = Modal.useModal();
   const [messageApi, contextHolder] = message.useMessage();
   const setActiveService = useServiceStore((state) => state.setActiveService);
@@ -17,6 +20,8 @@ export default function ExitModal() {
 
   const exitState = useEZSessionStore((state) => state.exitState);
   const exitWarning = useEZSessionStore((state) => state.exitWarning);
+  const setExitState = useEZSessionStore((state) => state.setExitState);
+  const setExitWarning = useEZSessionStore((state) => state.setExitWarning);
   const isEzBackendAlive = useEZServiceStore((state) => state.isEzBackendAlive);
   const ezState = useEZServiceStore((state) => state.state);
   const requestId = useEZSessionStore((state) => state.requestId);
@@ -35,9 +40,9 @@ export default function ExitModal() {
         title: exitWarning.title,
         icon: <ExclamationCircleOutlined />,
         content: exitWarning.message,
-        okText: 'Exit Anyway',
+        okText: t('exitModal.exitAnyway'),
         okType: 'danger',
-        cancelText: 'Stay in EZ',
+        cancelText: t('exitModal.stayInEZ'),
         closable: false,
         maskClosable: false,
         keyboard: false,
@@ -53,7 +58,7 @@ export default function ExitModal() {
               <CopyRequestIdButton
                 requestId={requestId}
                 showText={true}
-                text="Copy"
+                text={t('exitModal.copy')}
                 size="small"
                 type="default"
                 messageApi={messageApi}
@@ -67,7 +72,7 @@ export default function ExitModal() {
                   instance.destroy();
                 }}
               >
-                Stay in EZ
+                {t('exitModal.stayInEZ')}
               </Button>
               <Button
                 size="small"
@@ -78,7 +83,7 @@ export default function ExitModal() {
                   instance.destroy();
                 }}
               >
-                Exit Anyway
+                {t('exitModal.exitAnyway')}
               </Button>
             </Space>
           </div>
@@ -95,15 +100,14 @@ export default function ExitModal() {
 
       resetAllEZStores();
 
-      const sessionStore = useEZSessionStore.getState();
-      sessionStore.setExitState('idle');
-      sessionStore.setExitWarning(null);
+      setExitState('idle');
+      setExitWarning(null);
 
       setActiveService('REST');
 
       isResettingRef.current = false;
     }
-  }, [exitState, exitWarning, modal, setActiveService, isEzBackendAlive, ezState, requestId, messageApi]);
+  }, [exitState, exitWarning, setExitState, setExitWarning, modal, setActiveService, isEzBackendAlive, ezState, requestId, messageApi, t]);
 
   return (
     <>

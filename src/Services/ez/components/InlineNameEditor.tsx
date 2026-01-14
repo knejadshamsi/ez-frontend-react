@@ -1,6 +1,8 @@
 import { useState, type ReactElement } from 'react'
 import { Button, Input, message } from 'antd'
 import { CloseOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
+import './locales'
 import styles from './InlineNameEditor.module.less'
 
 interface InlineNameEditorProps {
@@ -17,11 +19,12 @@ export const InlineNameEditor = ({
   value,
   onSave,
   maxLength = 50,
-  placeholder = 'Enter name',
+  placeholder,
   autoGenerateName,
   className,
   disabled = false
 }: InlineNameEditorProps): ReactElement => {
+  const { t } = useTranslation('ez-components')
   const [isEditing, setIsEditing] = useState(false)
   const [editValue, setEditValue] = useState('')
   const [messageApi, contextHolder] = message.useMessage()
@@ -40,7 +43,7 @@ export const InlineNameEditor = ({
         const autoName = autoGenerateName()
         onSave(autoName)
       } else {
-        messageApi.error('Name cannot be empty')
+        messageApi.error(t('inlineNameEditor.errorEmpty'))
         return
       }
     } else {
@@ -75,7 +78,7 @@ export const InlineNameEditor = ({
             onChange={(e) => setEditValue(e.target.value.slice(0, maxLength))}
             onKeyDown={handleKeyDown}
             maxLength={maxLength}
-            placeholder={placeholder}
+            placeholder={placeholder || t('inlineNameEditor.placeholder')}
             autoFocus
             className={styles.input}
           />
@@ -85,7 +88,7 @@ export const InlineNameEditor = ({
             icon={<SaveOutlined />}
             onClick={handleSave}
             className={styles.button}
-            title="Save"
+            title={t('inlineNameEditor.tooltipSave')}
           />
           <Button
             type="text"
@@ -93,7 +96,7 @@ export const InlineNameEditor = ({
             icon={<CloseOutlined />}
             onClick={handleCancel}
             className={styles.button}
-            title="Cancel"
+            title={t('inlineNameEditor.tooltipCancel')}
           />
         </>
       ) : (
@@ -109,7 +112,7 @@ export const InlineNameEditor = ({
             onClick={handleStartEdit}
             disabled={disabled}
             className={`${styles.button} ${styles.editButton}`}
-            title="Edit name"
+            title={t('inlineNameEditor.tooltipEdit')}
           />
         </>
       )}

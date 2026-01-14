@@ -1,13 +1,16 @@
 import { Space, Button, Input, Typography, message } from 'antd'
+import { useTranslation } from 'react-i18next'
 import { useEZSessionStore } from '~stores/session'
 import { useEZServiceStore } from '~store'
 import { loadScenario } from '~ez/api'
 import previousScenarios from './previousScenarios.json'
+import './locales'
 import styles from './WelcomeView.module.less'
 
 const { Text } = Typography
 
 export const WelcomeView = () => {
+  const { t } = useTranslation('ez-welcome');
   const [messageApi, contextHolder] = message.useMessage();
 
   const requestId = useEZSessionStore((state) => state.requestId)
@@ -15,7 +18,7 @@ export const WelcomeView = () => {
   const setState = useEZServiceStore((state) => state.setState)
 
   const handleScenarioLoadError = (errorMessage: string) => {
-    messageApi.error(errorMessage || 'Failed to load scenario. Try again');
+    messageApi.error(errorMessage || t('errors.loadFailed'));
     setState('WELCOME');
   };
 
@@ -23,7 +26,7 @@ export const WelcomeView = () => {
 
   const handleViewScenario = async (scenarioRequestId: string) => {
     if (!scenarioRequestId || scenarioRequestId.trim() === '') {
-      messageApi.error('Invalid scenario ID');
+      messageApi.error(t('errors.invalidId'));
       return;
     }
 
@@ -37,7 +40,7 @@ export const WelcomeView = () => {
 
   const handleViewPreviousScenario = async () => {
     if (!requestId || requestId.trim() === '') {
-      messageApi.error('Please enter a valid scenario ID');
+      messageApi.error(t('errors.enterValidId'));
       return;
     }
 
@@ -50,26 +53,28 @@ export const WelcomeView = () => {
       {contextHolder}
       <div className={styles.welcomeText}>
         <br />
-        Welcome to <strong>Emission Zone Impact analysis Tool</strong>.<br />
+        {t('welcome.title')}
+        <strong>{t('welcome.titleBold')}</strong>
+        {t('welcome.titleEnd')}
         <br />
-        This tool is designed to help you (or any policymaker) view the impact of zero and low-emission zones on urban
-        area and traffic flow, air quality, and CO2 emissions in Montreal.
+        <br />
+        {t('welcome.subtitle')}
       </div>
 
       <div className={styles.scenarioListContainer}>
-        <Text className={styles.scenarioListTitle}>Previous Scenarios</Text>
+        <Text className={styles.scenarioListTitle}>{t('previousScenarios.title')}</Text>
         <div className={styles.scenarioList}>
           {previousScenarios.map((scenario) => (
             <div key={scenario.requestId} className={styles.scenarioItem}>
               <div className={styles.scenarioItemTitle}>
-                {scenario.name}
+                {t(`scenarios.${scenario.requestId}.name`)}
               </div>
               <div className={styles.scenarioItemDescription}>
-                {scenario.description}
+                {t(`scenarios.${scenario.requestId}.description`)}
               </div>
               <div className={styles.scenarioItemButton}>
                 <Button type="primary" onClick={() => handleViewScenario(scenario.requestId)}>
-                  View Scenario
+                  {t('previousScenarios.viewButton')}
                 </Button>
               </div>
             </div>
@@ -82,7 +87,7 @@ export const WelcomeView = () => {
         <Space direction="vertical" className={styles.fullWidth}>
           <Space.Compact className={styles.fullWidth}>
             <Input
-              placeholder="Enter request Id"
+              placeholder={t('input.placeholder')}
               style={{ flex: 1 }}
               value={requestId || ''}
               onChange={(e) => setRequestId(e.target.value)}
@@ -97,7 +102,7 @@ export const WelcomeView = () => {
               disabled={!requestId || requestId.trim() === ''}
               onClick={handleViewPreviousScenario}
             >
-              View Previous Scenario
+              {t('buttons.viewPrevious')}
             </Button>
           </Space.Compact>
           <Button
@@ -105,7 +110,7 @@ export const WelcomeView = () => {
             className={styles.linkButton}
             onClick={handleCreateScenario}
           >
-            Create your own scenario
+            {t('buttons.createNew')}
           </Button>
         </Space>
       </div>

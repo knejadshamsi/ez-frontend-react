@@ -2,6 +2,8 @@ import { useState, type ReactElement } from 'react';
 import { Button, Tooltip } from 'antd';
 import { CopyOutlined, CheckOutlined, LoadingOutlined } from '@ant-design/icons';
 import type { MessageInstance } from 'antd/es/message/interface';
+import { useTranslation } from 'react-i18next';
+import './locales';
 
 type CopyState = 'idle' | 'copying' | 'success';
 
@@ -22,20 +24,21 @@ export const CopyRequestIdButton = ({
   requestId,
   messageApi,
   showText = true,
-  text = 'Copy ID',
+  text,
   size = 'small',
   type = 'default',
   ghost = false,
   className,
   disabled = false,
-  tooltipText = 'Copy Request ID',
+  tooltipText,
 }: CopyRequestIdButtonProps): ReactElement => {
+  const { t } = useTranslation('ez-components');
   const [copyState, setCopyState] = useState<CopyState>('idle');
 
   const handleCopy = async () => {
 
     if (!requestId || requestId.trim() === '') {
-      messageApi.error('No request ID available to copy');
+      messageApi.error(t('copyRequestId.noIdAvailable'));
       return;
     }
 
@@ -65,7 +68,7 @@ export const CopyRequestIdButton = ({
 
       // Show success state
       setCopyState('success');
-      messageApi.success('Request ID copied to clipboard');
+      messageApi.success(t('copyRequestId.copiedSuccess'));
 
       // Reset to idle after brief success indication
       setTimeout(() => {
@@ -74,7 +77,7 @@ export const CopyRequestIdButton = ({
     } catch (error) {
       console.error('Failed to copy request ID:', error);
       setCopyState('idle');
-      messageApi.error('Failed to copy request ID. Please try again or copy manually.');
+      messageApi.error(t('copyRequestId.copyFailed'));
     }
   };
 
@@ -95,17 +98,17 @@ export const CopyRequestIdButton = ({
 
     switch (copyState) {
       case 'copying':
-        return 'Copying...';
+        return t('copyRequestId.copying');
       case 'success':
-        return 'Copied!';
+        return t('copyRequestId.copied');
       case 'idle':
       default:
-        return text;
+        return text || t('copyRequestId.copyId');
     }
   };
 
   return (
-    <Tooltip title={tooltipText}>
+    <Tooltip title={tooltipText || t('copyRequestId.tooltipCopyId')}>
       <Button
         type={type}
         size={size}
