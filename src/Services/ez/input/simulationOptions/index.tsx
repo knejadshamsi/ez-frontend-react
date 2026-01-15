@@ -1,39 +1,42 @@
 import { Divider } from 'antd'
+import { useTranslation } from 'react-i18next'
 import BasicSettingsSection from './basicSettings'
 import SourcesSection from './sources'
 import ModeUtilityAdjustments from './ModeUtilityAdjustments'
 
 import styles from './simulationOptions.module.less'
+import './locales'
 
 const SimulationOptionsSection = () => {
+  const { t } = useTranslation('ez-simulation-options')
 
   return (
     <>
       <Divider orientationMargin={10} orientation="left" className={`${styles.divider} ${styles.boldText}`}>
-        <strong>3. SIMULATION OPTIONS</strong>
+        <strong>{t('section.title')}</strong>
       </Divider>
       <div className={`${styles.container} ${styles.simulationOptionsContainer}`}>
         <div className={styles.sectionContainer}>
           <div className={styles.subsectionContainer}>
-            <span className={styles.sectionHeader}><strong>BASIC SETTINGS</strong></span>
+            <span className={styles.sectionHeader}><strong>{t('basicSettings.title')}</strong></span>
             <div className={styles.descriptionText}>
-              Configure simulation iterations and population coverage
+              {t('basicSettings.description')}
             </div>
             <BasicSettingsSection />
           </div>
 
           <div className={styles.subsectionContainer}>
-            <span className={styles.sectionHeader}><strong>DATA SOURCES</strong></span>
+            <span className={styles.sectionHeader}><strong>{t('dataSources.title')}</strong></span>
             <div className={styles.descriptionText}>
-              Select datasets for the simulation
+              {t('dataSources.description')}
             </div>
             <SourcesSection />
           </div>
 
           <div className={styles.subsectionContainer}>
-            <span className={styles.sectionHeader}><strong>ATTRACTIVENESS</strong></span>
+            <span className={styles.sectionHeader}><strong>{t('attractiveness.title')}</strong></span>
             <div className={styles.descriptionText}>
-              Left-click for positive values (more attractive), right-click for negative values (less attractive)
+              {t('attractiveness.description')}
             </div>
             <ModeUtilityAdjustments />
           </div>

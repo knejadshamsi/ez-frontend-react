@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { Slider } from 'antd'
+import { useTranslation } from 'react-i18next'
 import { useAPIPayloadStore } from '~store'
 import CarDistributionBar from './CarDistributionBar'
 import styles from '../simulationOptions.module.less'
+import '../locales'
 
 const MIN_VALUE = 1
 const MAX_VALUE = 10
@@ -16,6 +18,7 @@ const generateMarks = (min: number, max: number, suffix: string = ''): Record<nu
 }
 
 const BasicSettingsSection = () => {
+  const { t } = useTranslation('ez-simulation-options')
   const simulationOptions = useAPIPayloadStore((state) => state.payload.simulationOptions)
   const setSimulationOptions = useAPIPayloadStore((state) => state.setSimulationOptions)
 
@@ -42,10 +45,10 @@ const BasicSettingsSection = () => {
     <div className={styles.optionsGroup}>
       <div className={styles.sliderSection}>
         <div className={styles.title}>
-          <span><strong>Simulation Iterations</strong></span>
+          <span><strong>{t('basicSettings.iterations.title')}</strong></span>
         </div>
         <div className={styles.description}>
-          Higher number can lead to more accurate results at the cost of increased computation time.
+          {t('basicSettings.iterations.description')}
         </div>
         <Slider
           min={MIN_VALUE}
@@ -55,16 +58,17 @@ const BasicSettingsSection = () => {
           onAfterChange={handleSliderAfterChange('iterations')}
           marks={generateMarks(MIN_VALUE, MAX_VALUE)}
           className={styles.slider}
-          aria-label="Simulation iterations slider"
+          aria-label={t('basicSettings.iterations.ariaLabel')}
+          tooltip={{ open: false }}
         />
       </div>
 
       <div className={styles.sliderSection}>
         <div className={styles.title}>
-          <span><strong>Simulation Percentage</strong></span>
+          <span><strong>{t('basicSettings.percentage.title')}</strong></span>
         </div>
         <div className={styles.description}>
-          Higher percentage increases resolution at the cost of increased computation time.
+          {t('basicSettings.percentage.description')}
         </div>
         <Slider
           min={MIN_VALUE}
@@ -74,16 +78,17 @@ const BasicSettingsSection = () => {
           onAfterChange={handleSliderAfterChange('percentage')}
           marks={generateMarks(MIN_VALUE, MAX_VALUE, '%')}
           className={styles.slider}
-          aria-label="Simulation percentage slider"
+          aria-label={t('basicSettings.percentage.ariaLabel')}
+          tooltip={{ open: false }}
         />
       </div>
 
       <div className={styles.sliderSection}>
         <div className={styles.title}>
-          <span><strong>Vehicle Distribution</strong></span>
+          <span><strong>{t('basicSettings.vehicleDistribution.title')}</strong></span>
         </div>
         <div className={styles.description}>
-          Adjust the distribution of vehicle types among car users. Drag dividers to change percentages.
+          {t('basicSettings.vehicleDistribution.description')}
         </div>
         <CarDistributionBar />
       </div>

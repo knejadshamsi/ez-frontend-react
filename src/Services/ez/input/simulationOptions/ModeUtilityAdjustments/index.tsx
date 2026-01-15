@@ -1,17 +1,20 @@
+import { useTranslation } from 'react-i18next';
 import ModeUtilityCard from './ModeUtilityCard';
 import { useAPIPayloadStore } from '~store';
 import styles from '../simulationOptions.module.less';
+import '../locales';
 
 const MODE_CONFIG = [
-  { id: 'walk', name: 'Walk' },
-  { id: 'bike', name: 'Bike' },
-  { id: 'ev', name: 'EV' },
-  { id: 'subway', name: 'Subway' },
-  { id: 'bus', name: 'Bus' },
-  { id: 'car', name: 'Car' }
+  { id: 'walk' },
+  { id: 'bike' },
+  { id: 'ev' },
+  { id: 'subway' },
+  { id: 'bus' },
+  { id: 'car' }
 ];
 
 const ModeUtilityAdjustments = () => {
+  const { t } = useTranslation('ez-simulation-options');
   const modeUtilities = useAPIPayloadStore((state) => state.payload.modeUtilities);
   const setModeUtilities = useAPIPayloadStore((state) => state.setModeUtilities);
 
@@ -33,7 +36,7 @@ const ModeUtilityAdjustments = () => {
         <ModeUtilityCard
           key={mode.id}
           id={mode.id}
-          name={mode.name}
+          name={t(`attractiveness.modes.${mode.id}`)}
           selectedUtilityLevel={modeUtilities[mode.id]}
           onUtilityChange={updateUtilityLevel}
         />

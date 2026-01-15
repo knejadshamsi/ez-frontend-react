@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { useProgressStore, getProgressStatus, canViewResultsEarly } from './store';
 import { useEZServiceStore } from '~store';
 import { useEZSessionStore } from '~stores/session';
@@ -12,11 +13,13 @@ import {
 } from '~stores/output';
 import { SuccessState, ErrorState, RunningState } from './states';
 import styles from './Progress.module.less';
+import './locales';
 
 export { useProgressStore, showProgress, showProgressError } from './store';
 export { decodeProgressAlert } from './decoder';
 
 export const Progress = () => {
+  const { t } = useTranslation('ez-progress');
   const state = useProgressStore();
   const setState = useEZServiceStore((state) => state.setState);
   const abortSseStream = useEZSessionStore((state) => state.abortSseStream);
@@ -107,10 +110,10 @@ export const Progress = () => {
       <div className={styles.loadingScenarioContainer}>
         <div className={styles.loadingContent}>
           <LoadingOutlined className={styles.spinner} />
-          <span className={styles.loadingText}>Loading scenario, please wait.</span>
+          <span className={styles.loadingText}>{t('loadingScenario')}</span>
         </div>
         <div className={styles.actionButtons}>
-          <Button onClick={handleCancel}>Cancel</Button>
+          <Button onClick={handleCancel}>{t('buttons.cancel')}</Button>
         </div>
       </div>
     );

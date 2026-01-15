@@ -1,20 +1,14 @@
 import { useState, useCallback, useEffect } from 'react';
 import { message } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { useAPIPayloadStore } from '~store';
 import { useEZSessionStore } from '~stores/session';
 import styles from '../simulationOptions.module.less';
 import type { CarDistribution } from '~ez/stores/types';
 import { VEHICLE_TYPE_COLORS } from '~ez/stores/types';
+import '../locales';
 
 const SEGMENT_COLORS = VEHICLE_TYPE_COLORS;
-
-const SEGMENT_LABELS = {
-  zeroEmission: 'Zero Em.',
-  nearZeroEmission: 'Near-Zero Em.',
-  lowEmission: 'Low Em.',
-  midEmission: 'Mid Em.',
-  highEmission: 'High Em.'
-} as const;
 
 // Calculate mouse position as percentage with 5% snapping
 const calculateSnappedPercentage = (mouseX: number, barRect: DOMRect): number => {
@@ -76,6 +70,7 @@ const calculateNewDistribution = (
 };
 
 const CarDistributionBar = () => {
+  const { t } = useTranslation('ez-simulation-options');
   const carDistribution = useAPIPayloadStore((state) => state.payload.carDistribution);
   const setCarDistribution = useAPIPayloadStore((state) => state.setCarDistribution);
   const sessionStore = useEZSessionStore();
@@ -94,7 +89,7 @@ const CarDistributionBar = () => {
     const enabledCount = Object.values(sessionStore.carDistributionCategories).filter(v => v).length;
 
     if (isCurrentlyEnabled && enabledCount <= 1) {
-      messageApi.warning('At least one emission category must remain enabled');
+      messageApi.warning(t('basicSettings.vehicleDistribution.minCategoryWarning'));
       return;
     }
 
@@ -173,7 +168,7 @@ const CarDistributionBar = () => {
       <div className={styles.legend}>
         {Object.entries(SEGMENT_COLORS).map(([key, color]) => {
           const isEnabled = sessionStore.carDistributionCategories[key];
-          const label = SEGMENT_LABELS[key];
+          const label = t(`basicSettings.vehicleDistribution.emissionCategories.${key}`);
 
           return (
             <div
