@@ -1,4 +1,4 @@
-import { type ReactElement, useEffect } from 'react'
+import { type ReactElement, useCallback } from 'react'
 import { Button, Tooltip } from 'antd'
 import {
   AimOutlined,
@@ -7,6 +7,7 @@ import {
   RadiusBottomleftOutlined,
   RadiusBottomrightOutlined
 } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import { polygon, area } from '@turf/turf'
 import { useAPIPayloadStore } from '~store'
 import { useEZSessionStore } from '~stores/session'
@@ -16,6 +17,7 @@ import selectorStyles from './simulationAreaSection.module.less'
 import EZSlider from '~ez/components/EZSlider'
 import type { OriginType, ScaleUpdate, ValidatedZone } from './types'
 import type { Coordinate } from '~stores/types'
+import './locales'
 
 const ORIGIN_OPTIONS: OriginType[] = ['center', 'top-left', 'top-right', 'bottom-left', 'bottom-right']
 const DEFAULT_SCALE: [number, OriginType] = [100, 'center']
@@ -53,24 +55,24 @@ const getOriginIcon = (origin: OriginType): ReactElement => {
   }
 }
 
-const getOriginLabel = (origin: OriginType): string => {
-  return origin
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ')
-}
-
 const ZoneScaleList = (): ReactElement => {
+  const { t } = useTranslation('ez-simulation-area-section')
   const apiZones = useAPIPayloadStore((state) => state.payload.zones)
   const sessionZones = useEZSessionStore((state) => state.zones)
   const setZoneProperty = useEZSessionStore((state) => state.setZoneProperty)
 
-  const visibleZones = apiZones.filter((zone): zone is ValidatedZone => {
-    const sessionData = sessionZones[zone.id]
-    return zone.coords !== null && zone.coords !== undefined && sessionData !== undefined && !sessionData.hidden
-  })
+  const getOriginLabel = (origin: OriginType): string => {
+    const labelKeys: Record<OriginType, string> = {
+      'center': t('zoneScaling.origins.center'),
+      'top-left': t('zoneScaling.origins.topLeft'),
+      'top-right': t('zoneScaling.origins.topRight'),
+      'bottom-left': t('zoneScaling.origins.bottomLeft'),
+      'bottom-right': t('zoneScaling.origins.bottomRight'),
+    }
+    return labelKeys[origin]
+  }
 
-  const updateZoneSettings = (zoneId: string, updates: ScaleUpdate): void => {
+  const updateZoneSettings = useCallback((zoneId: string, updates: ScaleUpdate): void => {
     const sessionData = sessionZones[zoneId]
     if (!sessionData) return
 
@@ -82,30 +84,18 @@ const ZoneScaleList = (): ReactElement => {
     ]
 
     setZoneProperty(zoneId, 'scale', newScale)
-  }
+  }, [sessionZones, setZoneProperty])
 
-  // Reset scale to 100% when zone coords change
-  useEffect(() => {
-    visibleZones.forEach(zone => {
-      if (!zone.coords) return
-
-      const sessionData = sessionZones[zone.id]
-      if (!sessionData) return
-
-      const [currentScale] = sessionData.scale || DEFAULT_SCALE
-
-      // Reset to 100% if coords have changed
-      if (currentScale !== 100) {
-        updateZoneSettings(zone.id, { percentage: 100 })
-      }
-    })
-  }, [apiZones.map(z => z.coords).join(',')]) // Watch coords changes
+  const visibleZones = apiZones.filter((zone): zone is ValidatedZone => {
+    const sessionData = sessionZones[zone.id]
+    return zone.coords !== null && zone.coords !== undefined && sessionData !== undefined && !sessionData.hidden
+  })
 
   return (
     <div className={selectorStyles.zoneScaleContainer}>
       {visibleZones.length === 0 ? (
         <div className={selectorStyles.emptyStateMessage}>
-          Please select at least one emission zone first
+          {t('zoneScaling.emptyState')}
         </div>
       ) : (
         visibleZones.map((zone) => {

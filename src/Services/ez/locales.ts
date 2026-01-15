@@ -74,6 +74,16 @@ export const locales = {
     demoMode: {
       label: 'DEMO MODE',
     },
+    parameterSelection: {
+      backToWelcome: 'Back to Welcome page',
+      newScenario: 'New Scenario',
+      startSimulation: 'Start Simulation',
+      previousResultsFound: 'Previous Results Found',
+      previousResultsMessage: 'You have previous simulation results. Do you want to return to them or start a new simulation?',
+      startNewSimulation: 'Start New Simulation',
+      cancel: 'Cancel',
+      returnToOutput: 'Return to Output',
+    },
   },
   fr: {
     exitWarnings: {
@@ -147,6 +157,16 @@ export const locales = {
     },
     demoMode: {
       label: 'MODE DÉMO',
+    },
+    parameterSelection: {
+      backToWelcome: 'Retour à la page d\'accueil',
+      newScenario: 'Nouveau scénario',
+      startSimulation: 'Lancer la simulation',
+      previousResultsFound: 'Résultats précédents trouvés',
+      previousResultsMessage: 'Vous avez des résultats de simulation précédents. Voulez-vous y retourner ou démarrer une nouvelle simulation?',
+      startNewSimulation: 'Nouvelle simulation',
+      cancel: 'Annuler',
+      returnToOutput: 'Retour aux résultats',
     },
   },
 } as const;

@@ -7,9 +7,11 @@ import {
   BorderOutlined,
   BgColorsOutlined
 } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import { useEZSessionStore } from '~stores/session'
 import type { BorderStyle } from '~stores/session'
 import styles from './simulationAreaSection.module.less'
+import './locales'
 
 interface SimulationAreaDisplayControlsProps {
   compact?: boolean
@@ -21,6 +23,7 @@ const FILL_OPACITY_LIGHT = 51;      // 20% opacity
 const FILL_OPACITY_FULL = 128;      // 50.2% opacity
 
 const SimulationAreaDisplayControls = ({ compact = false }: SimulationAreaDisplayControlsProps): ReactElement => {
+  const { t } = useTranslation('ez-simulation-area-section')
   const simulationAreaDisplay = useEZSessionStore((state) => state.simulationAreaDisplay)
   const setSimulationAreaDisplay = useEZSessionStore((state) => state.setSimulationAreaDisplay)
 
@@ -77,23 +80,28 @@ const SimulationAreaDisplayControls = ({ compact = false }: SimulationAreaDispla
     }
   }
   const getBorderStyleLabel = () => {
-    const labels: Record<BorderStyle, string> = {
-      'dashed': 'Dashed',
-      'solid': 'Solid',
-      'dotted': 'Dotted'
+    const styleLabels: Record<BorderStyle, string> = {
+      'dashed': t('displayControls.borderStyles.dashed'),
+      'solid': t('displayControls.borderStyles.solid'),
+      'dotted': t('displayControls.borderStyles.dotted')
     }
-    return `Border: ${labels[simulationAreaDisplay.borderStyle]}`
+    return t('displayControls.borderLabel', { style: styleLabels[simulationAreaDisplay.borderStyle] })
   }
 
   const getFillLabel = () => {
+    let fillStyle: string
     switch (simulationAreaDisplay.fillOpacity) {
       case FILL_OPACITY_TRANSPARENT:
-        return 'Fill: Transparent'
+        fillStyle = t('displayControls.fillStyles.transparent')
+        break
       case FILL_OPACITY_LIGHT:
-        return 'Fill: Lightly Colored'
+        fillStyle = t('displayControls.fillStyles.lightlyColored')
+        break
       default:
-        return 'Fill: Colored'
+        fillStyle = t('displayControls.fillStyles.colored')
+        break
     }
+    return t('displayControls.fillLabel', { style: fillStyle })
   }
 
   return (

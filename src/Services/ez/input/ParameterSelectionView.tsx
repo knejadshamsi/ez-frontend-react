@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-
+import { useTranslation } from 'react-i18next'
 import { useEZSessionStore } from '~stores/session'
 import { useAPIPayloadStore, useEZServiceStore } from '~store'
 
@@ -9,12 +9,14 @@ import { hasOutputData } from '~stores/output'
 
 import { Button, Input, Modal, message } from 'antd'
 import { ArrowLeftOutlined, SendOutlined, EditOutlined, SaveOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
+import '~ez/locales'
 
 import styles from './ParameterSelectionView.module.less'
 
 const MAX_NAME_LENGTH = 50;
 
 export const ParameterSelectionView = () => {
+  const { t } = useTranslation('ez-root');
   const [modal, contextHolder] = Modal.useModal();
   const [messageApi, messageContextHolder] = message.useMessage();
 
@@ -53,11 +55,11 @@ export const ParameterSelectionView = () => {
     if (isEzBackendAlive) {
       if (outputExists) {
         const instance = modal.confirm({
-          title: 'Previous Results Found',
+          title: t('parameterSelection.previousResultsFound'),
           icon: <ExclamationCircleOutlined />,
-          content: 'You have previous simulation results. Do you want to return to them or start a new simulation?',
-          okText: 'Start New Simulation',
-          cancelText: 'Cancel',
+          content: t('parameterSelection.previousResultsMessage'),
+          okText: t('parameterSelection.startNewSimulation'),
+          cancelText: t('parameterSelection.cancel'),
           onOk() {
             setIsNewSimulation(true);
             setState('AWAIT_RESULTS');
@@ -73,7 +75,7 @@ export const ParameterSelectionView = () => {
                   instance.destroy();
                 }}
               >
-                Return to Output
+                {t('parameterSelection.returnToOutput')}
               </Button>
               <OkBtn />
             </>
@@ -102,7 +104,7 @@ export const ParameterSelectionView = () => {
       <div className={styles.backButtonContainer}>
           <Button type="link" onClick={() => setState('WELCOME')} className={styles.backButton}>
             <ArrowLeftOutlined style={{fontSize: '12px'}} />
-            Back to Welcome page
+            {t('parameterSelection.backToWelcome')}
           </Button>
         </div>
         <div className={styles.scenarioTitleContainer}>
@@ -132,7 +134,7 @@ export const ParameterSelectionView = () => {
           ) : (
             <>
               <div className={styles.scenarioTitleDisplay}>
-                <h4>{scenarioTitle || 'New Scenario'}</h4>
+                <h4>{scenarioTitle || t('parameterSelection.newScenario')}</h4>
                 <Button
                   type="text"
                   size="small"
@@ -152,7 +154,7 @@ export const ParameterSelectionView = () => {
         >
           <div className={styles.buttonText}>
             <SendOutlined />
-            <span>Start Simulation</span>
+            <span>{t('parameterSelection.startSimulation')}</span>
           </div>
         </Button>
       </div>

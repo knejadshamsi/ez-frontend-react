@@ -50,10 +50,10 @@ export const locales = {
   fr: {
     section: {
       title: '1. CONFIGURER LES ZONES D\'ÉMISSION',
-      addMoreZones: 'Ajouter plus de zones',
+      addMoreZones: 'Ajouter des zones',
     },
     addZoneCard: {
-      text: 'Ajouter une nouvelle zone',
+      text: 'Nouvelle zone',
     },
     zoneSettings: {
       hiddenTag: 'Cette zone est masquée et sera exclue de la simulation',

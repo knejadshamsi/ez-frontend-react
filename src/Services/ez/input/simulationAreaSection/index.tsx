@@ -1,5 +1,6 @@
 import { Button } from 'antd'
 import { type ReactElement, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useEZServiceStore, useAPIPayloadStore } from '~store'
 import { useEZSessionStore } from '~stores/session'
 import { ZoneScaleList } from './ZoneScaleList'
@@ -8,6 +9,7 @@ import { SimulationAreaDisplayControls } from './SimulationAreaDisplayControls'
 import { polygon, transformScale, bbox, center } from '@turf/turf'
 import type { OriginType } from './types'
 import type { Zone, Coordinate } from '~ez/stores/types'
+import './locales'
 
 import styles from './simulationAreaSection.module.less'
 
@@ -53,6 +55,7 @@ const calculateScaledCoordinates = (
 }
 
 const SimulationAreaSection = (): ReactElement => {
+  const { t } = useTranslation('ez-simulation-area-section')
   const setState = useEZServiceStore((state) => state.setState)
   const setActiveCustomArea = useEZSessionStore((state) => state.setActiveCustomArea)
 
@@ -68,6 +71,7 @@ const SimulationAreaSection = (): ReactElement => {
 
   const showControls = scaledSimulationAreas.length > 0 || customSimulationAreas.length > 0
 
+  // Calculate simulation areas for visuals based on emission zone + scale
   useEffect(() => {
     const visibleZones = apiZones.filter(zone => {
       const sessionData = sessionZones[zone.id]
@@ -82,6 +86,7 @@ const SimulationAreaSection = (): ReactElement => {
 
       const [percentage, origin] = sessionData.scale || DEFAULT_SCALE
 
+      // Only create scaled simulation area if scale !== 100%
       if (percentage !== 100) {
         zoneIdsWithScaling.add(zone.id)
 
@@ -97,12 +102,14 @@ const SimulationAreaSection = (): ReactElement => {
       }
     })
 
-    scaledSimulationAreas.forEach(scaledArea => {
+    // Clean up scaled areas that no longer have scaling
+    const currentScaledAreas = useAPIPayloadStore.getState().payload.scaledSimulationAreas
+    currentScaledAreas.forEach(scaledArea => {
       if (!zoneIdsWithScaling.has(scaledArea.zoneId)) {
         removeScaledSimulationArea(scaledArea.id)
       }
     })
-  }, [apiZones, sessionZones])
+  }, [apiZones, sessionZones, upsertScaledSimulationArea, removeScaledSimulationArea])
 
   const handleSelectCustomArea = (): void => {
     const areaColor = DEFAULT_CUSTOM_AREA_COLOR
@@ -118,7 +125,7 @@ const SimulationAreaSection = (): ReactElement => {
     <>
       <div className={styles.dividerWithControls}>
         <strong className={styles.dividerTitle}>
-          2. SELECT SIMULATION AREA
+          {t('section.title')}
         </strong>
         <hr className={styles.dividerLine} />
         {showControls && (
@@ -134,22 +141,22 @@ const SimulationAreaSection = (): ReactElement => {
       <div className={`${styles.container} ${styles.simulationAreaContainer}`}>
         <div className={styles.sectionContainer}>
           <div className={styles.subsectionContainer}>
-            <span className={styles.sectionHeader}><strong>ZONE SCALING</strong></span>
+            <span className={styles.sectionHeader}><strong>{t('zoneScaling.title')}</strong></span>
             <div className={styles.descriptionText}>
-              Scale emission zone to include the srrounding area
+              {t('zoneScaling.description')}
             </div>
             <ZoneScaleList />
           </div>
 
           <div className={styles.subsectionContainer}>
-            <span className={styles.sectionHeader}><strong>CUSTOM AREAS</strong></span>
+            <span className={styles.sectionHeader}><strong>{t('customAreas.title')}</strong></span>
             <div className={styles.descriptionText}>
-              Include other areas
+              {t('customAreas.description')}
             </div>
             <DrawAreaList />
             <div className={styles.customAreaButtonContainer}>
               <Button onClick={handleSelectCustomArea}>
-                {customSimulationAreas.length > 0 ? 'Add Another Area' : 'Add Custom Area'}
+                {customSimulationAreas.length > 0 ? t('customAreas.addAnotherButton') : t('customAreas.addButton')}
               </Button>
             </div>
           </div>
