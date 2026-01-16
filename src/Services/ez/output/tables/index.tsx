@@ -1,0 +1,1 @@
+export { TripLegsTable } from './TripLegsTable';

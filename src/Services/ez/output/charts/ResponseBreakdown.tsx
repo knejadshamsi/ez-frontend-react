@@ -1,5 +1,6 @@
 import { Spin, Alert, Button } from 'antd';
 import { Bar } from 'react-chartjs-2';
+import { useTranslation } from 'react-i18next';
 import {
   useEZOutputPeopleResponseStore,
   useEZOutputChartConfigStore
@@ -7,12 +8,14 @@ import {
 import { useEZSessionStore } from '~stores/session';
 import { retryComponentData } from '~ez/api';
 import outputStyles from '../Output.module.less';
+import './locales';
 
 /**
  * People Response Breakdown - stacked bar showing behavioral responses
  * SSE Message: data_chart_breakdown_people_response
  */
 export const ResponseBreakdown = () => {
+  const { t } = useTranslation('ez-output-charts');
   const breakdownData = useEZOutputPeopleResponseStore((state) => state.peopleResponseBreakdownChartData);
   const breakdownState = useEZOutputPeopleResponseStore((state) => state.peopleResponseBreakdownChartState);
   const breakdownError = useEZOutputPeopleResponseStore((state) => state.peopleResponseBreakdownChartError);
@@ -28,14 +31,14 @@ export const ResponseBreakdown = () => {
   if (breakdownError) {
     return (
       <Alert
-        message="Failed to load response breakdown chart"
+        message={t('responseBreakdown.error')}
         description={breakdownError}
         type="error"
         showIcon
         className={outputStyles.sectionErrorAlert}
         action={
           <Button size="small" danger onClick={handleRetry}>
-            Retry
+            {t('responseBreakdown.retry')}
           </Button>
         }
       />
@@ -63,7 +66,7 @@ export const ResponseBreakdown = () => {
   return (
     <>
       <span className={outputStyles.chartDescription}>
-        Breakdown of behavioral responses across all affected trips.
+        {t('responseBreakdown.description')}
       </span>
       <div className={outputStyles.peopleResponseChartContainer}>
         <Bar data={chartData} options={{

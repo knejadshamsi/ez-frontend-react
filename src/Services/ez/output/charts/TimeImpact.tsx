@@ -1,5 +1,6 @@
 import { Spin, Alert, Button } from 'antd';
 import { Bar } from 'react-chartjs-2';
+import { useTranslation } from 'react-i18next';
 import {
   useEZOutputPeopleResponseStore,
   useEZOutputChartConfigStore
@@ -7,12 +8,14 @@ import {
 import { useEZSessionStore } from '~stores/session';
 import { retryComponentData } from '~ez/api';
 import outputStyles from '../Output.module.less';
+import './locales';
 
 /**
  * People Response Time Impact - bar chart showing time deltas
  * SSE Message: data_chart_time_impact_people_response
  */
 export const TimeImpact = () => {
+  const { t } = useTranslation('ez-output-charts');
   const timeImpactData = useEZOutputPeopleResponseStore((state) => state.peopleResponseTimeImpactChartData);
   const timeImpactState = useEZOutputPeopleResponseStore((state) => state.peopleResponseTimeImpactChartState);
   const timeImpactError = useEZOutputPeopleResponseStore((state) => state.peopleResponseTimeImpactChartError);
@@ -28,14 +31,14 @@ export const TimeImpact = () => {
   if (timeImpactError) {
     return (
       <Alert
-        message="Failed to load time impact chart"
+        message={t('timeImpact.error')}
         description={timeImpactError}
         type="error"
         showIcon
         className={outputStyles.sectionErrorAlert}
         action={
           <Button size="small" danger onClick={handleRetry}>
-            Retry
+            {t('timeImpact.retry')}
           </Button>
         }
       />
@@ -53,7 +56,7 @@ export const TimeImpact = () => {
   const chartData = {
     labels: chartConfig.categoryLabels,
     datasets: [{
-      label: 'Avg Time Delta (min)',
+      label: t('timeImpact.datasetLabel'),
       data: timeImpactData.averageTimeDeltas,
       backgroundColor: chartConfig.categoryColors,
       borderWidth: 0
@@ -63,7 +66,7 @@ export const TimeImpact = () => {
   return (
     <>
       <span className={outputStyles.chartDescription}>
-        Average trip time impact for each behavioral response, illustrating the time cost of different adaptation strategies.
+        {t('timeImpact.description')}
       </span>
       <div className={outputStyles.timeImpactChartContainer}>
         <Bar data={chartData} options={{
@@ -91,7 +94,7 @@ export const TimeImpact = () => {
             },
             y: {
               grid: { color: 'rgba(0, 0, 0, 0.05)' },
-              title: { display: true, text: 'Avg Time Delta (min)' },
+              title: { display: true, text: t('timeImpact.yAxisTitle') },
               ticks: {
                 callback: (value) => {
                   const num = Number(value);

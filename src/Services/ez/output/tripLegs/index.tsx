@@ -1,2 +1,2 @@
-export { Table } from './Table';
-export { Map } from './Map';
+export { TripLegsTable as Table } from '../tables';
+export { TripLegs as Map } from '../maps';

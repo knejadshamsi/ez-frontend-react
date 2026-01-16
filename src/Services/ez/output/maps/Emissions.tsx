@@ -1,14 +1,17 @@
 import { useEffect } from 'react';
 import { Radio, Spin } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { useEZOutputMapStore } from '~stores/output';
 import { useEZOutputFiltersStore } from '~stores/session';
 import { useEZServiceStore } from '~store';
 import { fetchMapData } from '~ez/api';
-import { MapContainer } from '../reusables';
+import { MapContainer } from '../utils';
 import outputStyles from '../Output.module.less';
+import './locales';
 
 // Interactive emissions map with pollutant selector and visualization toggle
-export const Map = () => {
+export const Emissions = () => {
+  const { t } = useTranslation('ez-output-maps');
   const state = useEZOutputMapStore((state) => state.emissionsMapState);
   const error = useEZOutputMapStore((state) => state.emissionsMapError);
 
@@ -40,15 +43,15 @@ export const Map = () => {
   if (state === 'inactive') {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
-        <Spin size="default" tip="Preparing emissions map..." />
+        <Spin size="default" tip={t('emissions.loadingTip')} />
       </div>
     );
   }
 
   return (
     <MapContainer
-      title="Emissions Map Visualization"
-      description="Interactive map showing emissions distribution across the network"
+      title={t('emissions.title')}
+      description={t('emissions.description')}
       isShown={isMapVisible}
       onToggle={toggleMapVisibility}
       isLoading={state === 'loading'}
@@ -59,31 +62,31 @@ export const Map = () => {
       <div className={outputStyles.mapControlsContainer}>
         <div className={outputStyles.controlGroup}>
           <label className={outputStyles.controlLabel}>
-            Visualization Type
+            {t('emissions.controls.visualizationType')}
           </label>
           <Radio.Group
             value={visualizationType}
             onChange={(e) => setVisualizationType(e.target.value)}
             size="small"
           >
-            <Radio.Button value="hexagon">Hex Layer</Radio.Button>
-            <Radio.Button value="heatmap">Heat Map</Radio.Button>
+            <Radio.Button value="hexagon">{t('emissions.visualizationTypes.hexagon')}</Radio.Button>
+            <Radio.Button value="heatmap">{t('emissions.visualizationTypes.heatmap')}</Radio.Button>
           </Radio.Group>
         </div>
 
         <div className={outputStyles.controlGroup}>
           <label className={outputStyles.controlLabel}>
-            Pollutant Type
+            {t('emissions.controls.pollutantType')}
           </label>
           <Radio.Group
             value={selectedPollutant}
             onChange={(e) => setSelectedPollutant(e.target.value)}
             size="small"
           >
-            <Radio.Button value="CO2">CO₂</Radio.Button>
-            <Radio.Button value="NOx">NOₓ</Radio.Button>
-            <Radio.Button value="PM2.5">PM2.5</Radio.Button>
-            <Radio.Button value="PM10">PM10</Radio.Button>
+            <Radio.Button value="CO2">{t('emissions.pollutants.co2')}</Radio.Button>
+            <Radio.Button value="NOx">{t('emissions.pollutants.nox')}</Radio.Button>
+            <Radio.Button value="PM2.5">{t('emissions.pollutants.pm25')}</Radio.Button>
+            <Radio.Button value="PM10">{t('emissions.pollutants.pm10')}</Radio.Button>
           </Radio.Group>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { Spin, Alert, Button } from 'antd';
 import { Bar } from 'react-chartjs-2';
+import { useTranslation } from 'react-i18next';
 import {
   useEZOutputEmissionsStore,
   useEZOutputChartConfigStore
@@ -7,6 +8,7 @@ import {
 import { useEZSessionStore } from '~stores/session';
 import { retryComponentData } from '~ez/api';
 import outputStyles from '../Output.module.less';
+import './locales';
 
 const barChartOptions = {
   responsive: true,
@@ -29,7 +31,8 @@ const barChartOptions = {
  * Emissions Bar Chart - pollutant comparison (baseline vs post-policy)
  * SSE Message: data_chart_bar_emissions
  */
-export const BarChart = () => {
+export const EmissionsBar = () => {
+  const { t } = useTranslation('ez-output-charts');
   const barChartData = useEZOutputEmissionsStore((state) => state.emissionsBarChartData);
   const barChartState = useEZOutputEmissionsStore((state) => state.emissionsBarChartState);
   const barChartError = useEZOutputEmissionsStore((state) => state.emissionsBarChartError);
@@ -45,14 +48,14 @@ export const BarChart = () => {
   if (barChartError) {
     return (
       <Alert
-        message="Failed to load emissions bar chart"
+        message={t('emissionsBar.error')}
         description={barChartError}
         type="error"
         showIcon
         className={outputStyles.sectionErrorAlert}
         action={
           <Button size="small" danger onClick={handleRetry}>
-            Retry
+            {t('emissionsBar.retry')}
           </Button>
         }
       />
@@ -71,13 +74,13 @@ export const BarChart = () => {
     labels: chartConfig.pollutantLabels,
     datasets: [
       {
-        label: 'Baseline (tonnes/day)',
+        label: t('emissionsBar.legend.baseline'),
         data: barChartData.baselineEmissions,
         backgroundColor: chartConfig.baselineBarColor,
         borderWidth: 0
       },
       {
-        label: 'Post-Policy (tonnes/day)',
+        label: t('emissionsBar.legend.postPolicy'),
         data: barChartData.postPolicyEmissions,
         backgroundColor: chartConfig.postPolicyBarColor,
         borderWidth: 0
@@ -88,7 +91,7 @@ export const BarChart = () => {
   return (
     <>
       <span className={outputStyles.chartDescription}>
-        Breakdown by pollutant type comparing baseline and post-policy emissions.
+        {t('emissionsBar.description')}
       </span>
       <div className={outputStyles.emissionsChartContainer}>
         <Bar data={chartData} options={barChartOptions} />

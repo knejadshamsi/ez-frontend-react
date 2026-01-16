@@ -1,5 +1,6 @@
 import { Row, Col, Spin, Alert, Button } from 'antd';
 import { Pie } from 'react-chartjs-2';
+import { useTranslation } from 'react-i18next';
 import {
   useEZOutputEmissionsStore,
   useEZOutputChartConfigStore
@@ -7,6 +8,7 @@ import {
 import { useEZSessionStore } from '~stores/session';
 import { retryComponentData } from '~ez/api';
 import outputStyles from '../Output.module.less';
+import './locales';
 
 const pieChartOptions = {
   responsive: true,
@@ -20,7 +22,8 @@ const pieChartOptions = {
  * Emissions Vehicle Fleet Chart - vehicle type contribution to emissions
  * SSE Message: data_chart_pie_emissions
  */
-export const VehicleFleetChart = () => {
+export const VehicleFleet = () => {
+  const { t } = useTranslation('ez-output-charts');
   const pieChartsData = useEZOutputEmissionsStore((state) => state.emissionsPieChartsData);
   const pieChartsState = useEZOutputEmissionsStore((state) => state.emissionsPieChartsState);
   const pieChartsError = useEZOutputEmissionsStore((state) => state.emissionsPieChartsError);
@@ -36,14 +39,14 @@ export const VehicleFleetChart = () => {
   if (pieChartsError) {
     return (
       <Alert
-        message="Failed to load vehicle emissions chart"
+        message={t('vehicleFleet.error')}
         description={pieChartsError}
         type="error"
         showIcon
         className={outputStyles.sectionErrorAlert}
         action={
           <Button size="small" danger onClick={handleRetry}>
-            Retry
+            {t('vehicleFleet.retry')}
           </Button>
         }
       />
@@ -81,7 +84,7 @@ export const VehicleFleetChart = () => {
   return (
     <>
       <span className={outputStyles.chartDescription}>
-        Vehicle type contribution to total emissions, showing the shift in fleet composition between baseline and post-policy scenarios.
+        {t('vehicleFleet.description')}
       </span>
       <div className={outputStyles.vehicleEmissionsContainer}>
         <div className={outputStyles.legendContainer}>
@@ -101,7 +104,7 @@ export const VehicleFleetChart = () => {
               <Pie data={vehicleEmissionsBaseline} options={pieChartOptions} />
             </div>
             <div className={outputStyles.chartLabel}>
-              <span className={outputStyles.chartLabelText}>Baseline</span>
+              <span className={outputStyles.chartLabelText}>{t('vehicleFleet.labels.baseline')}</span>
             </div>
           </Col>
           <Col span={12}>
@@ -109,7 +112,7 @@ export const VehicleFleetChart = () => {
               <Pie data={vehicleEmissionsPostPolicy} options={pieChartOptions} />
             </div>
             <div className={outputStyles.chartLabel}>
-              <span className={outputStyles.chartLabelText}>Post-Policy</span>
+              <span className={outputStyles.chartLabelText}>{t('vehicleFleet.labels.postPolicy')}</span>
             </div>
           </Col>
         </Row>

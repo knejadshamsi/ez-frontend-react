@@ -3,14 +3,14 @@ import { useEZOutputPeopleResponseStore } from '~stores/output';
 import { useEZSessionStore } from '~stores/session';
 import { retryComponentData } from '~ez/api';
 import { generatePeopleResponseParagraph2Text } from '~ez/output/utils/peopleResponseTextGenerator';
-import { HighlightedText } from '../reusables';
+import { HighlightedText } from '../utils';
 import outputStyles from '../Output.module.less';
 
 /**
  * People Response Paragraph 2 - time impacts and elasticity
  * SSE Message: data_text_paragraph2_people_response
  */
-export const Paragraph2= () => {
+export const PeopleResponseParagraph2 = () => {
   const paragraph1Data = useEZOutputPeopleResponseStore((state) => state.peopleResponseParagraph1Data);
   const paragraph2Data = useEZOutputPeopleResponseStore((state) => state.peopleResponseParagraph2Data);
   const paragraph2State = useEZOutputPeopleResponseStore((state) => state.peopleResponseParagraph2State);

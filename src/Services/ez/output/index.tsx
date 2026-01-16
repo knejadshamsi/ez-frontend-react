@@ -1,5 +1,6 @@
 import { Divider, Button, Modal, Space } from 'antd';
 import { ArrowLeftOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -19,6 +20,7 @@ import { Overview } from './Overview';
 import * as Emissions from './emissions';
 import * as PeopleResponse from './peopleResponse';
 import * as TripLegs from './tripLegs';
+import './locales';
 
 ChartJS.register(
   CategoryScale,
@@ -31,6 +33,7 @@ ChartJS.register(
 );
 
 export const OutputView = () => {
+  const { t } = useTranslation('ez-output');
   useDemoDataLoader();
 
   const [modal, contextHolder] = Modal.useModal();
@@ -41,18 +44,18 @@ export const OutputView = () => {
 
   const handleEditParameters = () => {
     const instance = modal.confirm({
-      title: 'Edit Parameters',
+      title: t('editParametersModal.title'),
       icon: <ExclamationCircleOutlined />,
-      content: 'Do you want to keep the current inputs and modify them, or reset all inputs?',
-      okText: 'Keep Inputs',
-      cancelText: 'Cancel',
+      content: t('editParametersModal.content'),
+      okText: t('editParametersModal.keepInputs'),
+      cancelText: t('editParametersModal.cancel'),
       onOk() {
         setState('PARAMETER_SELECTION');
       },
       footer: () => (
         <div className={outputStyles.modalFooter}>
           <Button size="small" onClick={() => instance.destroy()}>
-            Cancel
+            {t('editParametersModal.cancel')}
           </Button>
           <Space size={8}>
             <Button
@@ -66,7 +69,7 @@ export const OutputView = () => {
                 instance.destroy();
               }}
             >
-              Reset
+              {t('editParametersModal.reset')}
             </Button>
             <Button
               size="small"
@@ -76,7 +79,7 @@ export const OutputView = () => {
                 instance.destroy();
               }}
             >
-              Keep Inputs
+              {t('editParametersModal.keepInputs')}
             </Button>
           </Space>
         </div>
@@ -93,14 +96,14 @@ export const OutputView = () => {
         <div className={parameterStyles.backButtonContainer}>
           <Button type="link" onClick={handleEditParameters} className={parameterStyles.backButton}>
             <ArrowLeftOutlined style={{fontSize: '12px'}} />
-            Back to Parameter Selection
+            {t('backToParameters')}
           </Button>
         </div>
       )}
       <Overview />
 
       <Divider orientation="left">
-        <span className={outputStyles.sectionTitle}>1. Emissions and Comparisons</span>
+        <span className={outputStyles.sectionTitle}>{t('sections.emissions')}</span>
       </Divider>
 
       <Emissions.Paragraph1 />
@@ -110,7 +113,7 @@ export const OutputView = () => {
       <Emissions.VehicleFleetChart />
 
       <Divider orientation="left">
-        <span className={outputStyles.sectionTitle}>2. People Response</span>
+        <span className={outputStyles.sectionTitle}>{t('sections.peopleResponse')}</span>
       </Divider>
 
       <PeopleResponse.Paragraph1 />
@@ -120,7 +123,7 @@ export const OutputView = () => {
       <PeopleResponse.TimeImpact />
 
       <Divider orientation="left">
-        <span className={outputStyles.sectionTitle}>3. Leg Performance</span>
+        <span className={outputStyles.sectionTitle}>{t('sections.legPerformance')}</span>
       </Divider>
 
       <TripLegs.Map />

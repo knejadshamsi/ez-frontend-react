@@ -3,14 +3,14 @@ import { useEZOutputEmissionsStore } from '~stores/output';
 import { useEZSessionStore } from '~stores/session';
 import { retryComponentData } from '~ez/api';
 import { generateEmissionsParagraph2Text } from '~ez/output/utils/emissionsTextGenerator';
-import { HighlightedText } from '../reusables';
+import { HighlightedText } from '../utils';
 import outputStyles from '../Output.module.less';
 
 /**
  * Emissions Paragraph 2 - PM2.5 concentration and vehicle fleet composition
  * SSE Message: data_text_paragraph2_emissions
  */
-export const Paragraph2= () => {
+export const EmissionsParagraph2 = () => {
   const paragraph2Data = useEZOutputEmissionsStore((state) => state.emissionsParagraph2Data);
   const paragraph2State = useEZOutputEmissionsStore((state) => state.emissionsParagraph2State);
   const paragraph2Error = useEZOutputEmissionsStore((state) => state.emissionsParagraph2Error);

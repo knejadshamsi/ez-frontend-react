@@ -1,5 +1,5 @@
-export { Paragraph1 } from './Paragraph1';
-export { Paragraph2 } from './Paragraph2';
-export { BarChart } from './BarChart';
-export { VehicleFleetChart } from './VehicleFleetChart';
-export { Map } from './Map';
+export { EmissionsParagraph1 as Paragraph1 } from '../paragraphs';
+export { EmissionsParagraph2 as Paragraph2 } from '../paragraphs';
+export { EmissionsBar as BarChart } from '../charts';
+export { VehicleFleet as VehicleFleetChart } from '../charts';
+export { Emissions as Map } from '../maps';

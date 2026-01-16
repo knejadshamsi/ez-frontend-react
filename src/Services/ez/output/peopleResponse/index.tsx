@@ -1,5 +1,5 @@
-export { Paragraph1 } from './Paragraph1';
-export { Paragraph2 } from './Paragraph2';
-export { ResponseBreakdown } from './ResponseBreakdown';
-export { TimeImpact } from './TimeImpact';
-export { Map } from './Map';
+export { PeopleResponseParagraph1 as Paragraph1 } from '../paragraphs';
+export { PeopleResponseParagraph2 as Paragraph2 } from '../paragraphs';
+export { ResponseBreakdown } from '../charts';
+export { TimeImpact } from '../charts';
+export { PeopleResponse as Map } from '../maps';

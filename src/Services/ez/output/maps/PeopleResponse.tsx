@@ -1,20 +1,21 @@
 import { useEffect } from 'react';
 import { Radio, Spin } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { useEZOutputMapStore } from '~stores/output';
 import { useEZOutputFiltersStore } from '~stores/session';
 import { useEZServiceStore } from '~store';
-import { selectPeopleResponseMapPoints } from '~utils/mapDataSelectors';
 import { fetchMapData } from '~ez/api';
-import { MapContainer } from '../reusables';
+import { MapContainer } from '../utils';
 import outputStyles from '../Output.module.less';
+import './locales';
 
 /**
  * People Response Map - spatial distribution of behavioral responses
  * SSE Message: success_map_people_response
  */
-export const Map = () => {
+export const PeopleResponse = () => {
+  const { t } = useTranslation('ez-output-maps');
   const state = useEZOutputMapStore((state) => state.peopleResponseMapState);
-  const mapData = useEZOutputMapStore((state) => state.peopleResponseMapData);
   const error = useEZOutputMapStore((state) => state.peopleResponseMapError);
 
   const setState = useEZOutputMapStore((state) => state.setPeopleResponseMapState);
@@ -45,17 +46,15 @@ export const Map = () => {
   if (state === 'inactive') {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
-        <Spin size="default" tip="Preparing people response map..." />
+        <Spin size="default" tip={t('peopleResponse.loadingTip')} />
       </div>
     );
   }
 
-  const currentPoints = selectPeopleResponseMapPoints(mapData, responseLayerView, responseType);
-
   return (
     <MapContainer
-      title="People Response Map"
-      description="Screen grid visualization showing spatial distribution of behavioral responses"
+      title={t('peopleResponse.title')}
+      description={t('peopleResponse.description')}
       isShown={isMapVisible}
       onToggle={toggleMapVisibility}
       isLoading={state === 'loading'}
@@ -67,21 +66,21 @@ export const Map = () => {
       <div className={outputStyles.mapControlsContainerVertical}>
         <div className={outputStyles.controlGroup}>
           <label className={outputStyles.controlLabel}>
-            View Type
+            {t('peopleResponse.controls.viewType')}
           </label>
           <Radio.Group
             value={responseLayerView}
             onChange={(e) => setResponseLayerView(e.target.value)}
             size="small"
           >
-            <Radio.Button value="origin">Origin</Radio.Button>
-            <Radio.Button value="destination">Destination</Radio.Button>
+            <Radio.Button value="origin">{t('peopleResponse.viewTypes.origin')}</Radio.Button>
+            <Radio.Button value="destination">{t('peopleResponse.viewTypes.destination')}</Radio.Button>
           </Radio.Group>
         </div>
 
         <div className={outputStyles.controlGroup}>
           <label className={outputStyles.controlLabel}>
-            Response Type
+            {t('peopleResponse.controls.responseType')}
           </label>
           <div className={outputStyles.responseTypeWrapper}>
             <Radio.Group
@@ -89,13 +88,13 @@ export const Map = () => {
               onChange={(e) => setResponseType(e.target.value)}
               size="small"
             >
-              <Radio.Button value="paidPenalty">Paid Penalty</Radio.Button>
-              <Radio.Button value="rerouted">Rerouted</Radio.Button>
-              <Radio.Button value="switchedToBus">Changed to Bus</Radio.Button>
-              <Radio.Button value="switchedToSubway">Changed to Subway</Radio.Button>
-              <Radio.Button value="switchedToWalking">Changed to Walking</Radio.Button>
-              <Radio.Button value="switchedToBiking">Changed to Biking</Radio.Button>
-              <Radio.Button value="cancelledTrip">Trip Cancelled</Radio.Button>
+              <Radio.Button value="paidPenalty">{t('peopleResponse.responseTypes.paidPenalty')}</Radio.Button>
+              <Radio.Button value="rerouted">{t('peopleResponse.responseTypes.rerouted')}</Radio.Button>
+              <Radio.Button value="switchedToBus">{t('peopleResponse.responseTypes.switchedToBus')}</Radio.Button>
+              <Radio.Button value="switchedToSubway">{t('peopleResponse.responseTypes.switchedToSubway')}</Radio.Button>
+              <Radio.Button value="switchedToWalking">{t('peopleResponse.responseTypes.switchedToWalking')}</Radio.Button>
+              <Radio.Button value="switchedToBiking">{t('peopleResponse.responseTypes.switchedToBiking')}</Radio.Button>
+              <Radio.Button value="cancelledTrip">{t('peopleResponse.responseTypes.cancelledTrip')}</Radio.Button>
             </Radio.Group>
           </div>
         </div>

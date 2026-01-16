@@ -1,31 +1,31 @@
 import { Spin, Alert, Button } from 'antd';
-import { useEZOutputPeopleResponseStore } from '~stores/output';
+import { useEZOutputEmissionsStore } from '~stores/output';
 import { useEZSessionStore } from '~stores/session';
 import { retryComponentData } from '~ez/api';
-import { generatePeopleResponseParagraph1Text } from '~ez/output/utils/peopleResponseTextGenerator';
-import { HighlightedText } from '../reusables';
+import { generateEmissionsParagraph1Text } from '~ez/output/utils/emissionsTextGenerator';
+import { HighlightedText } from '../utils';
 import outputStyles from '../Output.module.less';
 
 /**
- * People Response Paragraph 1 - behavioral breakdown and benchmarks
- * SSE Message: data_text_paragraph1_people_response
+ * Emissions Paragraph 1 - CO2 reduction and Paris Agreement context
+ * SSE Message: data_text_paragraph1_emissions
  */
-export const Paragraph1= () => {
-  const paragraph1Data = useEZOutputPeopleResponseStore((state) => state.peopleResponseParagraph1Data);
-  const paragraph1State = useEZOutputPeopleResponseStore((state) => state.peopleResponseParagraph1State);
-  const paragraph1Error = useEZOutputPeopleResponseStore((state) => state.peopleResponseParagraph1Error);
+export const EmissionsParagraph1 = () => {
+  const paragraph1Data = useEZOutputEmissionsStore((state) => state.emissionsParagraph1Data);
+  const paragraph1State = useEZOutputEmissionsStore((state) => state.emissionsParagraph1State);
+  const paragraph1Error = useEZOutputEmissionsStore((state) => state.emissionsParagraph1Error);
   const requestId = useEZSessionStore((state) => state.requestId);
 
   const handleRetry = async () => {
     if (requestId) {
-      await retryComponentData(requestId, 'text_paragraph1_people_response');
+      await retryComponentData(requestId, 'text_paragraph1_emissions');
     }
   };
 
   if (paragraph1Error) {
     return (
       <Alert
-        message="Failed to load behavioral response data"
+        message="Failed to load emissions comparison data"
         description={paragraph1Error}
         type="error"
         showIcon
@@ -47,7 +47,7 @@ export const Paragraph1= () => {
     );
   }
 
-  const paragraphText = generatePeopleResponseParagraph1Text(paragraph1Data);
+  const paragraphText = generateEmissionsParagraph1Text(paragraph1Data);
 
   return (
     <p className={outputStyles.contentParagraph}>
