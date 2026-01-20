@@ -24,6 +24,15 @@ export const locales = {
       description: 'Breakdown of behavioral responses across all affected trips.',
       error: 'Failed to load response breakdown chart',
       retry: 'Retry',
+      categories: {
+        paidPenalty: 'Paid Penalty',
+        rerouted: 'Rerouted',
+        switchedToBus: 'Changed to Bus',
+        switchedToSubway: 'Changed to Subway',
+        switchedToWalking: 'Changed to Walking',
+        switchedToBiking: 'Changed to Biking',
+        cancelledTrip: 'Trip Cancelled',
+      },
     },
     timeImpact: {
       description: 'Average trip time impact for each behavioral response, illustrating the time cost of different adaptation strategies.',
@@ -31,6 +40,14 @@ export const locales = {
       retry: 'Retry',
       datasetLabel: 'Avg Time Delta (min)',
       yAxisTitle: 'Avg Time Delta (min)',
+      categories: {
+        paidPenalty: 'Paid Penalty',
+        rerouted: 'Rerouted',
+        switchedToBus: 'Changed to Bus',
+        switchedToSubway: 'Changed to Subway',
+        switchedToWalking: 'Changed to Walking',
+        switchedToBiking: 'Changed to Biking',
+      },
     },
   },
   fr: {
@@ -56,6 +73,15 @@ export const locales = {
       description: 'Répartition des réponses comportementales pour tous les trajets affectés.',
       error: 'Échec du chargement du graphique de répartition des réponses',
       retry: 'Réessayer',
+      categories: {
+        paidPenalty: 'Pénalité payée',
+        rerouted: 'Dévié',
+        switchedToBus: 'Changé vers autobus',
+        switchedToSubway: 'Changé vers métro',
+        switchedToWalking: 'Changé vers marche',
+        switchedToBiking: 'Changé vers vélo',
+        cancelledTrip: 'Trajet annulé',
+      },
     },
     timeImpact: {
       description: 'Impact moyen sur le temps de trajet pour chaque réponse comportementale, illustrant le coût en temps des différentes stratégies d\'adaptation.',
@@ -63,6 +89,14 @@ export const locales = {
       retry: 'Réessayer',
       datasetLabel: 'Variation moyenne de temps (min)',
       yAxisTitle: 'Variation moyenne de temps (min)',
+      categories: {
+        paidPenalty: 'Pénalité payée',
+        rerouted: 'Dévié',
+        switchedToBus: 'Changé vers autobus',
+        switchedToSubway: 'Changé vers métro',
+        switchedToWalking: 'Changé vers marche',
+        switchedToBiking: 'Changé vers vélo',
+      },
     },
   },
 } as const;

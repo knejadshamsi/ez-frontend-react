@@ -54,7 +54,7 @@ export const TimeImpact = () => {
   }
 
   const chartData = {
-    labels: chartConfig.categoryLabels,
+    labels: chartConfig.categoryIds.map(categoryId => t(`timeImpact.categories.${categoryId}`)),
     datasets: [{
       label: t('timeImpact.datasetLabel'),
       data: timeImpactData.averageTimeDeltas,

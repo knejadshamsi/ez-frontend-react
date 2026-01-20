@@ -54,9 +54,9 @@ export const ResponseBreakdown = () => {
   }
 
   const chartData = {
-    labels: [chartConfig.categoryLabels[0]],
-    datasets: chartConfig.categoryLabels.map((label, index) => ({
-      label,
+    labels: [t('responseBreakdown.categories.paidPenalty')],
+    datasets: chartConfig.categoryIds.map((categoryId, index) => ({
+      label: t(`responseBreakdown.categories.${categoryId}`),
       data: [breakdownData.responsePercentages[index]],
       backgroundColor: chartConfig.categoryColors[index],
       borderWidth: 0

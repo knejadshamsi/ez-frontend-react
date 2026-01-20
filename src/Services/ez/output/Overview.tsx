@@ -1,4 +1,5 @@
 import { Spin, Alert, Button, message } from 'antd';
+import { useTranslation, Trans } from 'react-i18next';
 import { useEZOutputOverviewStore } from '~stores/output';
 import { useEZSessionStore, useEZOutputFiltersStore } from '~stores/session';
 import { useEZServiceStore, useAPIPayloadStore } from '~store';
@@ -6,12 +7,14 @@ import { retryComponentData } from '~ez/api';
 import { CopyRequestIdButton } from '../components/CopyRequestIdButton';
 import { InputLayerToggleButton } from './InputLayerToggleButton';
 import outputStyles from './Output.module.less';
+import './locales';
 
 /**
  * Overview component - displays simulation summary statistics
  * SSE Message: data_text_overview
  */
 export const Overview = () => {
+  const { t } = useTranslation('ez-output');
   const [messageApi, contextHolder] = message.useMessage();
   const overviewData = useEZOutputOverviewStore((state) => state.overviewData);
   const overviewState = useEZOutputOverviewStore((state) => state.overviewState);
@@ -41,14 +44,14 @@ export const Overview = () => {
     return (
       <div className={outputStyles.contentWrapper}>
         <Alert
-          message="Failed to load overview data"
+          message={t('overview.error')}
           description={overviewError}
           type="error"
           showIcon
           className={outputStyles.sectionErrorAlert}
           action={
             <Button size="small" danger onClick={handleRetry}>
-              Retry
+              {t('overview.retry')}
             </Button>
           }
         />
@@ -59,7 +62,7 @@ export const Overview = () => {
   if (overviewState === 'inactive' || overviewState === 'loading' || !overviewData) {
     return (
       <div className={outputStyles.contentWrapper} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
-        <Spin size="large" tip="Loading overview data..." />
+        <Spin size="large" tip={t('overview.loadingTip')} />
       </div>
     );
   }
@@ -68,7 +71,7 @@ export const Overview = () => {
     <>
       {contextHolder}
       <div className={outputStyles.titleContainer}>
-        <h1 className={outputStyles.title}>Output</h1>
+        <h1 className={outputStyles.title}>{t('overview.title')}</h1>
         <div className={outputStyles.titleButtonGroup}>
           {hasSimulationAreas && (
             <InputLayerToggleButton
@@ -99,31 +102,21 @@ export const Overview = () => {
         </div>
       </div>
       <p className={outputStyles.description}>
-        The simulation included{' '}
-        <span className={outputStyles.highlightedNumber}>
-          {overviewData.totalPersonCount.toLocaleString()}
-        </span>{' '}
-        people and analyzed{' '}
-        <span className={outputStyles.highlightedNumber}>
-          {overviewData.totalLegCount.toLocaleString()}
-        </span>{' '}
-        legs over a 24-hour period, covering an area of{' '}
-        <span className={outputStyles.highlightedNumber}>
-          {overviewData.totalAreaCoverageKm2}
-        </span>{' '}
-        km² with a network of{' '}
-        <span className={outputStyles.highlightedNumber}>
-          {overviewData.totalNetworkNodes.toLocaleString()}
-        </span>{' '}
-        nodes and{' '}
-        <span className={outputStyles.highlightedNumber}>
-          {overviewData.totalNetworkLinks.toLocaleString()}
-        </span>{' '}
-        links, analyzing a total of{' '}
-        <span className={outputStyles.highlightedNumber}>
-          {overviewData.totalKilometersTraveled.toLocaleString()}
-        </span>{' '}
-        km traveled.
+        <Trans
+          i18nKey="overview.description"
+          ns="ez-output"
+          values={{
+            totalPersonCount: overviewData.totalPersonCount.toLocaleString(),
+            totalLegCount: overviewData.totalLegCount.toLocaleString(),
+            totalAreaCoverageKm2: overviewData.totalAreaCoverageKm2,
+            totalNetworkNodes: overviewData.totalNetworkNodes.toLocaleString(),
+            totalNetworkLinks: overviewData.totalNetworkLinks.toLocaleString(),
+            totalKilometersTraveled: overviewData.totalKilometersTraveled.toLocaleString(),
+          }}
+          components={{
+            strong: <span className={outputStyles.highlightedNumber} />,
+          }}
+        />
       </p>
     </>
   );

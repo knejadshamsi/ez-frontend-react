@@ -1,12 +1,11 @@
 import { useEffect } from 'react';
-import { Spin, Button } from 'antd';
+import { Spin } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useEZOutputMapStore } from '~stores/output';
 import { useEZOutputFiltersStore } from '~stores/session';
 import { useEZServiceStore } from '~store';
 import { fetchMapData } from '~ez/api';
 import { MapContainer } from '../utils';
-import outputStyles from '../Output.module.less';
 import './locales';
 
 /**
@@ -17,7 +16,6 @@ import './locales';
 export const TripLegs = () => {
   const { t } = useTranslation('ez-output-maps');
   const state = useEZOutputMapStore((state) => state.tripLegsMapState);
-  const mapData = useEZOutputMapStore((state) => state.tripLegsMapData);
   const error = useEZOutputMapStore((state) => state.tripLegsMapError);
 
   const setState = useEZOutputMapStore((state) => state.setTripLegsMapState);
@@ -25,10 +23,6 @@ export const TripLegs = () => {
 
   const isMapVisible = useEZOutputFiltersStore((state) => state.isTripLegsMapVisible);
   const toggleMapVisibility = useEZOutputFiltersStore((state) => state.toggleTripLegsMapVisibility);
-
-  const visibleTripLegIds = useEZOutputFiltersStore((state) => state.visibleTripLegIds);
-  const showAllTripLegs = useEZOutputFiltersStore((state) => state.showAllTripLegs);
-  const hideAllTripLegs = useEZOutputFiltersStore((state) => state.hideAllTripLegs);
 
   const isDemoMode = !useEZServiceStore((state) => state.isEzBackendAlive);
 
@@ -52,16 +46,6 @@ export const TripLegs = () => {
     );
   }
 
-  const allPathsVisible = mapData.length > 0 && visibleTripLegIds.size === mapData.length;
-
-  const handleToggleAll = () => {
-    if (allPathsVisible) {
-      hideAllTripLegs();
-    } else {
-      showAllTripLegs(mapData.map(p => p.id));
-    }
-  };
-
   return (
     <MapContainer
       title={t('tripLegs.title')}
@@ -72,19 +56,6 @@ export const TripLegs = () => {
       hasData={state === 'success'}
       error={state === 'error_initial' || state === 'error' ? error : null}
       onRetry={handleRetry}
-    >
-      <div className={outputStyles.tripLegsMapContainer}>
-        <span className={outputStyles.tripLegsMapText}>
-          {t('tripLegs.pathsLoaded', { count: mapData.length })}
-        </span>
-        <Button
-          type={allPathsVisible ? 'primary' : 'default'}
-          size="small"
-          onClick={handleToggleAll}
-        >
-          {allPathsVisible ? t('tripLegs.buttons.hideAll') : t('tripLegs.buttons.showAll')}
-        </Button>
-      </div>
-    </MapContainer>
+    />
   );
 };

@@ -1,6 +1,8 @@
 import { type ReactElement } from 'react';
 import { Button, Tooltip } from 'antd';
-import { getOpacityLabel, type OpacityState } from '~utils/opacityMapping';
+import { useTranslation } from 'react-i18next';
+import { type OpacityState } from '~utils/opacityMapping';
+import './locales';
 
 interface InputLayerToggleButtonProps {
   layerType: 'zone' | 'area';
@@ -17,15 +19,31 @@ export const InputLayerToggleButton = ({
   className,
   disabled = false,
 }: InputLayerToggleButtonProps): ReactElement => {
+  const { t } = useTranslation('ez-output');
+
+  const getOpacityLabel = (state: OpacityState): string => {
+    switch (state) {
+      case 'hidden':
+        return t('layerToggle.opacityHidden');
+      case 'low':
+        return '5%';
+      case 'medium':
+        return '10%';
+      case 'normal':
+        return t('layerToggle.opacityNormal');
+      default:
+        return t('layerToggle.opacityHidden');
+    }
+  };
 
   const getButtonText = () => {
-    const label = layerType === 'zone' ? 'Zones' : 'Areas';
+    const label = layerType === 'zone' ? t('layerToggle.zones') : t('layerToggle.areas');
     const opacityLabel = getOpacityLabel(opacityState);
     return `${label}: ${opacityLabel}`;
   };
 
   const getTooltipText = () => {
-    return `Cycle ${layerType} layer opacity`;
+    return layerType === 'zone' ? t('layerToggle.tooltipZone') : t('layerToggle.tooltipArea');
   };
 
   return (
@@ -37,7 +55,7 @@ export const InputLayerToggleButton = ({
         onClick={onCycle}
         disabled={disabled}
         className={className}
-        aria-label={`Cycle ${layerType} layer opacity`}
+        aria-label={getTooltipText()}
       >
         {getButtonText()}
       </Button>

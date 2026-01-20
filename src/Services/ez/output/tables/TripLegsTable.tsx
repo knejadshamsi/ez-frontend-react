@@ -1,4 +1,5 @@
 import { Table as AntTable, Spin, Alert, Button } from 'antd';
+import { useTranslation } from 'react-i18next';
 import {
   useEZOutputTripLegsStore,
   useEZOutputChartConfigStore,
@@ -7,6 +8,7 @@ import {
 import { useEZOutputFiltersStore } from '~stores/session';
 import { fetchTripLegsPage } from '~ez/api';
 import outputStyles from '../Output.module.less';
+import './locales';
 
 /**
  * Trip Legs Table - paginated table of individual trip legs
@@ -14,6 +16,7 @@ import outputStyles from '../Output.module.less';
  * REST: GET /api/simulation/{requestId}/trip-legs?page={n}&pageSize={n}
  */
 export const TripLegsTable = () => {
+  const { t } = useTranslation('ez-output-tables');
   const visibleTripLegIds = useEZOutputFiltersStore((state) => state.visibleTripLegIds);
   const toggleTripLegVisibility = useEZOutputFiltersStore((state) => state.toggleTripLegVisibility);
 
@@ -27,13 +30,13 @@ export const TripLegsTable = () => {
   if (!pagination) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
-        <Spin size="default" tip="Loading trip legs data..." />
+        <Spin size="default" tip={t('tripLegsTable.loadingTip')} />
       </div>
     );
   }
 
   const columns = tableConfig.columns.map((col) => ({
-    title: col.title,
+    title: t(`tripLegsTable.columns.${col.dataIndex}`),
     dataIndex: col.dataIndex,
     key: col.key,
     width: col.width,
@@ -65,7 +68,7 @@ export const TripLegsTable = () => {
     <>
       {error && (
         <Alert
-          message="Error loading trip legs page"
+          message={t('tripLegsTable.error')}
           description={error}
           type="error"
           showIcon
@@ -76,7 +79,7 @@ export const TripLegsTable = () => {
               onClick={handleRetry}
               loading={state === 'loading'}
             >
-              Retry
+              {t('tripLegsTable.retry')}
             </Button>
           }
           className={outputStyles.tripLegsErrorAlert}
@@ -84,7 +87,7 @@ export const TripLegsTable = () => {
       )}
 
       <span className={outputStyles.chartDescription}>
-        Sample of individual trip legs showing the granular impact on emissions and travel time. Click column headers to sort or click a row to toggle visibility on map.
+        {t('tripLegsTable.description')}
       </span>
       <AntTable
         dataSource={tripLegRecords}

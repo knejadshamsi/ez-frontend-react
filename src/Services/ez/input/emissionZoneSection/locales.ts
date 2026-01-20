@@ -12,6 +12,13 @@ export const locales = {
     zoneSettings: {
       hiddenTag: 'This zone is hidden and will be excluded from simulation',
       defaultZoneName: 'Zone {{zoneId}}',
+      zoneCard: {
+        showZone: 'Show zone',
+        hideZone: 'Hide zone',
+        duplicateZone: 'Duplicate zone',
+        changeColor: 'Change color',
+        deleteZone: 'Delete zone',
+      },
       boundaries: {
         title: 'BOUNDARIES',
         description: 'Geographic boundaries for this emission zone',
@@ -58,6 +65,13 @@ export const locales = {
     zoneSettings: {
       hiddenTag: 'Cette zone est masquée et sera exclue de la simulation',
       defaultZoneName: 'Zone {{zoneId}}',
+      zoneCard: {
+        showZone: 'Afficher la zone',
+        hideZone: 'Masquer la zone',
+        duplicateZone: 'Dupliquer la zone',
+        changeColor: 'Changer la couleur',
+        deleteZone: 'Supprimer la zone',
+      },
       boundaries: {
         title: 'FRONTIÈRES',
         description: 'Frontières géographiques de cette zone d\'émission',

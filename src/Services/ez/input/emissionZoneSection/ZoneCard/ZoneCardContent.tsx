@@ -1,7 +1,9 @@
-import { ColorPicker } from 'antd';
+import { ColorPicker, Tooltip } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { EyeInvisibleOutlined, EyeOutlined, CopyOutlined, DeleteOutlined, MinusOutlined } from '@ant-design/icons';
 import styles from './ZoneCard.module.less';
 import { colorShader, HIDDEN_COLOR } from '~utils/colors';
+import '../locales';
 
 interface ZoneCardContentProps {
   zoneId: string;
@@ -35,6 +37,7 @@ const ZoneCardContent = ({
   onClick,
   dragHandleProps
 }: ZoneCardContentProps) => {
+  const { t } = useTranslation('ez-emission-zone-section');
   const baseContainerStyle = {
     border: `2px solid ${isHidden ? HIDDEN_COLOR : baseColor}`,
     backgroundColor: isHidden ? '#f5f5f5' : colorShader(baseColor, 1.875),
@@ -82,26 +85,34 @@ const ZoneCardContent = ({
 
       {isSelected && (
         <div className={styles.actionToolbar}>
-          <div className={styles.toolbarIcon} onClick={handleAction('toggle')}>
-            {isHidden ? <EyeOutlined /> : <EyeInvisibleOutlined />}
-          </div>
-          <div className={styles.toolbarIcon} onClick={handleAction('duplicate')}>
-            <CopyOutlined />
-          </div>
-          <div className={styles.toolbarIcon} onClick={(e) => e.stopPropagation()}>
-            <ColorPicker
-              value={baseColor}
-              onChange={(color) => onColorChange?.(color.toHexString())}
-            >
-              <div
-                className={styles.colorTrigger}
-                style={{ backgroundColor: baseColor }}
-              />
-            </ColorPicker>
-          </div>
-          <div className={styles.toolbarIcon} onClick={handleAction('delete')}>
-            <DeleteOutlined style={{ color: 'red' }} />
-          </div>
+          <Tooltip title={isHidden ? t('zoneSettings.zoneCard.showZone') : t('zoneSettings.zoneCard.hideZone')}>
+            <div className={styles.toolbarIcon} onClick={handleAction('toggle')}>
+              {isHidden ? <EyeOutlined /> : <EyeInvisibleOutlined />}
+            </div>
+          </Tooltip>
+          <Tooltip title={t('zoneSettings.zoneCard.duplicateZone')}>
+            <div className={styles.toolbarIcon} onClick={handleAction('duplicate')}>
+              <CopyOutlined />
+            </div>
+          </Tooltip>
+          <Tooltip title={t('zoneSettings.zoneCard.changeColor')}>
+            <div className={styles.toolbarIcon} onClick={(e) => e.stopPropagation()}>
+              <ColorPicker
+                value={baseColor}
+                onChange={(color) => onColorChange?.(color.toHexString())}
+              >
+                <div
+                  className={styles.colorTrigger}
+                  style={{ backgroundColor: baseColor }}
+                />
+              </ColorPicker>
+            </div>
+          </Tooltip>
+          <Tooltip title={t('zoneSettings.zoneCard.deleteZone')}>
+            <div className={styles.toolbarIcon} onClick={handleAction('delete')}>
+              <DeleteOutlined style={{ color: 'red' }} />
+            </div>
+          </Tooltip>
         </div>
       )}
     </div>
