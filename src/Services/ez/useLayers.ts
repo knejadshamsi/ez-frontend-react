@@ -76,6 +76,8 @@ export function useLayers() {
   const activeZone = useEZSessionStore((state) => state.activeZone);
   const activeCustomArea = useEZSessionStore((state) => state.activeCustomArea);
   const sessionZones = useEZSessionStore((state) => state.zones);
+  const sessionCustomAreas = useEZSessionStore((state) => state.customAreas);
+  const sessionScaledAreas = useEZSessionStore((state) => state.scaledAreas);
   const simulationAreaDisplay = useEZSessionStore((state) => state.simulationAreaDisplay);
   const apiZones = useAPIPayloadStore((state) => state.payload.zones);
   const customSimulationAreas = useAPIPayloadStore((state) => state.payload.customSimulationAreas);
@@ -287,7 +289,8 @@ export function useLayers() {
         return null;
       }
 
-      const colorRGB = hexToRgb(area.color);
+      const sessionData = sessionCustomAreas[area.id];
+      const colorRGB = hexToRgb(sessionData?.color || '#00BCD4');
 
       return createEditablePolygonLayer({
         geoJsonData: drawToolGeoJson,
@@ -324,18 +327,24 @@ export function useLayers() {
         areas: [
           ...customSimulationAreas
             .filter(area => area.coords !== null)
-            .map(area => ({
-              coords: area.coords!,
-              color: area.color,
-              type: 'custom' as const
-            })),
+            .map(area => {
+              const sessionData = sessionCustomAreas[area.id];
+              return {
+                coords: area.coords!,
+                color: sessionData?.color || '#00BCD4',
+                type: 'custom' as const
+              };
+            }),
           ...scaledSimulationAreas
             .filter(area => area.coords && area.coords.length > 0)
-            .map(area => ({
-              coords: area.coords,
-              color: area.color,
-              type: 'scaled' as const
-            }))
+            .map(area => {
+              const sessionData = sessionScaledAreas[area.id];
+              return {
+                coords: area.coords,
+                color: sessionData?.color || '#1A16E2',
+                type: 'scaled' as const
+              };
+            })
         ],
         borderStyle: simulationAreaDisplay.borderStyle,
         fillOpacity: simulationAreaDisplay.fillOpacity
@@ -382,16 +391,22 @@ export function useLayers() {
       areaLayer: (filteredCustomAreas.length > 0 || filteredScaledAreas.length > 0)
         ? createSimulationAreaDisplayLayer({
             areas: [
-              ...filteredCustomAreas.map(area => ({
-                coords: area.coords!,
-                color: area.color,
-                type: 'custom' as const
-              })),
-              ...filteredScaledAreas.map(area => ({
-                coords: area.coords,
-                color: area.color,
-                type: 'scaled' as const
-              }))
+              ...filteredCustomAreas.map(area => {
+                const sessionData = sessionCustomAreas[area.id];
+                return {
+                  coords: area.coords!,
+                  color: sessionData?.color || '#00BCD4',
+                  type: 'custom' as const
+                };
+              }),
+              ...filteredScaledAreas.map(area => {
+                const sessionData = sessionScaledAreas[area.id];
+                return {
+                  coords: area.coords,
+                  color: sessionData?.color || '#1A16E2',
+                  type: 'scaled' as const
+                };
+              })
             ],
             borderStyle: simulationAreaDisplay.borderStyle,
             fillOpacity: simulationAreaDisplay.fillOpacity
@@ -472,18 +487,24 @@ export function useLayers() {
         const filteredAreas = [
           ...customSimulationAreas
             .filter(area => area.coords !== null)
-            .map(area => ({
-              coords: area.coords!,
-              color: area.color,
-              type: 'custom' as const
-            })),
+            .map(area => {
+              const sessionData = sessionCustomAreas[area.id];
+              return {
+                coords: area.coords!,
+                color: sessionData?.color || '#00BCD4',
+                type: 'custom' as const
+              };
+            }),
           ...scaledSimulationAreas
             .filter(area => area.coords && area.coords.length > 0)
-            .map(area => ({
-              coords: area.coords,
-              color: area.color,
-              type: 'scaled' as const
-            }))
+            .map(area => {
+              const sessionData = sessionScaledAreas[area.id];
+              return {
+                coords: area.coords,
+                color: sessionData?.color || '#1A16E2',
+                type: 'scaled' as const
+              };
+            })
         ];
 
         if (filteredAreas.length === 0) return null;

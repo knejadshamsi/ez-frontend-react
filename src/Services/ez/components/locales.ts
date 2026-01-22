@@ -4,8 +4,13 @@ export const locales = {
   en: {
     exitModal: {
       exitAnyway: 'Exit Anyway',
+      exitWithoutSaving: 'Exit Without Saving',
       stayInEZ: 'Stay in EZ',
       copy: 'Copy',
+      saveAndExit: 'Save & Exit',
+      saving: 'Saving changes...',
+      saveSuccess: 'Changes saved successfully',
+      saveError: 'Failed to save changes',
     },
     copyRequestId: {
       noIdAvailable: 'No request ID available to copy',
@@ -27,8 +32,13 @@ export const locales = {
   fr: {
     exitModal: {
       exitAnyway: 'Quitter quand même',
+      exitWithoutSaving: 'Quitter sans sauvegarder',
       stayInEZ: 'Rester dans EZ',
       copy: 'Copier',
+      saveAndExit: 'Sauvegarder et quitter',
+      saving: 'Sauvegarde en cours...',
+      saveSuccess: 'Modifications sauvegardées avec succès',
+      saveError: 'Échec de la sauvegarde des modifications',
     },
     copyRequestId: {
       noIdAvailable: 'Aucun ID de requête disponible à copier',

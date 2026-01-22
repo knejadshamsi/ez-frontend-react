@@ -10,6 +10,7 @@ import { confirmExit, cancelExit } from '../exitHandler';
 import { resetAllEZStores } from '~stores/reset';
 import { useServiceStore } from '~globalStores';
 import { CopyRequestIdButton } from './CopyRequestIdButton';
+import { updateScenarioMetadata } from '../api/updateScenarioMetadata';
 
 export default function ExitModal() {
   const { t } = useTranslation('ez-components');
@@ -33,6 +34,12 @@ export default function ExitModal() {
         isEzBackendAlive &&
         ezState === 'RESULT_VIEW' &&
         hasOutputData() &&
+        requestId &&
+        requestId.trim() !== '';
+
+      // Check if save button should be shown
+      const showSaveButton =
+        isEzBackendAlive &&
         requestId &&
         requestId.trim() !== '';
 
@@ -74,6 +81,30 @@ export default function ExitModal() {
               >
                 {t('exitModal.stayInEZ')}
               </Button>
+              {showSaveButton && (
+                <Button
+                  size="small"
+                  type="primary"
+                  onClick={async () => {
+                    const loadingKey = 'saving';
+                    try {
+                      messageApi.loading({ content: t('exitModal.saving'), key: loadingKey, duration: 0 });
+                      await updateScenarioMetadata(requestId);
+                      messageApi.destroy(loadingKey);
+                      messageApi.success(t('exitModal.saveSuccess'));
+                      confirmExit();
+                      instance.destroy();
+                    } catch (error) {
+                      messageApi.destroy(loadingKey);
+                      const errorMsg = error instanceof Error ? error.message : t('exitModal.saveError');
+                      messageApi.error(errorMsg);
+                      console.error('[Exit Modal] Save failed:', error);
+                    }
+                  }}
+                >
+                  {t('exitModal.saveAndExit')}
+                </Button>
+              )}
               <Button
                 size="small"
                 danger
@@ -83,7 +114,7 @@ export default function ExitModal() {
                   instance.destroy();
                 }}
               >
-                {t('exitModal.exitAnyway')}
+                {t('exitModal.exitWithoutSaving')}
               </Button>
             </Space>
           </div>
@@ -98,14 +129,15 @@ export default function ExitModal() {
     } else if (exitState === 'resetting' && !isResettingRef.current) {
       isResettingRef.current = true;
 
-      resetAllEZStores();
-
-      setExitState('idle');
-      setExitWarning(null);
-
-      setActiveService('REST');
-
-      isResettingRef.current = false;
+      resetAllEZStores().then(() => {
+        setExitState('idle');
+        setExitWarning(null);
+        setActiveService('REST');
+        isResettingRef.current = false;
+      }).catch((error) => {
+        console.error('[Exit Modal] Reset failed:', error);
+        isResettingRef.current = false;
+      });
     }
   }, [exitState, exitWarning, setExitState, setExitWarning, modal, setActiveService, isEzBackendAlive, ezState, requestId, messageApi, t]);
 

@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import i18n from '~i18nConfig';
-import { useAPIPayloadStore } from '~store';
 import { useEZSessionStore } from '~stores/session';
 import { detectDefaultNameType, convertDefaultName } from '~utils/zoneNames';
 
@@ -45,17 +44,17 @@ export const useAutoTranslateDefaultNames = () => {
       });
 
       // Translate custom area names
-      const customAreas = useAPIPayloadStore.getState().payload.customSimulationAreas;
-      const updateCustomSimulationArea = useAPIPayloadStore.getState().updateCustomSimulationArea;
+      const sessionCustomAreas = useEZSessionStore.getState().customAreas;
+      const setCustomAreaProperty = useEZSessionStore.getState().setCustomAreaProperty;
 
-      customAreas.forEach((area) => {
-        const detected = detectDefaultNameType(area.name);
+      Object.entries(sessionCustomAreas).forEach(([areaId, areaData]) => {
+        const detected = detectDefaultNameType(areaData.name);
 
         // Only translate if it's a default name pattern
         if (detected.type === 'customArea') {
-          const translatedName = convertDefaultName(area.name, targetLang);
-          if (translatedName !== area.name) {
-            updateCustomSimulationArea(area.id, { name: translatedName });
+          const translatedName = convertDefaultName(areaData.name, targetLang);
+          if (translatedName !== areaData.name) {
+            setCustomAreaProperty(areaId, 'name', translatedName);
           }
         }
       });

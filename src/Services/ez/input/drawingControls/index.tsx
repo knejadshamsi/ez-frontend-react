@@ -7,6 +7,8 @@ import { useEZSessionStore } from '~stores/session';
 import { useNotificationStore } from '~/Services/CustomNotification';
 import { validatePolygon } from '~utils/polygonValidation';
 import { geoJsonToCoords } from '~utils/geoJson';
+import type { Zone, CustomSimulationArea, ScaledSimulationArea } from '~ez/stores/types';
+import type { ZoneSessionData, CustomAreaSessionData, ScaledAreaSessionData } from '~stores/session';
 import './locales';
 import styles from './DrawingControls.module.less';
 
@@ -75,7 +77,11 @@ const LayerGroup = ({ title, items, type, showAllLabel }: LayerGroupProps) => {
   );
 };
 
-const getOtherZones = (excludeZoneId: string | null, zones: any[], sessionZones: any): LayerItem[] => {
+const getOtherZones = (
+  excludeZoneId: string | null,
+  zones: Zone[],
+  sessionZones: Record<string, ZoneSessionData>
+): LayerItem[] => {
   return zones
     .filter(zone => {
       if (zone.id === excludeZoneId) return false;
@@ -93,10 +99,12 @@ const getOtherZones = (excludeZoneId: string | null, zones: any[], sessionZones:
 
 const getOtherAreas = (
   excludeAreaId: string | null,
-  customAreas: any[],
-  scaledAreas: any[],
-  zones: any[],
-  sessionZones: any,
+  customAreas: CustomSimulationArea[],
+  scaledAreas: ScaledSimulationArea[],
+  zones: Zone[],
+  sessionZones: Record<string, ZoneSessionData>,
+  sessionCustomAreas: Record<string, CustomAreaSessionData>,
+  sessionScaledAreas: Record<string, ScaledAreaSessionData>,
   scaledSuffix: string,
   unknownLabel: string
 ): LayerItem[] => {
@@ -105,11 +113,14 @@ const getOtherAreas = (
       if (area.id === excludeAreaId) return false;
       return area.coords !== null;
     })
-    .map(area => ({
-      id: area.id,
-      name: area.name,
-      color: area.color,
-    }));
+    .map(area => {
+      const sessionData = sessionCustomAreas[area.id];
+      return {
+        id: area.id,
+        name: sessionData?.name || unknownLabel,
+        color: sessionData?.color || '#00BCD4',
+      };
+    });
 
   const scaled = scaledAreas
     .filter(area => {
@@ -121,10 +132,11 @@ const getOtherAreas = (
     })
     .map(area => {
       const zoneName = sessionZones[area.zoneId]?.name || unknownLabel;
+      const scaledData = sessionScaledAreas[area.id];
       return {
         id: area.id,
-        name: `${zoneName} (${area.scale[0]}${scaledSuffix})`,
-        color: area.color,
+        name: `${zoneName} (${scaledData?.scale[0] || 100}${scaledSuffix})`,
+        color: scaledData?.color || '#1A16E2',
       };
     });
 
@@ -139,6 +151,8 @@ export const DrawingControls = () => {
   const activeZone = useEZSessionStore(state => state.activeZone);
   const activeCustomArea = useEZSessionStore(state => state.activeCustomArea);
   const sessionZones = useEZSessionStore(state => state.zones);
+  const sessionCustomAreas = useEZSessionStore(state => state.customAreas);
+  const sessionScaledAreas = useEZSessionStore(state => state.scaledAreas);
   const zones = useAPIPayloadStore(state => state.payload.zones);
   const customSimulationAreas = useAPIPayloadStore(state => state.payload.customSimulationAreas);
   const scaledSimulationAreas = useAPIPayloadStore(state => state.payload.scaledSimulationAreas);
@@ -213,6 +227,8 @@ export const DrawingControls = () => {
     scaledSimulationAreas,
     zones,
     sessionZones,
+    sessionCustomAreas,
+    sessionScaledAreas,
     t('scaledAreaSuffix'),
     t('fallbacks.unknownZone')
   );

@@ -11,6 +11,7 @@ import {
   useEZOutputPeopleResponseStore,
   useEZOutputTripLegsStore,
 } from '~stores/output';
+import { cancelSimulation } from '~ez/api';
 import { SuccessState, ErrorState, RunningState } from './states';
 import styles from './Progress.module.less';
 import './locales';
@@ -22,7 +23,7 @@ export const Progress = () => {
   const { t } = useTranslation('ez-progress');
   const state = useProgressStore();
   const setState = useEZServiceStore((state) => state.setState);
-  const abortSseStream = useEZSessionStore((state) => state.abortSseStream);
+  const requestId = useEZSessionStore((state) => state.requestId);
   const isNewSimulation = useEZSessionStore((state) => state.isNewSimulation);
   const isEzBackendAlive = useEZServiceStore((state) => state.isEzBackendAlive);
   const hideProgress = useProgressStore((state) => state.hide);
@@ -100,10 +101,10 @@ export const Progress = () => {
   }
 
   if (!isNewSimulation) {
-    const handleCancel = () => {
-      abortSseStream();
+    const handleCancel = async () => {
+      await cancelSimulation(requestId);
       resetProgress();
-      setState('WELCOME');
+      setState('PARAMETER_SELECTION');
     };
 
     return (
@@ -124,8 +125,8 @@ export const Progress = () => {
     setState('RESULT_VIEW');
   };
 
-  const handleCancel = () => {
-    abortSseStream();
+  const handleCancel = async () => {
+    await cancelSimulation(requestId);
     resetProgress();
     setState('PARAMETER_SELECTION');
   };

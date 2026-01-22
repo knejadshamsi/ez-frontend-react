@@ -13,7 +13,7 @@ import './locales';
 /**
  * Trip Legs Table - paginated table of individual trip legs
  * SSE Message: data_table_trip_legs (first page delivery)
- * REST: GET /api/simulation/{requestId}/trip-legs?page={n}&pageSize={n}
+ * REST: GET /scenario/{requestId}/trip-legs?page={n}&pageSize={n}
  */
 export const TripLegsTable = () => {
   const { t } = useTranslation('ez-output-tables');

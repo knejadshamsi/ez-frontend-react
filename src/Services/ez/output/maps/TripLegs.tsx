@@ -11,7 +11,7 @@ import './locales';
 /**
  * Trip Legs Map - line layer showing selected trip routes
  * SSE Message: success_map_trip_legs (signals data available)
- * REST: GET /api/simulation/{requestId}/maps/trip-legs
+ * REST: GET /scenario/{requestId}/maps/trip-legs
  */
 export const TripLegs = () => {
   const { t } = useTranslation('ez-output-maps');

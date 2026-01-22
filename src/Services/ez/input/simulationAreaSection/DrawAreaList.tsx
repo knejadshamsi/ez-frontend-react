@@ -33,30 +33,35 @@ const DrawAreaList = (): ReactElement => {
 
   const customSimulationAreas = useAPIPayloadStore((state) => state.payload.customSimulationAreas)
   const removeCustomSimulationArea = useAPIPayloadStore((state) => state.removeCustomSimulationArea)
-  const updateCustomSimulationArea = useAPIPayloadStore((state) => state.updateCustomSimulationArea)
   const setState = useEZServiceStore((state) => state.setState)
   const setActiveCustomArea = useEZSessionStore((state) => state.setActiveCustomArea)
+  const sessionCustomAreas = useEZSessionStore((state) => state.customAreas)
+  const setCustomAreaProperty = useEZSessionStore((state) => state.setCustomAreaProperty)
 
   return (
     <div className={selectorStyles.drawAreaContainer}>
       {customSimulationAreas.length === 0 ? (
         <div className={selectorStyles.emptyStateMessage}>{t('customAreas.emptyState')}</div>
       ) : (
-        customSimulationAreas.map((area: CustomSimulationArea) => (
-          <div
-            key={area.id}
-            className={selectorStyles.drawAreaCard}
-            style={{
-              background: `linear-gradient(120deg, ${colorShader(DEFAULT_CUSTOM_AREA_COLOR, 1.85)}, ${colorShader(area.color, 1.85)})`,
-              border: `2px solid ${colorShader(area.color, 1.75)}`,
-            }}
-          >
-            <InlineNameEditor
-              value={area.name}
-              onSave={(newName) => updateCustomSimulationArea(area.id, { name: newName })}
-              autoGenerateName={() => generateDefaultName('customArea')}
-              className={selectorStyles.drawAreaNameLabel}
-            />
+        customSimulationAreas.map((area: CustomSimulationArea) => {
+          const sessionData = sessionCustomAreas[area.id]
+          if (!sessionData) return null
+
+          return (
+            <div
+              key={area.id}
+              className={selectorStyles.drawAreaCard}
+              style={{
+                background: `linear-gradient(120deg, ${colorShader(DEFAULT_CUSTOM_AREA_COLOR, 1.85)}, ${colorShader(sessionData.color, 1.85)})`,
+                border: `2px solid ${colorShader(sessionData.color, 1.75)}`,
+              }}
+            >
+              <InlineNameEditor
+                value={sessionData.name}
+                onSave={(newName) => setCustomAreaProperty(area.id, 'name', newName)}
+                autoGenerateName={() => generateDefaultName('customArea')}
+                className={selectorStyles.drawAreaNameLabel}
+              />
             <div className={selectorStyles.customAreaButtonGroup}>
               <Tooltip title={area.coords ? t('customAreas.editTooltip') : t('customAreas.drawFirstTooltip')}>
                 <div
@@ -79,11 +84,11 @@ const DrawAreaList = (): ReactElement => {
               <Tooltip title={t('customAreas.changeColorTooltip')}>
                 <div className={selectorStyles.customAreaButton} onClick={(e) => e.stopPropagation()}>
                   <ColorPicker
-                    value={area.color}
-                    onChange={(color) => updateCustomSimulationArea(area.id, { color: color.toHexString() })}
+                    value={sessionData.color}
+                    onChange={(color) => setCustomAreaProperty(area.id, 'color', color.toHexString())}
                     presets={COLOR_PRESETS}
                   >
-                    <div className={selectorStyles.colorPickerDot} style={{ backgroundColor: area.color }} />
+                    <div className={selectorStyles.colorPickerDot} style={{ backgroundColor: sessionData.color }} />
                   </ColorPicker>
                 </div>
               </Tooltip>
@@ -101,7 +106,8 @@ const DrawAreaList = (): ReactElement => {
               </Tooltip>
             </div>
           </div>
-        ))
+          )
+        })
       )}
     </div>
   )

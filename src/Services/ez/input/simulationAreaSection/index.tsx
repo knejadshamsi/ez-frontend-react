@@ -13,7 +13,6 @@ import './locales'
 
 import styles from './simulationAreaSection.module.less'
 
-const DEFAULT_CUSTOM_AREA_COLOR = '#00BCD4'
 const DEFAULT_SCALE: [number, OriginType] = [100, 'center']
 
 const getBboxPoint = (poly: ReturnType<typeof polygon>, origin: OriginType): [number, number] => {
@@ -92,12 +91,7 @@ const SimulationAreaSection = (): ReactElement => {
 
         const scaledCoords = calculateScaledCoordinates(zone, percentage, origin as OriginType)
         if (scaledCoords) {
-          upsertScaledSimulationArea(
-            zone.id,
-            scaledCoords,
-            [percentage, origin],
-            sessionData.color
-          )
+          upsertScaledSimulationArea(zone.id, scaledCoords)
         }
       }
     })
@@ -112,13 +106,11 @@ const SimulationAreaSection = (): ReactElement => {
   }, [apiZones, sessionZones, upsertScaledSimulationArea, removeScaledSimulationArea])
 
   const handleSelectCustomArea = (): void => {
-    const areaColor = DEFAULT_CUSTOM_AREA_COLOR
-
-    const newAreaId = addCustomSimulationArea(areaColor)
+    const newAreaId = addCustomSimulationArea()
     setActiveCustomArea(newAreaId)
     setState('DRAW_SIM_AREA')
 
-    console.log('[SimulationAreaSection] Created custom area:', { id: newAreaId, color: areaColor })
+    console.log('[SimulationAreaSection] Created custom area:', { id: newAreaId })
   }
 
   return (
