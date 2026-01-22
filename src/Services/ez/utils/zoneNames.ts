@@ -1,4 +1,3 @@
-import { useAPIPayloadStore } from '~store';
 import { useEZSessionStore } from '~stores/session';
 import i18n from '~i18nConfig';
 import './zoneNames.locales';
@@ -121,8 +120,8 @@ export const generateDefaultName = (mode: 'zone' | 'customArea'): string => {
       existingNames = Object.values(sessionZones).map(zone => zone.name);
       break;
     case 'customArea':
-      const customAreas = useAPIPayloadStore.getState().payload.customSimulationAreas;
-      existingNames = customAreas.map(area => area.name);
+      const sessionCustomAreas = useEZSessionStore.getState().customAreas;
+      existingNames = Object.values(sessionCustomAreas).map(area => area.name);
       break;
   }
 

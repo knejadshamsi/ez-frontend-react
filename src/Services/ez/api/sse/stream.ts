@@ -165,18 +165,3 @@ export function startSimulationStream(config: SimulationStreamConfig): () => voi
 
   return cleanup;
 }
-
-export async function cancelSimulation(
-  endpoint: string,
-  requestId: string
-): Promise<boolean> {
-  try {
-    const response = await fetch(`${endpoint}/${requestId}/cancel`, {
-      method: 'POST',
-    });
-    return response.ok;
-  } catch (error) {
-    console.error('[SSE] Failed to cancel simulation:', error);
-    return false;
-  }
-}

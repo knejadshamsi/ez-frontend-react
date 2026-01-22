@@ -3,6 +3,7 @@ import { useEZSessionStore } from '~stores/session';
 import { useEZOutputMapStore } from '~stores/output';
 import { getBackendUrl } from './config';
 import { loadDemoMapData } from '../output/demoMapData';
+import { ApiResponse, unwrapResponse } from './apiResponse';
 
 type MapType = 'emissions' | 'peopleResponse' | 'tripLegs';
 
@@ -42,11 +43,12 @@ const fetchMapDataInternal = async (type: MapType): Promise<void> => {
     const backendUrl = getBackendUrl();
     const requestId = useEZSessionStore.getState().requestId!;
 
-    const response = await axios.get(
-      `${backendUrl}/api/simulation/${requestId}/maps/${config.endpoint}`
+    const response = await axios.get<ApiResponse<unknown>>(
+      `${backendUrl}/scenario/${requestId}/maps/${config.endpoint}`,
+      { timeout: 15000 }
     );
 
-    (store as any)[`set${typeCapitalized}MapData`](response.data);
+    (store as any)[`set${typeCapitalized}MapData`](unwrapResponse(response));
     (store as any)[`set${typeCapitalized}MapState`]('success');
   } catch (error) {
     const message = error instanceof Error ? error.message : `Failed to fetch ${type} map data`;

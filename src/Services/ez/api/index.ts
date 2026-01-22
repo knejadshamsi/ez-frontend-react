@@ -12,11 +12,11 @@
 export { checkBackendHealth } from './healthCheck';
 export {
   startSimulationStream,
-  cancelSimulation,
   type SSEMessage,
   type SimulationError,
   type SimulationStreamConfig,
 } from './sse';
+export { cancelSimulation } from './cancelSimulation';
 export { startSimulation, loadScenario } from './startSimulation';
 export {
   fetchMapData,
@@ -32,3 +32,7 @@ export {
   type APIRequest,
 } from './apiRequestFactory';
 export { retryComponentData } from './retryComponent';
+export { fetchScenarioMetadata } from './fetchScenarioMetadata';
+export { updateScenarioMetadata, createMetadataPayload } from './updateScenarioMetadata';
+export { deleteScenario } from './deleteScenario';
+export { fetchScenarioMainInput, restoreStoresFromInput } from './fetchScenarioInput';

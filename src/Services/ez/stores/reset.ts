@@ -3,12 +3,13 @@ import { useEZSessionStore, useEZOutputFiltersStore } from './session';
 import { useDrawingStateStore } from './drawingState';
 import { resetAllEZOutputStores } from './output';
 import { useProgressStore } from '../progress/store';
+import { cancelSimulation } from '../api/cancelSimulation';
 
-export const resetAllEZStores = (): void => {
+export const resetAllEZStores = async (): Promise<void> => {
   try {
     const sessionStore = useEZSessionStore.getState();
-    if (sessionStore.sseCleanup) {
-      sessionStore.abortSseStream();
+    if (sessionStore.sseCleanup && sessionStore.requestId) {
+      await cancelSimulation(sessionStore.requestId);
     }
 
     const progressStore = useProgressStore.getState();

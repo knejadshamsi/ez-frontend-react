@@ -3,6 +3,7 @@ import { useEZSessionStore } from '~stores/session';
 import { useEZOutputTripLegsStore, type EZTripLegRecord } from '~stores/output';
 import { useEZServiceStore } from '~store';
 import { getBackendUrl } from './config';
+import { ApiResponse, unwrapResponse } from './apiResponse';
 
 interface TripLegsPageResponse {
   records: EZTripLegRecord[];
@@ -75,19 +76,21 @@ export const fetchTripLegsPage = async (page: number): Promise<void> => {
       const backendUrl = getBackendUrl();
       const requestId = useEZSessionStore.getState().requestId!;
 
-      const response = await axios.get<TripLegsPageResponse>(
-        `${backendUrl}/api/simulation/${requestId}/trip-legs`,
+      const response = await axios.get<ApiResponse<TripLegsPageResponse>>(
+        `${backendUrl}/scenario/${requestId}/trip-legs`,
         {
           params: {
             page,
             pageSize: pagination.pageSize,
           },
+          timeout: 15000,
         }
       );
 
-      store.setTripLegsPage(page, response.data.records);
+      const data = unwrapResponse(response);
+      store.setTripLegsPage(page, data.records);
       store.setTripLegsTableState('success');
-      console.log(`[TripLegsFetch] Page ${page} loaded with ${response.data.records.length} records`);
+      console.log(`[TripLegsFetch] Page ${page} loaded with ${data.records.length} records`);
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to fetch trip legs page';

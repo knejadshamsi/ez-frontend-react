@@ -17,6 +17,18 @@ export interface ZoneSessionData {
   scale: [number, string];
 }
 
+// Custom simulation area session data
+export interface CustomAreaSessionData {
+  name: string;
+  color: string;
+}
+
+// Scaled simulation area session data
+export interface ScaledAreaSessionData {
+  scale: [number, string];
+  color: string;
+}
+
 // Car distribution categories enable/disable state
 export interface CarDistributionCategories {
   zeroEmission: boolean;
@@ -39,6 +51,8 @@ export interface EZSessionStore {
   scenarioDescription: string;
   requestId: string;
   zones: { [zoneId: string]: ZoneSessionData };
+  customAreas: { [areaId: string]: CustomAreaSessionData };
+  scaledAreas: { [areaId: string]: ScaledAreaSessionData };
   activeZone: string | null;
   activeCustomArea: string | null;
   colorPalette: string[];
@@ -55,6 +69,12 @@ export interface EZSessionStore {
   setZoneProperty: (zoneId: string, property: keyof ZoneSessionData, value: any) => void;
   setZoneData: (zoneId: string, data: Partial<ZoneSessionData>) => void;
   removeZone: (zoneId: string) => void;
+  setCustomAreaData: (areaId: string, data: Partial<CustomAreaSessionData>) => void;
+  setCustomAreaProperty: (areaId: string, property: keyof CustomAreaSessionData, value: any) => void;
+  removeCustomArea: (areaId: string) => void;
+  setScaledAreaData: (areaId: string, data: Partial<ScaledAreaSessionData>) => void;
+  setScaledAreaProperty: (areaId: string, property: keyof ScaledAreaSessionData, value: any) => void;
+  removeScaledArea: (areaId: string) => void;
   setActiveZone: (zoneId: string | null) => void;
   setActiveCustomArea: (areaId: string | null) => void;
   nextAvailableColor: () => string;

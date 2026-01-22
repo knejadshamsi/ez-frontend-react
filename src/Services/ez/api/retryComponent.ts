@@ -1,12 +1,15 @@
+import axios from 'axios';
 import {
   useEZOutputOverviewStore,
   useEZOutputEmissionsStore,
   useEZOutputPeopleResponseStore,
 } from '~stores/output';
+import { getBackendUrl } from './config';
+import { ApiResponse } from './apiResponse';
 
 /**
  * Centralized retry function for SSE component data.
- * POSTs to /{requestId}/retry and manages component state via switch case.
+ * POSTs to /scenario/retry and manages component state via switch case.
  */
 export async function retryComponentData(
   requestId: string,
@@ -66,16 +69,15 @@ export async function retryComponentData(
 
   // POST to retry endpoint
   try {
-    const response = await fetch(`/${requestId}/retry`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ messageType }),
-    });
+    const backendUrl = getBackendUrl();
+    const response = await axios.post<ApiResponse<void>>(
+      `${backendUrl}/scenario/retry`,
+      { requestId, messageType },
+      { timeout: 10000 }
+    );
 
-    if (!response.ok) {
-      throw new Error(`Retry request failed: ${response.status} ${response.statusText}`);
+    if (response.data.statusCode !== 200) {
+      throw new Error(`Retry failed: ${response.data.message}`);
     }
 
     // Success: SSE handler will update state to 'success' when data arrives

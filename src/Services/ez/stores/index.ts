@@ -130,7 +130,7 @@ export const useAPIPayloadStore = create<APIPayloadStore>((set, get) => ({
     const state = get();
 
     if (state.payload.zones.length <= 1) {
-      console.warn('[Zone Guard] Cannot delete the last zone. At least one zone must exist.');
+      console.warn('Cannot delete the last zone. At least one zone must exist.');
       return;
     }
 
@@ -142,6 +142,7 @@ export const useAPIPayloadStore = create<APIPayloadStore>((set, get) => ({
 
     useEZSessionStore.getState().setActiveZone(newActiveZoneId);
 
+    // Remove zone from payload
     set((state) => ({
       payload: {
         ...state.payload,
@@ -149,7 +150,16 @@ export const useAPIPayloadStore = create<APIPayloadStore>((set, get) => ({
       }
     }));
 
+    // Remove zone from session
     useEZSessionStore.getState().removeZone(zoneId);
+
+    // CASCADE DELETE: Remove all scaled areas that reference this zone
+    const scaledAreasToRemove = state.payload.scaledSimulationAreas
+      .filter(area => area.zoneId === zoneId);
+
+    scaledAreasToRemove.forEach(area => {
+      get().removeScaledSimulationArea(area.id);
+    });
   },
 
   duplicateZone: (zoneId: string) => {
@@ -228,10 +238,10 @@ export const useAPIPayloadStore = create<APIPayloadStore>((set, get) => ({
     });
   },
 
-  addCustomSimulationArea: (color: string): string => {
+  addCustomSimulationArea: (): string => {
     const areaId = uuidv4();
-    const name = generateDefaultName('customArea');
 
+    // Add to payload (coords only)
     set((state) => ({
       payload: {
         ...state.payload,
@@ -239,16 +249,26 @@ export const useAPIPayloadStore = create<APIPayloadStore>((set, get) => ({
           ...state.payload.customSimulationAreas,
           {
             id: areaId,
-            coords: null,
-            name,
-            color
+            coords: null
           }
         ]
       }
     }));
 
+    // Initialize session data
+    const sessionStore = useEZSessionStore.getState();
+    sessionStore.setCustomAreaData(areaId, {
+      name: generateDefaultName('customArea'),
+      color: '#00BCD4'
+    });
+
     return areaId;
   },
+
+  setCustomSimulationAreas: (areas: CustomSimulationArea[]) =>
+    set((state) => ({
+      payload: { ...state.payload, customSimulationAreas: areas }
+    })),
 
   updateCustomSimulationArea: (areaId: string, data: Partial<CustomSimulationArea>) => {
     set((state) => ({
@@ -270,11 +290,15 @@ export const useAPIPayloadStore = create<APIPayloadStore>((set, get) => ({
         )
       }
     }));
+
+    // Clean up session data
+    useEZSessionStore.getState().removeCustomArea(areaId);
   },
 
-  addScaledSimulationArea: (zoneId: string, coords: Coordinate[][], scale: [number, string], color: string): string => {
+  addScaledSimulationArea: (zoneId: string, coords: Coordinate[][]): string => {
     const areaId = uuidv4();
 
+    // Add to payload (coords only)
     set((state) => ({
       payload: {
         ...state.payload,
@@ -283,16 +307,29 @@ export const useAPIPayloadStore = create<APIPayloadStore>((set, get) => ({
           {
             id: areaId,
             zoneId,
-            coords,
-            scale,
-            color
+            coords
           }
         ]
       }
     }));
 
+    // Initialize session data from zone
+    const sessionStore = useEZSessionStore.getState();
+    const zoneData = sessionStore.zones[zoneId];
+    if (zoneData) {
+      sessionStore.setScaledAreaData(areaId, {
+        scale: zoneData.scale,
+        color: zoneData.color
+      });
+    }
+
     return areaId;
   },
+
+  setScaledSimulationAreas: (areas: ScaledSimulationArea[]) =>
+    set((state) => ({
+      payload: { ...state.payload, scaledSimulationAreas: areas }
+    })),
 
   updateScaledSimulationArea: (areaId: string, data: Partial<ScaledSimulationArea>) => {
     set((state) => ({
@@ -314,6 +351,9 @@ export const useAPIPayloadStore = create<APIPayloadStore>((set, get) => ({
         )
       }
     }));
+
+    // Clean up session data
+    useEZSessionStore.getState().removeScaledArea(areaId);
   },
 
   getScaledAreaByZoneId: (zoneId: string): ScaledSimulationArea | undefined => {
@@ -321,40 +361,35 @@ export const useAPIPayloadStore = create<APIPayloadStore>((set, get) => ({
     return state.payload.scaledSimulationAreas.find(area => area.zoneId === zoneId);
   },
 
-  upsertScaledSimulationArea: (zoneId: string, coords: Coordinate[][], scale: [number, string], color: string): string => {
+  upsertScaledSimulationArea: (zoneId: string, coords: Coordinate[][]): string => {
     const state = get();
     const existingArea = state.payload.scaledSimulationAreas.find(area => area.zoneId === zoneId);
 
     if (existingArea) {
+      // Update coords in payload
       set((state) => ({
         payload: {
           ...state.payload,
           scaledSimulationAreas: state.payload.scaledSimulationAreas.map(area =>
-            area.zoneId === zoneId
-              ? { ...area, coords, scale, color }
-              : area
+            area.zoneId === zoneId ? { ...area, coords } : area
           )
         }
       }));
+
+      // Sync session data from zone
+      const sessionStore = useEZSessionStore.getState();
+      const zoneData = sessionStore.zones[zoneId];
+      if (zoneData) {
+        sessionStore.setScaledAreaData(existingArea.id, {
+          scale: zoneData.scale,
+          color: zoneData.color
+        });
+      }
+
       return existingArea.id;
     } else {
-      const areaId = uuidv4();
-      set((state) => ({
-        payload: {
-          ...state.payload,
-          scaledSimulationAreas: [
-            ...state.payload.scaledSimulationAreas,
-            {
-              id: areaId,
-              zoneId,
-              coords,
-              scale,
-              color
-            }
-          ]
-        }
-      }));
-      return areaId;
+      // Create new
+      return get().addScaledSimulationArea(zoneId, coords);
     }
   },
 

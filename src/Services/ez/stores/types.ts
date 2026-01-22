@@ -82,15 +82,11 @@ export interface ModeUtilities {
 export interface CustomSimulationArea {
   id: string;
   coords: Coordinate[][] | null;
-  name: string;
-  color: string;
 }
 export interface ScaledSimulationArea {
   id: string;
   zoneId: string;
   coords: Coordinate[][];
-  scale: [number, string];
-  color: string;
 }
 export interface APIPayload {
   zones: Zone[];
@@ -102,8 +98,8 @@ export interface APIPayload {
   modeUtilities: ModeUtilities;
 }
 
-// ============= FULL INPUT PAYLOAD (FOR LOADING SCENARIOS) =============
-export interface FullInputPayload {
+// ============= MAIN INPUT PAYLOAD (SIMULATION DATA) =============
+export interface MainInputPayload {
   scenarioTitle: string;
   scenarioDescription: string;
   zones: Zone[];
@@ -113,8 +109,55 @@ export interface FullInputPayload {
   simulationOptions: SimulationOptions;
   carDistribution: CarDistribution;
   modeUtilities: ModeUtilities;
-  zoneSessionData?: { [zoneId: string]: { name: string; color: string; hidden: boolean; description?: string; scale: [number, string] } };
-  simulationAreaDisplay: { borderStyle: 'solid' | 'dashed' | 'dotted'; fillOpacity: number };
+}
+
+// ============= SCENARIO METADATA (UI STATE) =============
+export interface ScenarioMetadata {
+  // Zone UI metadata
+  zoneSessionData: {
+    [zoneId: string]: {
+      name: string;
+      color: string;
+      hidden: boolean;
+      description?: string;
+      scale: [number, string];
+    };
+  };
+
+  // Display configuration
+  simulationAreaDisplay: {
+    borderStyle: 'solid' | 'dashed' | 'dotted';
+    fillOpacity: number;
+  };
+
+  // Car distribution toggles
+  carDistributionCategories: {
+    zeroEmission: boolean;
+    nearZeroEmission: boolean;
+    lowEmission: boolean;
+    midEmission: boolean;
+    highEmission: boolean;
+  };
+
+  // Custom/scaled area UI properties
+  customAreaSessionData: {
+    [areaId: string]: {
+      name: string;
+      color: string;
+    };
+  };
+
+  scaledAreaSessionData: {
+    [areaId: string]: {
+      scale: [number, string];
+      color: string;
+    };
+  };
+
+  // Optional session state
+  activeZone?: string | null;
+  activeCustomArea?: string | null;
+  colorPalette?: string[];
 }
 
 // ============= EZ SERVICE STORE INTERFACE =============
@@ -136,15 +179,17 @@ export interface APIPayloadStore {
   updateZone: (zoneId: string, data: Partial<Zone>) => void;
   reorderZones: (activeId: string, overId: string) => void;
 
-  addCustomSimulationArea: (color: string) => string;
+  addCustomSimulationArea: () => string;
+  setCustomSimulationAreas: (areas: CustomSimulationArea[]) => void;
   updateCustomSimulationArea: (areaId: string, data: Partial<CustomSimulationArea>) => void;
   removeCustomSimulationArea: (areaId: string) => void;
 
-  addScaledSimulationArea: (zoneId: string, coords: Coordinate[][], scale: [number, string], color: string) => string;
+  addScaledSimulationArea: (zoneId: string, coords: Coordinate[][]) => string;
+  setScaledSimulationAreas: (areas: ScaledSimulationArea[]) => void;
   updateScaledSimulationArea: (areaId: string, data: Partial<ScaledSimulationArea>) => void;
   removeScaledSimulationArea: (areaId: string) => void;
   getScaledAreaByZoneId: (zoneId: string) => ScaledSimulationArea | undefined;
-  upsertScaledSimulationArea: (zoneId: string, coords: Coordinate[][], scale: [number, string], color: string) => string;
+  upsertScaledSimulationArea: (zoneId: string, coords: Coordinate[][]) => string;
 
   setZones: (zones: Zone[]) => void;
   setSources: (sources: Sources) => void;

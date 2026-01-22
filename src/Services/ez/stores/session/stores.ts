@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { DEFAULT_ZONE_ID } from '../types';
 import type {
   ZoneSessionData,
+  CustomAreaSessionData,
+  ScaledAreaSessionData,
   EZSessionStore,
   EZOutputFiltersStore,
   VisualizationType,
@@ -83,6 +85,8 @@ export const createInitialSessionState = () => ({
   zones: {
     [DEFAULT_ZONE_ID]: DEFAULT_ZONE_SESSION_DATA
   },
+  customAreas: {} as Record<string, { name: string; color: string }>,
+  scaledAreas: {} as Record<string, { scale: [number, string]; color: string }>,
   activeZone: DEFAULT_ZONE_ID,
   activeCustomArea: null as string | null,
   colorPalette: [...COLOR_PALETTE],
@@ -133,6 +137,64 @@ export const useEZSessionStore = create<EZSessionStore>((set, get) => ({
       const newZones = { ...state.zones };
       delete newZones[zoneId];
       return { zones: newZones };
+    }),
+
+  setCustomAreaData: (areaId: string, data: Partial<CustomAreaSessionData>) =>
+    set((state) => ({
+      customAreas: {
+        ...state.customAreas,
+        [areaId]: {
+          ...state.customAreas[areaId],
+          ...data
+        }
+      }
+    })),
+
+  setCustomAreaProperty: (areaId: string, property: keyof CustomAreaSessionData, value: any) =>
+    set((state) => ({
+      customAreas: {
+        ...state.customAreas,
+        [areaId]: {
+          ...state.customAreas[areaId],
+          [property]: value
+        }
+      }
+    })),
+
+  removeCustomArea: (areaId: string) =>
+    set((state) => {
+      const newCustomAreas = { ...state.customAreas };
+      delete newCustomAreas[areaId];
+      return { customAreas: newCustomAreas };
+    }),
+
+  setScaledAreaData: (areaId: string, data: Partial<ScaledAreaSessionData>) =>
+    set((state) => ({
+      scaledAreas: {
+        ...state.scaledAreas,
+        [areaId]: {
+          ...state.scaledAreas[areaId],
+          ...data
+        }
+      }
+    })),
+
+  setScaledAreaProperty: (areaId: string, property: keyof ScaledAreaSessionData, value: any) =>
+    set((state) => ({
+      scaledAreas: {
+        ...state.scaledAreas,
+        [areaId]: {
+          ...state.scaledAreas[areaId],
+          [property]: value
+        }
+      }
+    })),
+
+  removeScaledArea: (areaId: string) =>
+    set((state) => {
+      const newScaledAreas = { ...state.scaledAreas };
+      delete newScaledAreas[areaId];
+      return { scaledAreas: newScaledAreas };
     }),
 
   setActiveZone: (activeZone: string | null) =>

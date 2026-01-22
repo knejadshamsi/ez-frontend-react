@@ -87,7 +87,7 @@ export interface EZPeopleResponseTimeImpactChartData {
 
 // === TRIP LEGS TYPES ===
 
-// Single trip leg performance record (REST: GET /api/simulation/{requestId}/trip-legs)
+// Single trip leg performance record (REST: GET /scenario/{requestId}/trip-legs)
 export interface EZTripLegRecord {
   legId: string;
   personId: string;
