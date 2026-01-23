@@ -9,6 +9,7 @@ import { useEZOutputMapStore } from './map';
 export type * from './types';
 export * from './stores';
 export * from './map';
+export * from './timeout';
 
 export const resetAllEZOutputStores = (): void => {
   useEZOutputOverviewStore.getState().resetOverviewStore();

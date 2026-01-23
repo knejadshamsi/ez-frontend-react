@@ -1,4 +1,4 @@
-import { resetAllEZOutputStores } from '~stores/output';
+import { resetAllEZOutputStores, setIncompleteComponentsToError } from '~stores/output';
 import type { SSEMessage, SimulationStreamConfig } from './types';
 import { handleSSEMessage } from './handlers';
 
@@ -41,9 +41,13 @@ export function startSimulationStream(config: SimulationStreamConfig): () => voi
     }
     universalTimeoutId = setTimeout(() => {
       console.error('[SSE] Universal timeout - no data received within 5 minutes');
+
+      // Set all incomplete components to error state
+      setIncompleteComponentsToError();
+
       config.onError?.({
         code: 'UNIVERSAL_TIMEOUT',
-        message: 'No data received within 5 minutes - returning to input',
+        message: 'Simulation timeout - some components may have failed',
       });
       cleanup();
     }, UNIVERSAL_TIMEOUT_MS);
