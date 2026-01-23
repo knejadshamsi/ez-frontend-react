@@ -83,6 +83,12 @@ export const locales = {
       startNewSimulation: 'Start New Simulation',
       cancel: 'Cancel',
       returnToOutput: 'Return to Output',
+      backToWelcomeWarning: {
+        title: 'Return to Welcome?',
+        both: 'All configuration and simulation results will be lost. This action cannot be undone.',
+        inputOnly: 'All configuration will be lost. This action cannot be undone.',
+        confirm: 'Yes, Return to Welcome',
+      },
     },
   },
   fr: {
@@ -167,6 +173,12 @@ export const locales = {
       startNewSimulation: 'Nouvelle simulation',
       cancel: 'Annuler',
       returnToOutput: 'Retour aux résultats',
+      backToWelcomeWarning: {
+        title: 'Retourner à l\'accueil?',
+        both: 'Toute la configuration et les résultats de simulation seront perdus. Cette action est irréversible.',
+        inputOnly: 'Toute la configuration sera perdue. Cette action est irréversible.',
+        confirm: 'Oui, retourner à l\'accueil',
+      },
     },
   },
 } as const;

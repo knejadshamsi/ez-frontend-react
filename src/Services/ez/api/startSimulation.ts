@@ -11,7 +11,9 @@ import {
 } from '../progress';
 import { useProgressStore } from '../progress/store';
 import { loadDemoData } from '../output/demo';
-import { fetchScenarioInput } from './fetchScenarioInput';
+import { fetchScenarioMainInput, restoreStoresFromInput } from './fetchScenarioInput';
+import { updateScenarioMetadata } from './updateScenarioMetadata';
+import { fetchScenarioMetadata } from './fetchScenarioMetadata';
 
 export const startSimulation = async (
   setState: (state: EZStateType) => void,
@@ -106,13 +108,34 @@ const runRealSimulation = (
 
   showProgress();
 
+  let abortStream: (() => void) | null = null;
+
   const cleanup = startSimulationStream({
-    endpoint: `${backendUrl}/api/ez/simulate`,
+    endpoint: `${backendUrl}/simulate`,
     payload: apiRequest as unknown as Record<string, unknown>,
 
-    onStarted: (requestId: string) => {
+    onStarted: async (requestId: string) => {
       console.log('[SSE] Simulation started with requestId:', requestId);
       setRequestId(requestId);
+
+      try {
+        await updateScenarioMetadata(requestId);
+        console.log('[EZ API] Metadata sent successfully');
+      } catch (error) {
+        console.error('[EZ API] CRITICAL: Failed to send metadata:', error);
+
+        if (abortStream) {
+          abortStream();
+          setSseCleanup(null);
+
+          const progressStore = useProgressStore.getState();
+          progressStore.hide();
+          progressStore.reset();
+
+          onError('Failed to send scenario metadata. Please try again.');
+        }
+        return;
+      }
     },
 
     onComplete: () => {
@@ -137,6 +160,7 @@ const runRealSimulation = (
     },
   });
 
+  abortStream = cleanup;
   setSseCleanup(cleanup);
   console.log('[SSE] Stream started, cleanup function stored');
 };
@@ -160,12 +184,27 @@ export const loadScenario = async (
   }
 
   try {
-    await fetchScenarioInput(requestId);
+    // Fetch main input (simulation data)
+    const mainInput = await fetchScenarioMainInput(requestId);
+
+    // Fetch metadata (UI state)
+    const metadata = await fetchScenarioMetadata(requestId);
+
+    // Both succeeded - restore stores from input data
+    restoreStoresFromInput(mainInput, metadata);
+
   } catch (error) {
+    // Either main input OR metadata failed - reset all stores
+    console.error('[Load Scenario] Failed to load scenario data:', error);
+
+    // CRITICAL: Reset all stores to clean up any partial data
+    const { resetAllEZStores } = await import('~stores/reset');
+    await resetAllEZStores();
+
     const errorMessage = error instanceof Error
       ? error.message
-      : 'Failed to load scenario input data';
-    console.error('[Load Scenario] Input fetch failed:', error);
+      : 'Failed to load scenario data. Both simulation data and metadata are required.';
+
     onError(errorMessage);
     return; // Stop execution
   }
@@ -205,7 +244,7 @@ const runRealScenarioLoad = (
   showProgress();
 
   const cleanup = startSimulationStream({
-    endpoint: `${backendUrl}/api/ez/scenario/${requestId}`,
+    endpoint: `${backendUrl}/scenario/${requestId}`,
     payload: null,
     method: 'GET',
 

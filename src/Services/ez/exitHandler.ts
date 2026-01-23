@@ -10,7 +10,7 @@ import { DEFAULT_ZONE_ID } from '~stores/types';
 const t = i18n.t.bind(i18n);
 
 // Checks if input has changed from default state
-const hasInputChangedFromDefault = (): boolean => {
+export const hasInputChangedFromDefault = (): boolean => {
   const payload = useAPIPayloadStore.getState().payload;
   const drawToolGeoJson = useDrawToolStore.getState().drawToolGeoJson;
   const sessionStore = useEZSessionStore.getState();

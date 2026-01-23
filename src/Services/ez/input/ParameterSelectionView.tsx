@@ -6,6 +6,8 @@ import { useAPIPayloadStore, useEZServiceStore } from '~store'
 import { InputContainer } from './inputContainer'
 import { createAPIRequest, validateAPIRequest, startSimulation } from '~ez/api'
 import { hasOutputData } from '~stores/output'
+import { resetAllEZStores } from '~stores/reset'
+import { hasInputChangedFromDefault } from '~ez/exitHandler'
 
 import { Button, Input, Modal, message } from 'antd'
 import { ArrowLeftOutlined, SendOutlined, EditOutlined, SaveOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
@@ -39,6 +41,34 @@ export const ParameterSelectionView = () => {
   const handleSimulationError = (errorMessage: string) => {
     messageApi.error(errorMessage || 'Simulation failed');
     setState('PARAMETER_SELECTION');
+  };
+
+  const handleBackToWelcome = () => {
+    const hasInput = hasInputChangedFromDefault();
+    const hasOutput = hasOutputData();
+
+    // If no data to lose, go directly to WELCOME
+    if (!hasInput && !hasOutput) {
+      setState('WELCOME');
+      return;
+    }
+
+    // Determine which warning message to show
+    const warningKey = hasOutput ? 'both' : 'inputOnly';
+
+    // Show warning modal
+    modal.confirm({
+      title: t('parameterSelection.backToWelcomeWarning.title'),
+      icon: <ExclamationCircleOutlined />,
+      content: t(`parameterSelection.backToWelcomeWarning.${warningKey}`),
+      okText: t('parameterSelection.backToWelcomeWarning.confirm'),
+      cancelText: t('parameterSelection.cancel'),
+      okButtonProps: { danger: true },
+      async onOk() {
+        await resetAllEZStores();
+        setState('WELCOME');
+      },
+    });
   };
 
   const handleStartSimulation = () => {
@@ -102,7 +132,7 @@ export const ParameterSelectionView = () => {
       {contextHolder}
       {messageContextHolder}
       <div className={styles.backButtonContainer}>
-          <Button type="link" onClick={() => setState('WELCOME')} className={styles.backButton}>
+          <Button type="link" onClick={handleBackToWelcome} className={styles.backButton}>
             <ArrowLeftOutlined style={{fontSize: '12px'}} />
             {t('parameterSelection.backToWelcome')}
           </Button>
