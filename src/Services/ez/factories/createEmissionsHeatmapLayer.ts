@@ -1,6 +1,7 @@
 
 import { HeatmapLayer } from '@deck.gl/aggregation-layers';
 import type { MapPointData } from '~stores/output';
+import { EMISSIONS_COLOR_GRADIENT } from './constants';
 
 export interface CreateEmissionsHeatmapLayerInput {
   data: MapPointData[]; // Array of emission points with position and weight
@@ -21,18 +22,12 @@ export const createEmissionsHeatmapLayer = ({
     radiusPixels: 30,
     intensity: 1,
     threshold: 0.05,
-    // Color gradient from teal to red
     colorRange: [
-      [65, 182, 196],   // Light teal
-      [127, 205, 187],  // Teal-green
-      [199, 233, 180],  // Light green
-      [237, 248, 177],  // Yellow-green
-      [255, 237, 160],  // Light yellow
-      [254, 217, 118],  // Yellow
-      [254, 178, 76],   // Orange
-      [253, 141, 60],   // Dark orange
-      [252, 78, 42],    // Red-orange
-      [227, 26, 28],    // Red
+      ...EMISSIONS_COLOR_GRADIENT.slice(0, 4),
+      [255, 237, 160],
+      ...EMISSIONS_COLOR_GRADIENT.slice(4, 7),
+      [252, 78, 42],
+      EMISSIONS_COLOR_GRADIENT[7],
     ],
     pickable: false,
   });

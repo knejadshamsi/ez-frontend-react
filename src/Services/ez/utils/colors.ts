@@ -1,3 +1,7 @@
+export const DEFAULT_CUSTOM_AREA_COLOR = '#00BCD4';
+export const DEFAULT_SCALED_AREA_COLOR = '#1A16E2';
+export const DEFAULT_ZONE_COLOR = '#FF0000';
+
 export const HIDDEN_COLOR = '#CCCCCC';
 
 export const colorShader = (hex: string, multiplier: number): string | undefined => {

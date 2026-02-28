@@ -2,6 +2,7 @@ import { PolygonLayer } from '@deck.gl/layers';
 import { PathStyleExtension } from '@deck.gl/extensions';
 import type { Coordinate } from '~stores/types';
 import { hexToRgb } from '~utils/colors';
+import { LAYER_OPACITY } from './constants';
 
 interface SimulationAreaDisplayData {
   coords: Coordinate[][];
@@ -36,10 +37,9 @@ export const createSimulationAreaDisplayLayer = ({
       return [rgb[0], rgb[1], rgb[2], fillOpacity];
     },
 
-    // Colored outline
     getLineColor: (d: SimulationAreaDisplayData): [number, number, number, number] => {
       const rgb = hexToRgb(d.color);
-      return [rgb[0], rgb[1], rgb[2], 255];
+      return [rgb[0], rgb[1], rgb[2], LAYER_OPACITY.BORDER_FULL];
     },
 
     getLineWidth: 3,

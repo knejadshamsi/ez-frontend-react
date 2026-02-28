@@ -1,6 +1,7 @@
 import { PolygonLayer } from '@deck.gl/layers';
 import type { Coordinate } from '~stores/types';
 import { hexToRgb } from '~utils/colors';
+import { LAYER_OPACITY } from './constants';
 
 interface ZoneDisplayData {
   coords: Coordinate[][];
@@ -22,8 +23,7 @@ export const createZoneDisplayLayer = ({
     return null;
   }
 
-  // Use override if provided, otherwise default to 80 (31%)
-  const fillOpacity = fillOpacityOverride !== undefined ? fillOpacityOverride : 80;
+  const fillOpacity = fillOpacityOverride !== undefined ? fillOpacityOverride : LAYER_OPACITY.FILL_PRIMARY;
 
   return new PolygonLayer({
     id: 'zone-display-layer',
@@ -36,10 +36,9 @@ export const createZoneDisplayLayer = ({
       return [rgb[0], rgb[1], rgb[2], fillOpacity];
     },
 
-    // Darker border
     getLineColor: (d: ZoneDisplayData): [number, number, number, number] => {
       const rgb = hexToRgb(d.color);
-      return [rgb[0], rgb[1], rgb[2], 200];
+      return [rgb[0], rgb[1], rgb[2], LAYER_OPACITY.BORDER_PRIMARY];
     },
 
     getLineWidth: 2,

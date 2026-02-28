@@ -4,15 +4,13 @@ import { ColorPicker, Tooltip } from 'antd'
 import { useTranslation } from 'react-i18next'
 import { useAPIPayloadStore, useEZServiceStore } from '~store'
 import { useEZSessionStore } from '~stores/session'
-import { colorShader } from '~utils/colors'
+import { colorShader, DEFAULT_CUSTOM_AREA_COLOR } from '~utils/colors'
 import { generateDefaultName } from '~utils/zoneNames'
 import { InlineNameEditor } from '~ez/components/InlineNameEditor'
 import selectorStyles from './simulationAreaSection.module.less'
 import type { CustomSimulationArea } from '~ez/stores/types'
 import type { AreaColorPreset } from './types'
 import './locales'
-
-const DEFAULT_CUSTOM_AREA_COLOR = '#00BCD4'
 
 const DrawAreaList = (): ReactElement => {
   const { t } = useTranslation('ez-simulation-area-section')
@@ -21,7 +19,7 @@ const DrawAreaList = (): ReactElement => {
     {
       label: t('customAreas.colorPresetLabel'),
       colors: [
-        '#00BCD4',
+        DEFAULT_CUSTOM_AREA_COLOR,
         '#26A69A',
         '#00ACC1',
         '#0097A7',

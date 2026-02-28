@@ -103,8 +103,8 @@ interface TripLegsFirstPagePayload {
   records: Array<{
     legId: string;
     personId: string;
-    originActivity: string;
-    destinationActivity: string;
+    originActivityType: string;
+    destinationActivityType: string;
     co2DeltaGrams: number;
     timeDeltaMinutes: number;
     impact: string;
@@ -118,7 +118,8 @@ interface TripLegsFirstPagePayload {
 // Discriminated union for all SSE message types
 export type SSEMessage =
   // Lifecycle events
-  | { messageType: 'pa_connection'; payload: StartedPayload; timestamp: string }
+  | { messageType: 'pa_request_accepted'; payload: StartedPayload; timestamp: string }
+  | { messageType: 'pa_simulation_start'; payload: Record<string, never>; timestamp: string }
   | { messageType: 'heartbeat'; payload: Record<string, never>; timestamp: string }
   | { messageType: 'success_process'; payload: Record<string, never>; timestamp: string }
   | { messageType: 'error_global'; payload: ErrorPayload; timestamp: string }
@@ -171,6 +172,7 @@ export interface SimulationStreamConfig {
   connectionTimeout?: number;
   heartbeatTimeout?: number;
   onStarted?: (requestId: string) => void;
+  onSimulationStart?: () => void;
   onComplete?: () => void;
   onError?: (error: SimulationError) => void;
   onTimelineEvent?: (event: string) => void;

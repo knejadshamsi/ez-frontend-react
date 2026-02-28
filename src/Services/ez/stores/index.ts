@@ -17,6 +17,7 @@ import {
 } from './types';
 import { useEZSessionStore } from './session';
 import { generateDefaultName, generateDuplicateName } from '~utils/zoneNames';
+import { DEFAULT_CUSTOM_AREA_COLOR } from '~utils/colors';
 
 // ============= DEFAULT VALUE =============
 export const createInitialPayload = (): APIPayload => ({
@@ -259,7 +260,7 @@ export const useAPIPayloadStore = create<APIPayloadStore>((set, get) => ({
     const sessionStore = useEZSessionStore.getState();
     sessionStore.setCustomAreaData(areaId, {
       name: generateDefaultName('customArea'),
-      color: '#00BCD4'
+      color: DEFAULT_CUSTOM_AREA_COLOR
     });
 
     return areaId;

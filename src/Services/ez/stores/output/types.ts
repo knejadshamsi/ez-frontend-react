@@ -91,8 +91,8 @@ export interface EZPeopleResponseTimeImpactChartData {
 export interface EZTripLegRecord {
   legId: string;
   personId: string;
-  originActivity: string;
-  destinationActivity: string;
+  originActivityType: string;
+  destinationActivityType: string;
   co2DeltaGrams: number;
   timeDeltaMinutes: number;
   impact: string;

@@ -13,7 +13,7 @@ import { createPeopleResponseGridLayerForType } from './factories/createPeopleRe
 import { createTripLegsPathLayer } from './factories/createTripLegsPathLayer';
 import { validatePolygon } from '~utils/polygonValidation';
 import { coordsToGeoJSON } from '~utils/geoJson';
-import { hexToRgb } from '~utils/colors';
+import { hexToRgb, DEFAULT_CUSTOM_AREA_COLOR, DEFAULT_SCALED_AREA_COLOR, DEFAULT_ZONE_COLOR } from '~utils/colors';
 import { selectEmissionsMapPoints, selectPeopleResponseMapPoints } from '~utils/mapDataSelectors';
 import { mapZoneOpacityToAlpha, mapSimulationAreaOpacityToAlpha } from '~utils/opacityMapping';
 import type { Coordinate, EZStateType } from './stores/types';
@@ -225,7 +225,7 @@ export function useLayers() {
         geoJsonData: drawToolGeoJson,
         onEdit: handlePolygonEdit,
         mode: 'draw',
-        color: [255, 0, 0],  // Red
+        color: hexToRgb(DEFAULT_ZONE_COLOR),
         type: 'zone'
       });
     }
@@ -239,7 +239,7 @@ export function useLayers() {
       }
 
       const sessionData = sessionZones[zone.id];
-      const colorRGB = hexToRgb(sessionData?.color || '#FF0000');
+      const colorRGB = hexToRgb(sessionData?.color || DEFAULT_ZONE_COLOR);
 
       return createEditablePolygonLayer({
         geoJsonData: drawToolGeoJson,
@@ -259,7 +259,7 @@ export function useLayers() {
       }
 
       const sessionData = sessionZones[zone.id];
-      const colorRGB = hexToRgb(sessionData?.color || '#FF0000');
+      const colorRGB = hexToRgb(sessionData?.color || DEFAULT_ZONE_COLOR);
 
       return createEditablePolygonLayer({
         geoJsonData: drawToolGeoJson,
@@ -276,7 +276,7 @@ export function useLayers() {
         geoJsonData: drawToolGeoJson,
         onEdit: handlePolygonEdit,
         mode: 'draw',
-        color: [0, 188, 212],  // Cyan
+        color: hexToRgb(DEFAULT_CUSTOM_AREA_COLOR),
         type: 'area'
       });
     }
@@ -290,7 +290,7 @@ export function useLayers() {
       }
 
       const sessionData = sessionCustomAreas[area.id];
-      const colorRGB = hexToRgb(sessionData?.color || '#00BCD4');
+      const colorRGB = hexToRgb(sessionData?.color || DEFAULT_CUSTOM_AREA_COLOR);
 
       return createEditablePolygonLayer({
         geoJsonData: drawToolGeoJson,
@@ -331,7 +331,7 @@ export function useLayers() {
               const sessionData = sessionCustomAreas[area.id];
               return {
                 coords: area.coords!,
-                color: sessionData?.color || '#00BCD4',
+                color: sessionData?.color || DEFAULT_CUSTOM_AREA_COLOR,
                 type: 'custom' as const
               };
             }),
@@ -341,7 +341,7 @@ export function useLayers() {
               const sessionData = sessionScaledAreas[area.id];
               return {
                 coords: area.coords,
-                color: sessionData?.color || '#1A16E2',
+                color: sessionData?.color || DEFAULT_SCALED_AREA_COLOR,
                 type: 'scaled' as const
               };
             })
@@ -395,7 +395,7 @@ export function useLayers() {
                 const sessionData = sessionCustomAreas[area.id];
                 return {
                   coords: area.coords!,
-                  color: sessionData?.color || '#00BCD4',
+                  color: sessionData?.color || DEFAULT_CUSTOM_AREA_COLOR,
                   type: 'custom' as const
                 };
               }),
@@ -403,7 +403,7 @@ export function useLayers() {
                 const sessionData = sessionScaledAreas[area.id];
                 return {
                   coords: area.coords,
-                  color: sessionData?.color || '#1A16E2',
+                  color: sessionData?.color || DEFAULT_SCALED_AREA_COLOR,
                   type: 'scaled' as const
                 };
               })
@@ -491,7 +491,7 @@ export function useLayers() {
               const sessionData = sessionCustomAreas[area.id];
               return {
                 coords: area.coords!,
-                color: sessionData?.color || '#00BCD4',
+                color: sessionData?.color || DEFAULT_CUSTOM_AREA_COLOR,
                 type: 'custom' as const
               };
             }),
@@ -501,7 +501,7 @@ export function useLayers() {
               const sessionData = sessionScaledAreas[area.id];
               return {
                 coords: area.coords,
-                color: sessionData?.color || '#1A16E2',
+                color: sessionData?.color || DEFAULT_SCALED_AREA_COLOR,
                 type: 'scaled' as const
               };
             })

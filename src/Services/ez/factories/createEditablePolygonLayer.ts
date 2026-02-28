@@ -1,4 +1,5 @@
 import { EditableGeoJsonLayer, DrawPolygonMode, ModifyMode, type FeatureCollection } from '@deck.gl-community/editable-layers';
+import { LAYER_OPACITY, FALLBACK_RED } from './constants';
 
 interface CreateEditablePolygonLayerInput {
   geoJsonData: FeatureCollection;
@@ -13,7 +14,7 @@ export const createEditablePolygonLayer = ({
   geoJsonData,
   onEdit,
   mode,
-  color = [255, 0, 0],
+  color = FALLBACK_RED,
   type
 }: CreateEditablePolygonLayerInput) => {
   const isModifying = mode === 'modify';
@@ -27,16 +28,15 @@ export const createEditablePolygonLayer = ({
     onEdit: onEdit,
     editHandleType: 'existing',  // Only show handles for existing vertices, not intermediate points
 
-    getFillColor: [...color, 80],
-    getLineColor: [...color, 200],
+    getFillColor: [...color, LAYER_OPACITY.FILL_PRIMARY],
+    getLineColor: [...color, LAYER_OPACITY.BORDER_PRIMARY],
 
-    getTentativeFillColor: [...color, 80],
-    getTentativeLineColor: [...color, 200],
+    getTentativeFillColor: [...color, LAYER_OPACITY.FILL_PRIMARY],
+    getTentativeLineColor: [...color, LAYER_OPACITY.BORDER_PRIMARY],
     getTentativeLineWidth: isModifying ? 2 : 3,
 
-    // Edit handles (vertices)
-    getEditHandlePointColor: [255, 255, 255, 255],
-    getEditHandlePointOutlineColor: [...color, 255],
+    getEditHandlePointColor: [255, 255, 255, LAYER_OPACITY.BORDER_FULL],
+    getEditHandlePointOutlineColor: [...color, LAYER_OPACITY.BORDER_FULL],
     editHandlePointRadiusScale: 2,
     editHandlePointRadiusMinPixels: isModifying ? 10 : 8,
     editHandlePointRadiusMaxPixels: isModifying ? 14 : 12,

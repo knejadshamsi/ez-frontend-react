@@ -37,8 +37,8 @@ export const DEFAULT_VEHICLE_EMISSIONS_CHART_CONFIG: EZVehicleEmissionsChartConf
 export const DEFAULT_TRIP_LEGS_TABLE_CONFIG: EZTripLegsTableConfig = {
   columns: [
     { title: 'Person ID', dataIndex: 'personId', key: 'personId', width: 120 },
-    { title: 'From Activity', dataIndex: 'originActivity', key: 'originActivity', width: 150 },
-    { title: 'To Activity', dataIndex: 'destinationActivity', key: 'destinationActivity', width: 150 },
+    { title: 'From Activity', dataIndex: 'originActivityType', key: 'originActivityType', width: 150 },
+    { title: 'To Activity', dataIndex: 'destinationActivityType', key: 'destinationActivityType', width: 150 },
     { title: 'CO₂ Δ (g)', dataIndex: 'co2DeltaGrams', key: 'co2DeltaGrams', width: 120, isSortable: true },
     { title: 'Time Δ (min)', dataIndex: 'timeDeltaMinutes', key: 'timeDeltaMinutes', width: 120, isSortable: true },
     { title: 'Impact', dataIndex: 'impact', key: 'impact', width: 150 },

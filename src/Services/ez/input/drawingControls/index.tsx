@@ -7,6 +7,7 @@ import { useEZSessionStore } from '~stores/session';
 import { useNotificationStore } from '~/Services/CustomNotification';
 import { validatePolygon } from '~utils/polygonValidation';
 import { geoJsonToCoords } from '~utils/geoJson';
+import { DEFAULT_CUSTOM_AREA_COLOR, DEFAULT_SCALED_AREA_COLOR } from '~utils/colors';
 import type { Zone, CustomSimulationArea, ScaledSimulationArea } from '~ez/stores/types';
 import type { ZoneSessionData, CustomAreaSessionData, ScaledAreaSessionData } from '~stores/session';
 import './locales';
@@ -118,7 +119,7 @@ const getOtherAreas = (
       return {
         id: area.id,
         name: sessionData?.name || unknownLabel,
-        color: sessionData?.color || '#00BCD4',
+        color: sessionData?.color || DEFAULT_CUSTOM_AREA_COLOR,
       };
     });
 
@@ -136,7 +137,7 @@ const getOtherAreas = (
       return {
         id: area.id,
         name: `${zoneName} (${scaledData?.scale[0] || 100}${scaledSuffix})`,
-        color: scaledData?.color || '#1A16E2',
+        color: scaledData?.color || DEFAULT_SCALED_AREA_COLOR,
       };
     });
 

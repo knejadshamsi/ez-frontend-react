@@ -20,7 +20,7 @@ export function decodeSSEMessage(messageType: string): {
 
   switch (prefix) {
     case 'pa':
-      // Progress alerts: pa_connection, pa_phase_*
+      // Progress alerts: pa_request_accepted, pa_simulation_start, pa_phase_*
       return {
         category: 'progress_alert',
         message: messageType,

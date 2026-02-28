@@ -90,9 +90,15 @@ function handleProgressAlertMessage(
 
   // Handle lifecycle events and map-specific events
   switch (messageType) {
-    case 'pa_connection':
+    case 'pa_request_accepted':
       if (config.onStarted && 'requestId' in payload) {
         config.onStarted((payload as { requestId: string }).requestId);
+      }
+      break;
+
+    case 'pa_simulation_start':
+      if (config.onSimulationStart) {
+        config.onSimulationStart();
       }
       break;
 
@@ -341,8 +347,8 @@ function handleDataMessage(
         records: Array<{
           legId: string;
           personId: string;
-          originActivity: string;
-          destinationActivity: string;
+          originActivityType: string;
+          destinationActivityType: string;
           co2DeltaGrams: number;
           timeDeltaMinutes: number;
           impact: string;

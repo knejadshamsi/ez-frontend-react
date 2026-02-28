@@ -34,8 +34,8 @@ const generateDemoTripLegsPage = (page: number, pageSize: number, totalRecords: 
     records.push({
       legId: `leg_${i.toString().padStart(5, '0')}`,
       personId,
-      originActivity: `A_${activities[Math.floor(Math.random() * activities.length)]}_${personId.slice(1)}`,
-      destinationActivity: `A_${activities[Math.floor(Math.random() * activities.length)]}_${personId.slice(1)}`,
+      originActivityType: `A_${activities[Math.floor(Math.random() * activities.length)]}_${personId.slice(1)}`,
+      destinationActivityType: `A_${activities[Math.floor(Math.random() * activities.length)]}_${personId.slice(1)}`,
       co2DeltaGrams: Math.round((Math.random() - 0.4) * 500), // -200 to +300
       timeDeltaMinutes: Math.round((Math.random() - 0.2) * 20), // -4 to +16
       impact: impacts[Math.floor(Math.random() * impacts.length)],
