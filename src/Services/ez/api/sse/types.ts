@@ -78,8 +78,9 @@ interface PeopleResponseParagraph1Payload {
   subwayPct: number;
   walkPct: number;
   bikePct: number;
+  carPct: number;
   cancelledPct: number;
-  penaltyCharge: number;
+  penaltyCharges: Array<{ zoneName: string; rate: number }>;
   totalAffectedTrips: number;
 }
 
@@ -91,6 +92,7 @@ interface PeopleResponseParagraph2Payload {
   avgSubwayTime: number;
   avgWalkTime: number;
   avgBikeTime: number;
+  avgCarTime: number;
 }
 
 // Response breakdown chart data (SSE: data_chart_breakdown_people_response, data_chart_time_impact_people_response)

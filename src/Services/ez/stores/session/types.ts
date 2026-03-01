@@ -107,6 +107,7 @@ export type BehavioralResponseType =
   | 'switchedToSubway'
   | 'switchedToWalking'
   | 'switchedToBiking'
+  | 'switchedToCar'
   | 'cancelledTrip';
 
 // Output filters store interface

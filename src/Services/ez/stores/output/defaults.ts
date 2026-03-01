@@ -10,15 +10,15 @@ import type {
 import { VEHICLE_TYPE_COLORS } from '../types';
 
 export const DEFAULT_PEOPLE_RESPONSE_CHART_CONFIG: EZPeopleResponseChartConfig = {
-  categoryIds: ['paidPenalty', 'rerouted', 'switchedToBus', 'switchedToSubway', 'switchedToWalking', 'switchedToBiking', 'cancelledTrip'],
-  categoryLabels: ['Paid Penalty', 'Rerouted', 'Changed to Bus', 'Changed to Subway', 'Changed to Walking', 'Changed to Biking', 'Trip Cancelled'],
-  categoryColors: ['#c9c9c9', '#ffd4a3', '#b8d4e8', '#a8c7dd', '#c8e6c9', '#b2dfb2', '#f5b7b1'],
+  categoryIds: ['paidPenalty', 'rerouted', 'switchedToBus', 'switchedToSubway', 'switchedToWalking', 'switchedToBiking', 'switchedToCar', 'cancelledTrip'],
+  categoryLabels: ['Paid Penalty', 'Rerouted', 'Changed to Bus', 'Changed to Subway', 'Changed to Walking', 'Changed to Biking', 'Changed to Car', 'Trip Cancelled'],
+  categoryColors: ['#c9c9c9', '#ffd4a3', '#b8d4e8', '#a8c7dd', '#c8e6c9', '#b2dfb2', '#e8d0b3', '#f5b7b1'],
 };
 
 export const DEFAULT_TIME_IMPACT_CHART_CONFIG: EZTimeImpactChartConfig = {
-  categoryIds: ['paidPenalty', 'rerouted', 'switchedToBus', 'switchedToSubway', 'switchedToWalking', 'switchedToBiking'],
-  categoryLabels: ['Paid Penalty', 'Rerouted', 'Changed to Bus', 'Changed to Subway', 'Changed to Walking', 'Changed to Biking'],
-  categoryColors: ['#c9c9c9', '#ffd4a3', '#b8d4e8', '#a8c7dd', '#c8e6c9', '#b2dfb2'],
+  categoryIds: ['paidPenalty', 'rerouted', 'switchedToBus', 'switchedToSubway', 'switchedToWalking', 'switchedToBiking', 'switchedToCar'],
+  categoryLabels: ['Paid Penalty', 'Rerouted', 'Changed to Bus', 'Changed to Subway', 'Changed to Walking', 'Changed to Biking', 'Changed to Car'],
+  categoryColors: ['#c9c9c9', '#ffd4a3', '#b8d4e8', '#a8c7dd', '#c8e6c9', '#b2dfb2', '#e8d0b3'],
 };
 
 export const DEFAULT_EMISSIONS_BAR_CHART_CONFIG: EZEmissionsBarChartConfig = {

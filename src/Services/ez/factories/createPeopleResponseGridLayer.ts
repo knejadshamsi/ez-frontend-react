@@ -16,6 +16,7 @@ export const RESPONSE_TYPE_COLORS: Record<string, [number, number, number]> = {
   switchedToSubway: [168, 199, 221], // Blue
   switchedToWalking: [200, 230, 201], // Light green
   switchedToBiking: [178, 223, 178], // Green
+  switchedToCar: [232, 208, 179],    // Warm tan
   cancelledTrip: [245, 183, 177],    // Light red
 };
 

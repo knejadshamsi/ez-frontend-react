@@ -70,8 +70,9 @@ const DEMO_PEOPLE_RESPONSE_PARAGRAPH1_DATA: EZPeopleResponseParagraph1Data = {
   switchedToSubwayPercentage: 7,
   switchedToWalkingPercentage: 4,
   switchedToBikingPercentage: 2,
-  cancelledTripPercentage: 4,
-  penaltyChargeAmount: 10,
+  switchedToCarPercentage: 3,
+  cancelledTripPercentage: 1,
+  penaltyCharges: [{ zoneName: 'Zone A', rate: 10 }],
   totalAffectedTrips: 72000,
 };
 
@@ -82,14 +83,15 @@ const DEMO_PEOPLE_RESPONSE_PARAGRAPH2_DATA: EZPeopleResponseParagraph2Data = {
   averageTimeSwitchedToSubway: 12,
   averageTimeSwitchedToWalking: 5,
   averageTimeSwitchedToBiking: 15,
+  averageTimeSwitchedToCar: 3,
 };
 
 const DEMO_PEOPLE_RESPONSE_BREAKDOWN_DATA: EZPeopleResponseBreakdownChartData = {
-  responsePercentages: [47, 28, 8, 7, 4, 2, 4],
+  responsePercentages: [47, 28, 8, 7, 4, 2, 3, 1],
 };
 
 const DEMO_PEOPLE_RESPONSE_TIME_IMPACT_DATA: EZPeopleResponseTimeImpactChartData = {
-  averageTimeDeltas: [1, -2, 8, 12, 5, 15],
+  averageTimeDeltas: [1, -2, 8, 12, 5, 15, 3],
 };
 
 const DEMO_TRIP_LEGS_PAGE_SIZE = 10;

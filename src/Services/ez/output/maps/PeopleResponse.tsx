@@ -94,6 +94,7 @@ export const PeopleResponse = () => {
               <Radio.Button value="switchedToSubway">{t('peopleResponse.responseTypes.switchedToSubway')}</Radio.Button>
               <Radio.Button value="switchedToWalking">{t('peopleResponse.responseTypes.switchedToWalking')}</Radio.Button>
               <Radio.Button value="switchedToBiking">{t('peopleResponse.responseTypes.switchedToBiking')}</Radio.Button>
+              <Radio.Button value="switchedToCar">{t('peopleResponse.responseTypes.switchedToCar')}</Radio.Button>
               <Radio.Button value="cancelledTrip">{t('peopleResponse.responseTypes.cancelledTrip')}</Radio.Button>
             </Radio.Group>
           </div>

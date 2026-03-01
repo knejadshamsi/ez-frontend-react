@@ -62,8 +62,9 @@ export interface EZPeopleResponseParagraph1Data {
   switchedToSubwayPercentage: number;
   switchedToWalkingPercentage: number;
   switchedToBikingPercentage: number;
+  switchedToCarPercentage: number;
   cancelledTripPercentage: number;
-  penaltyChargeAmount: number;
+  penaltyCharges: Array<{ zoneName: string; rate: number }>;
   totalAffectedTrips: number;
 }
 
@@ -75,6 +76,7 @@ export interface EZPeopleResponseParagraph2Data {
   averageTimeSwitchedToSubway: number;
   averageTimeSwitchedToWalking: number;
   averageTimeSwitchedToBiking: number;
+  averageTimeSwitchedToCar: number;
 }
 
 // People Response Breakdown Chart - stacked bar percentages (SSE: data_people_response_breakdown)
@@ -179,6 +181,7 @@ export interface PeopleResponseMapData {
     switchedToSubway: MapPointData[];
     switchedToWalking: MapPointData[];
     switchedToBiking: MapPointData[];
+    switchedToCar: MapPointData[];
     cancelledTrip: MapPointData[];
   };
   destination: {
@@ -188,6 +191,7 @@ export interface PeopleResponseMapData {
     switchedToSubway: MapPointData[];
     switchedToWalking: MapPointData[];
     switchedToBiking: MapPointData[];
+    switchedToCar: MapPointData[];
     cancelledTrip: MapPointData[];
   };
 }

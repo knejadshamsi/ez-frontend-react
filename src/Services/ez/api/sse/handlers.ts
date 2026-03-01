@@ -292,8 +292,9 @@ function handleDataMessage(
         subwayPct: number;
         walkPct: number;
         bikePct: number;
+        carPct: number;
         cancelledPct: number;
-        penaltyCharge: number;
+        penaltyCharges: Array<{ zoneName: string; rate: number }>;
         totalAffectedTrips: number;
       };
       useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph1Data({
@@ -303,8 +304,9 @@ function handleDataMessage(
         switchedToSubwayPercentage: data.subwayPct,
         switchedToWalkingPercentage: data.walkPct,
         switchedToBikingPercentage: data.bikePct,
+        switchedToCarPercentage: data.carPct,
         cancelledTripPercentage: data.cancelledPct,
-        penaltyChargeAmount: data.penaltyCharge,
+        penaltyCharges: data.penaltyCharges,
         totalAffectedTrips: data.totalAffectedTrips,
       });
       break;
@@ -318,6 +320,7 @@ function handleDataMessage(
         avgSubwayTime: number;
         avgWalkTime: number;
         avgBikeTime: number;
+        avgCarTime: number;
       };
       useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph2Data({
         averageTimePaidPenalty: data.avgPenaltyTime,
@@ -326,6 +329,7 @@ function handleDataMessage(
         averageTimeSwitchedToSubway: data.avgSubwayTime,
         averageTimeSwitchedToWalking: data.avgWalkTime,
         averageTimeSwitchedToBiking: data.avgBikeTime,
+        averageTimeSwitchedToCar: data.avgCarTime,
       });
       break;
     }

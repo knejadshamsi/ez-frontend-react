@@ -72,6 +72,12 @@ function generateEnglishParagraph2(
     }
   }
 
+  // Car switch analysis (avoidance, not sustainable)
+  if (paragraph1Data.switchedToCarPercentage > 0) {
+    const carTime = paragraph2Data.averageTimeSwitchedToCar;
+    sentences.push(`Those who switched to car ${carTime >= 0 ? 'added' : 'saved'} an average of ${Math.abs(carTime).toFixed(0)} minutes per trip.`);
+  }
+
   // Rerouting analysis
   const reroutingAnalysis = interpretReroutingImpact(
     paragraph1Data.reroutedPercentage,
@@ -143,6 +149,12 @@ function generateFrenchParagraph2(
     } else {
       phrases.push(`Les impacts sur le temps ont varié : certains modes ont permis d'économiser jusqu'à ${Math.abs(tempsMin).toFixed(0)} minutes tandis que d'autres ont ajouté ${tempsMax.toFixed(0)} minutes (${pctMin}-${pctMax} % du budget de déplacement Marchetti de ${MARCHETTI_CONSTANT} minutes), indiquant une couverture inégale du transport en commun.`);
     }
+  }
+
+  // Analyse du passage en voiture (évitement, non durable)
+  if (donneesP1.switchedToCarPercentage > 0) {
+    const tempsVoiture = donneesP2.averageTimeSwitchedToCar;
+    phrases.push(`Ceux qui sont passés en voiture ont ${tempsVoiture >= 0 ? 'ajouté' : 'économisé'} en moyenne ${Math.abs(tempsVoiture).toFixed(0)} minutes par trajet.`);
   }
 
   // Analyse du détournement

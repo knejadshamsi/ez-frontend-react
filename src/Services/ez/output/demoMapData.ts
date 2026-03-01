@@ -27,6 +27,7 @@ const DEMO_CONFIG = {
     switchedToSubway: 0.4,
     switchedToWalking: 0.3,
     switchedToBiking: 0.2,
+    switchedToCar: 0.35,
     cancelledTrip: 0.3,
   },
   tripImpacts: [
@@ -118,6 +119,7 @@ export const generateDemoPeopleResponseMapData = (): PeopleResponseMapData => {
     switchedToSubway: generateRandomPoints(Math.floor(base * mult.switchedToSubway), bounds),
     switchedToWalking: generateRandomPoints(Math.floor(base * mult.switchedToWalking), bounds),
     switchedToBiking: generateRandomPoints(Math.floor(base * mult.switchedToBiking), bounds),
+    switchedToCar: generateRandomPoints(Math.floor(base * mult.switchedToCar), bounds),
     cancelledTrip: generateRandomPoints(Math.floor(base * mult.cancelledTrip), bounds),
   });
 

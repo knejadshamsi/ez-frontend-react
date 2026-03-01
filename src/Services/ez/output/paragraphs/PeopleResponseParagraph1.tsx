@@ -20,7 +20,7 @@ interface BehaviorSplit {
 }
 
 function calculateBehaviorSplit(data: EZPeopleResponseParagraph1Data): BehaviorSplit {
-  const avoidancePct = data.paidPenaltyPercentage + data.reroutedPercentage;
+  const avoidancePct = data.paidPenaltyPercentage + data.reroutedPercentage + data.switchedToCarPercentage;
   const modalShiftPct = data.switchedToBusPercentage + data.switchedToSubwayPercentage +
                         data.switchedToWalkingPercentage + data.switchedToBikingPercentage;
 
@@ -72,18 +72,24 @@ function compareToBenchmarks(modalShiftPct: number): string {
 }
 
 function analyzeValueOfTime(data: EZPeopleResponseParagraph1Data): string | null {
-  if (!data.penaltyChargeAmount || data.paidPenaltyPercentage === 0) {
+  if (!data.penaltyCharges || data.penaltyCharges.length === 0 || data.paidPenaltyPercentage === 0) {
     return null;
   }
 
-  return `The $${data.penaltyChargeAmount.toFixed(2)} charge resulted in ${data.paidPenaltyPercentage.toFixed(0)}% choosing to pay the penalty.`;
+  if (data.penaltyCharges.length === 1) {
+    const charge = data.penaltyCharges[0];
+    return `The $${charge.rate.toFixed(2)} charge in ${charge.zoneName} resulted in ${data.paidPenaltyPercentage.toFixed(0)}% choosing to pay the penalty.`;
+  }
+
+  const chargeDescriptions = data.penaltyCharges.map(c => `$${c.rate.toFixed(2)} (${c.zoneName})`).join(' and ');
+  return `Charges of ${chargeDescriptions} resulted in ${data.paidPenaltyPercentage.toFixed(0)}% choosing to pay the penalty.`;
 }
 
 function generateEnglishParagraph1(data: EZPeopleResponseParagraph1Data): string {
   const { avoidancePct, modalShiftPct, characterization } = calculateBehaviorSplit(data);
   const benchmarkComparison = compareToBenchmarks(modalShiftPct);
 
-  const sentence1 = `Affected trips ${characterization}, with ${avoidancePct.toFixed(0)}% choosing avoidance (${data.paidPenaltyPercentage.toFixed(0)}% paid penalty, ${data.reroutedPercentage.toFixed(0)}% rerouted) versus ${modalShiftPct.toFixed(0)}% adopting sustainable modes.`;
+  const sentence1 = `Affected trips ${characterization}, with ${avoidancePct.toFixed(0)}% choosing avoidance (${data.paidPenaltyPercentage.toFixed(0)}% paid penalty, ${data.reroutedPercentage.toFixed(0)}% rerouted, ${data.switchedToCarPercentage.toFixed(0)}% switched to car) versus ${modalShiftPct.toFixed(0)}% adopting sustainable modes.`;
   const sentence2 = `Modal shift performance ${benchmarkComparison}.`;
   const votAnalysis = analyzeValueOfTime(data);
   const sentence3 = votAnalysis || '';
@@ -100,7 +106,7 @@ interface RepartitionComportement {
 }
 
 function calculerRepartitionComportement(data: EZPeopleResponseParagraph1Data): RepartitionComportement {
-  const pctEvitement = data.paidPenaltyPercentage + data.reroutedPercentage;
+  const pctEvitement = data.paidPenaltyPercentage + data.reroutedPercentage + data.switchedToCarPercentage;
   const pctTransfertModal = data.switchedToBusPercentage + data.switchedToSubwayPercentage +
                            data.switchedToWalkingPercentage + data.switchedToBikingPercentage;
 
@@ -152,18 +158,24 @@ function comparerAuxReferences(pctTransfertModal: number): string {
 }
 
 function analyserValeurDuTemps(data: EZPeopleResponseParagraph1Data): string | null {
-  if (!data.penaltyChargeAmount || data.paidPenaltyPercentage === 0) {
+  if (!data.penaltyCharges || data.penaltyCharges.length === 0 || data.paidPenaltyPercentage === 0) {
     return null;
   }
 
-  return `Des frais de ${data.penaltyChargeAmount.toFixed(2).replace('.', ',')} $ ont entraîné que ${data.paidPenaltyPercentage.toFixed(0)} % ont choisi de payer la pénalité.`;
+  if (data.penaltyCharges.length === 1) {
+    const charge = data.penaltyCharges[0];
+    return `Des frais de ${charge.rate.toFixed(2).replace('.', ',')} $ dans ${charge.zoneName} ont entraîné que ${data.paidPenaltyPercentage.toFixed(0)} % ont choisi de payer la pénalité.`;
+  }
+
+  const descriptionsCharges = data.penaltyCharges.map(c => `${c.rate.toFixed(2).replace('.', ',')} $ (${c.zoneName})`).join(' et ');
+  return `Des frais de ${descriptionsCharges} ont entraîné que ${data.paidPenaltyPercentage.toFixed(0)} % ont choisi de payer la pénalité.`;
 }
 
 function generateFrenchParagraph1(data: EZPeopleResponseParagraph1Data): string {
   const { pctEvitement, pctTransfertModal, caracterisation } = calculerRepartitionComportement(data);
   const comparaisonReferences = comparerAuxReferences(pctTransfertModal);
 
-  const phrase1 = `Les déplacements touchés ${caracterisation}, avec ${pctEvitement.toFixed(0)} % choisissant l'évitement (${data.paidPenaltyPercentage.toFixed(0)} % ont payé la pénalité, ${data.reroutedPercentage.toFixed(0)} % ont dévié leur trajet) contre ${pctTransfertModal.toFixed(0)} % adoptant des modes durables.`;
+  const phrase1 = `Les déplacements touchés ${caracterisation}, avec ${pctEvitement.toFixed(0)} % choisissant l'évitement (${data.paidPenaltyPercentage.toFixed(0)} % ont payé la pénalité, ${data.reroutedPercentage.toFixed(0)} % ont dévié leur trajet, ${data.switchedToCarPercentage.toFixed(0)} % sont passés en voiture) contre ${pctTransfertModal.toFixed(0)} % adoptant des modes durables.`;
   const phrase2 = `La performance du transfert modal ${comparaisonReferences}.`;
   const analyseVDT = analyserValeurDuTemps(data);
   const phrase3 = analyseVDT || '';
