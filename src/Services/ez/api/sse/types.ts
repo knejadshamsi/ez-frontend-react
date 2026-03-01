@@ -44,14 +44,16 @@ interface EmissionsParagraph1Payload {
 // Air quality and vehicle fleet data (SSE: data_text_paragraph2_emissions)
 interface EmissionsParagraph2Payload {
   pm25PostPolicy: number;
-  zoneArea: number;
-  mixingHeight: number;
-  evShareBaseline: number;
-  evSharePostPolicy: number;
-  standardShareBaseline: number;
-  standardSharePostPolicy: number;
-  heavyShareBaseline: number;
-  heavySharePostPolicy: number;
+  zeroEmissionShareBaseline: number;
+  zeroEmissionSharePostPolicy: number;
+  nearZeroEmissionShareBaseline: number;
+  nearZeroEmissionSharePostPolicy: number;
+  lowEmissionShareBaseline: number;
+  lowEmissionSharePostPolicy: number;
+  midEmissionShareBaseline: number;
+  midEmissionSharePostPolicy: number;
+  highEmissionShareBaseline: number;
+  highEmissionSharePostPolicy: number;
 }
 
 // Emissions bar chart arrays (SSE: data_chart_bar_emissions)

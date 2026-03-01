@@ -54,21 +54,21 @@ function getWHOTargetDescription(value: number, pollutant: Pollutant): string {
 
 function generateEnglishParagraph2(data: EZEmissionsParagraph2Data): string {
   // PM2.5 concentration and WHO comparison
-  const pm25Concentration = tonnesToConcentration(
-    data.pm25PostPolicy,
-    data.zoneAreaKm2,
-    data.mixingHeightMeters
-  );
+  const pm25Concentration = tonnesToConcentration(data.pm25PostPolicy);
 
   const whoPosition = getWHOTargetDescription(pm25Concentration, 'pm25');
   const pm25Sentence = `PM2.5 concentration fell to ${pm25Concentration.toFixed(1)} µg/m³, ${whoPosition}.`;
 
   // Fleet composition changes
-  const evDelta = data.electricVehicleSharePostPolicy - data.electricVehicleShareBaseline;
-  const standardDelta = data.standardVehicleSharePostPolicy - data.standardVehicleShareBaseline;
-  const heavyDelta = data.heavyVehicleSharePostPolicy - data.heavyVehicleShareBaseline;
+  const zeroDelta = data.zeroEmissionSharePostPolicy - data.zeroEmissionShareBaseline;
+  const nearZeroDelta = data.nearZeroEmissionSharePostPolicy - data.nearZeroEmissionShareBaseline;
+  const lowDelta = data.lowEmissionSharePostPolicy - data.lowEmissionShareBaseline;
+  const midDelta = data.midEmissionSharePostPolicy - data.midEmissionShareBaseline;
+  const highDelta = data.highEmissionSharePostPolicy - data.highEmissionShareBaseline;
 
-  const fleetTransition = `Fleet composition shifted towards electrification, with electric vehicles gaining ${Math.abs(evDelta).toFixed(1)} percentage points while standard combustion vehicles declined ${Math.abs(standardDelta).toFixed(1)} percentage points. Heavy vehicles ${heavyDelta >= 0 ? 'increased' : 'decreased'} ${Math.abs(heavyDelta).toFixed(1)} percentage points, reflecting expanded freight and transit operations.`;
+  const formatDelta = (delta: number) => `${delta >= 0 ? 'increased' : 'decreased'} ${Math.abs(delta).toFixed(1)} percentage points`;
+
+  const fleetTransition = `Fleet composition shifted across emission tiers: zero-emission vehicles ${formatDelta(zeroDelta)}, near-zero ${formatDelta(nearZeroDelta)}, low-emission ${formatDelta(lowDelta)}, mid-emission ${formatDelta(midDelta)}, and high-emission vehicles ${formatDelta(highDelta)}.`;
 
   // City benchmarks
   const cityComparison = `London's Ultra Low Emission Zone reached ${CITY_BENCHMARKS.londonULEZ} µg/m³ after two years. Paris' Zone à Faibles Émissions achieved ${CITY_BENCHMARKS.parisZFE} µg/m³.`;
@@ -117,21 +117,21 @@ function getDescriptionCibleOMS(valeur: number, polluant: Pollutant): string {
 
 function generateFrenchParagraph2(data: EZEmissionsParagraph2Data): string {
   // Concentration de PM2.5 et comparaison avec l'OMS
-  const concentrationPM25 = tonnesToConcentration(
-    data.pm25PostPolicy,
-    data.zoneAreaKm2,
-    data.mixingHeightMeters
-  );
+  const concentrationPM25 = tonnesToConcentration(data.pm25PostPolicy);
 
   const positionOMS = getDescriptionCibleOMS(concentrationPM25, 'pm25');
   const phrasePM25 = `La concentration de PM2,5 a chuté à ${concentrationPM25.toFixed(1).replace('.', ',')} µg/m³, ${positionOMS}.`;
 
   // Changements dans la composition du parc
-  const deltaVE = data.electricVehicleSharePostPolicy - data.electricVehicleShareBaseline;
-  const deltaStandard = data.standardVehicleSharePostPolicy - data.standardVehicleShareBaseline;
-  const deltaLourds = data.heavyVehicleSharePostPolicy - data.heavyVehicleShareBaseline;
+  const deltaZero = data.zeroEmissionSharePostPolicy - data.zeroEmissionShareBaseline;
+  const deltaProcheZero = data.nearZeroEmissionSharePostPolicy - data.nearZeroEmissionShareBaseline;
+  const deltaFaible = data.lowEmissionSharePostPolicy - data.lowEmissionShareBaseline;
+  const deltaMoyen = data.midEmissionSharePostPolicy - data.midEmissionShareBaseline;
+  const deltaEleve = data.highEmissionSharePostPolicy - data.highEmissionShareBaseline;
 
-  const transitionParc = `La composition du parc s'est orientée vers l'électrification, les véhicules électriques gagnant ${Math.abs(deltaVE).toFixed(1).replace('.', ',')} points de pourcentage tandis que les véhicules à combustion standard ont diminué de ${Math.abs(deltaStandard).toFixed(1).replace('.', ',')} points de pourcentage. Les véhicules lourds ${deltaLourds >= 0 ? 'ont augmenté' : 'ont diminué'} de ${Math.abs(deltaLourds).toFixed(1).replace('.', ',')} points de pourcentage, reflétant l'expansion des opérations de fret et de transport en commun.`;
+  const formatDelta = (delta: number) => `${delta >= 0 ? 'ont augmenté' : 'ont diminué'} de ${Math.abs(delta).toFixed(1).replace('.', ',')} points de pourcentage`;
+
+  const transitionParc = `La composition du parc a évolué selon les niveaux d'émissions\u00A0: les véhicules zéro émission ${formatDelta(deltaZero)}, les quasi-zéro ${formatDelta(deltaProcheZero)}, les faibles émissions ${formatDelta(deltaFaible)}, les émissions moyennes ${formatDelta(deltaMoyen)} et les véhicules à fortes émissions ${formatDelta(deltaEleve)}.`;
 
   // Comparaison avec d'autres villes
   const comparaisonVilles = `La zone à très faibles émissions de Londres a atteint ${CITY_BENCHMARKS.londonULEZ} µg/m³ après deux ans. La Zone à Faibles Émissions de Paris a atteint ${CITY_BENCHMARKS.parisZFE} µg/m³.`;

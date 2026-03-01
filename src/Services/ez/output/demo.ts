@@ -41,14 +41,16 @@ const DEMO_EMISSIONS_PARAGRAPH1_DATA: EZEmissionsParagraph1Data = {
 
 const DEMO_EMISSIONS_PARAGRAPH2_DATA: EZEmissionsParagraph2Data = {
   pm25PostPolicy: 0.027,
-  zoneAreaKm2: 42.5,
-  mixingHeightMeters: 1000,
-  electricVehicleShareBaseline: 5.2,
-  electricVehicleSharePostPolicy: 8.5,
-  standardVehicleShareBaseline: 68.4,
-  standardVehicleSharePostPolicy: 62.3,
-  heavyVehicleShareBaseline: 26.4,
-  heavyVehicleSharePostPolicy: 29.2,
+  zeroEmissionShareBaseline: 5.2,
+  zeroEmissionSharePostPolicy: 8.5,
+  nearZeroEmissionShareBaseline: 12.1,
+  nearZeroEmissionSharePostPolicy: 15.3,
+  lowEmissionShareBaseline: 28.4,
+  lowEmissionSharePostPolicy: 30.7,
+  midEmissionShareBaseline: 32.9,
+  midEmissionSharePostPolicy: 28.1,
+  highEmissionShareBaseline: 21.4,
+  highEmissionSharePostPolicy: 17.4,
 };
 
 const DEMO_EMISSIONS_BAR_CHART_DATA: EZEmissionsBarChartData = {
@@ -57,8 +59,8 @@ const DEMO_EMISSIONS_BAR_CHART_DATA: EZEmissionsBarChartData = {
 };
 
 const DEMO_EMISSIONS_PIE_CHARTS_DATA: EZEmissionsPieChartsData = {
-  vehicleShareBaseline: [5.2, 68.4, 26.4],
-  vehicleSharePostPolicy: [8.5, 62.3, 29.2],
+  vehicleShareBaseline: [5.2, 12.1, 28.4, 32.9, 21.4],
+  vehicleSharePostPolicy: [8.5, 15.3, 30.7, 28.1, 17.4],
 };
 
 const DEMO_PEOPLE_RESPONSE_PARAGRAPH1_DATA: EZPeopleResponseParagraph1Data = {

@@ -233,25 +233,29 @@ function handleDataMessage(
     case 'data_text_paragraph2_emissions': {
       const data = payload as {
         pm25PostPolicy: number;
-        zoneArea: number;
-        mixingHeight: number;
-        evShareBaseline: number;
-        evSharePostPolicy: number;
-        standardShareBaseline: number;
-        standardSharePostPolicy: number;
-        heavyShareBaseline: number;
-        heavySharePostPolicy: number;
+        zeroEmissionShareBaseline: number;
+        zeroEmissionSharePostPolicy: number;
+        nearZeroEmissionShareBaseline: number;
+        nearZeroEmissionSharePostPolicy: number;
+        lowEmissionShareBaseline: number;
+        lowEmissionSharePostPolicy: number;
+        midEmissionShareBaseline: number;
+        midEmissionSharePostPolicy: number;
+        highEmissionShareBaseline: number;
+        highEmissionSharePostPolicy: number;
       };
       useEZOutputEmissionsStore.getState().setEmissionsParagraph2Data({
         pm25PostPolicy: data.pm25PostPolicy,
-        zoneAreaKm2: data.zoneArea,
-        mixingHeightMeters: data.mixingHeight,
-        electricVehicleShareBaseline: data.evShareBaseline,
-        electricVehicleSharePostPolicy: data.evSharePostPolicy,
-        standardVehicleShareBaseline: data.standardShareBaseline,
-        standardVehicleSharePostPolicy: data.standardSharePostPolicy,
-        heavyVehicleShareBaseline: data.heavyShareBaseline,
-        heavyVehicleSharePostPolicy: data.heavySharePostPolicy,
+        zeroEmissionShareBaseline: data.zeroEmissionShareBaseline,
+        zeroEmissionSharePostPolicy: data.zeroEmissionSharePostPolicy,
+        nearZeroEmissionShareBaseline: data.nearZeroEmissionShareBaseline,
+        nearZeroEmissionSharePostPolicy: data.nearZeroEmissionSharePostPolicy,
+        lowEmissionShareBaseline: data.lowEmissionShareBaseline,
+        lowEmissionSharePostPolicy: data.lowEmissionSharePostPolicy,
+        midEmissionShareBaseline: data.midEmissionShareBaseline,
+        midEmissionSharePostPolicy: data.midEmissionSharePostPolicy,
+        highEmissionShareBaseline: data.highEmissionShareBaseline,
+        highEmissionSharePostPolicy: data.highEmissionSharePostPolicy,
       });
       break;
     }

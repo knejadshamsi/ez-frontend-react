@@ -28,14 +28,16 @@ export interface EZEmissionsParagraph1Data {
 // Emissions Paragraph 2 - air quality and vehicle fleet (SSE: data_emissions_paragraph2)
 export interface EZEmissionsParagraph2Data {
   pm25PostPolicy: number;
-  zoneAreaKm2: number;
-  mixingHeightMeters: number;
-  electricVehicleShareBaseline: number;
-  electricVehicleSharePostPolicy: number;
-  standardVehicleShareBaseline: number;
-  standardVehicleSharePostPolicy: number;
-  heavyVehicleShareBaseline: number;
-  heavyVehicleSharePostPolicy: number;
+  zeroEmissionShareBaseline: number;
+  zeroEmissionSharePostPolicy: number;
+  nearZeroEmissionShareBaseline: number;
+  nearZeroEmissionSharePostPolicy: number;
+  lowEmissionShareBaseline: number;
+  lowEmissionSharePostPolicy: number;
+  midEmissionShareBaseline: number;
+  midEmissionSharePostPolicy: number;
+  highEmissionShareBaseline: number;
+  highEmissionSharePostPolicy: number;
 }
 
 // Emissions Bar Chart - pollutant arrays (SSE: data_emissions_bar_chart) [CO2, NOx, PM2.5, PM10]
@@ -44,7 +46,7 @@ export interface EZEmissionsBarChartData {
   postPolicyEmissions: number[];
 }
 
-// Emissions Pie Charts - vehicle type contributions (SSE: data_emissions_pie_charts) [Electric, Standard, Heavy]
+// Emissions Pie Charts - vehicle type contributions (SSE: data_emissions_pie_charts) [ZeroEmission, NearZeroEmission, LowEmission, MidEmission, HighEmission]
 export interface EZEmissionsPieChartsData {
   vehicleShareBaseline: number[];
   vehicleSharePostPolicy: number[];
