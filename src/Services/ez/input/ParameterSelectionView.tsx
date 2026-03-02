@@ -5,9 +5,10 @@ import { useAPIPayloadStore, useEZServiceStore } from '~store'
 
 import { InputContainer } from './inputContainer'
 import { createAPIRequest, validateAPIRequest, startSimulation } from '~ez/api'
-import { hasOutputData } from '~stores/output'
+import { hasOutputData, resetAllEZOutputStores } from '~stores/output'
 import { resetAllEZStores } from '~stores/reset'
 import { hasInputChangedFromDefault } from '~ez/exitHandler'
+import { useScenarioSnapshotStore, hasInputChanged } from '~stores/scenario'
 
 import { Button, Input, Modal, message } from 'antd'
 import { ArrowLeftOutlined, SendOutlined, EditOutlined, SaveOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
@@ -82,49 +83,23 @@ export const ParameterSelectionView = () => {
 
     const outputExists = hasOutputData();
 
-    if (isEzBackendAlive) {
-      if (outputExists) {
-        const instance = modal.confirm({
-          title: t('parameterSelection.previousResultsFound'),
-          icon: <ExclamationCircleOutlined />,
-          content: t('parameterSelection.previousResultsMessage'),
-          okText: t('parameterSelection.startNewSimulation'),
-          cancelText: t('parameterSelection.cancel'),
-          onOk() {
-            setIsNewSimulation(true);
-            setState('AWAIT_RESULTS');
-            startSimulation(setState, handleSimulationError);
-          },
-          footer: (_, { OkBtn, CancelBtn }) => (
-            <>
-              <CancelBtn />
-              <Button
-                type="primary"
-                onClick={() => {
-                  setState('RESULT_VIEW');
-                  instance.destroy();
-                }}
-              >
-                {t('parameterSelection.returnToOutput')}
-              </Button>
-              <OkBtn />
-            </>
-          ),
-        });
-      } else {
-        setIsNewSimulation(true);
-        setState('AWAIT_RESULTS');
-        startSimulation(setState, handleSimulationError);
-      }
-    } else {
-      if (outputExists) {
-        setState('RESULT_VIEW');
-      } else {
-        setIsNewSimulation(true);
-        setState('AWAIT_RESULTS');
-        startSimulation(setState, handleSimulationError);
-      }
+    if (outputExists && !hasInputChanged()) {
+      // Input identical to snapshot — silently return to results
+      setState('RESULT_VIEW');
+      return;
     }
+
+    if (outputExists) {
+      // Input changed — clean slate before new simulation
+      const setRequestId = useEZSessionStore.getState().setRequestId;
+      setRequestId('');
+      useScenarioSnapshotStore.getState().reset();
+      resetAllEZOutputStores();
+    }
+
+    setIsNewSimulation(true);
+    setState('AWAIT_RESULTS');
+    startSimulation(setState, handleSimulationError);
   }
 
   return (

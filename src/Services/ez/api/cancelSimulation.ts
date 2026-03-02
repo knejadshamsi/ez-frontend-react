@@ -1,32 +1,29 @@
 import axios from 'axios';
 import { getBackendUrl } from './config';
-import { useEZSessionStore } from '~stores/session';
-import { ApiResponse } from './apiResponse';
 
-// Cancels running simulation: notifies backend, closes SSE connection, cleans up resources
-export async function cancelSimulation(requestId: string): Promise<void> {
+export type CancelResult = 'success' | 'conflict' | 'timeout' | 'not_found' | 'error';
+
+// Cancels a running simulation via long-poll REST endpoint.
+// The backend blocks until cancellation is confirmed (up to 30s).
+// Returns the result — caller handles cleanup and UI feedback.
+export async function cancelSimulation(requestId: string): Promise<CancelResult> {
   const backendUrl = getBackendUrl();
-  const sessionStore = useEZSessionStore.getState();
-  const cleanup = sessionStore.sseCleanup;
 
-  // Notify backend to stop
   try {
-    const response = await axios.post<ApiResponse<void>>(
-      `${backendUrl}/scenario/cancel`,
-      { requestId },
-      { timeout: 5000 }
+    const response = await axios.post(
+      `${backendUrl}/scenario/${requestId}/cancel`,
+      null,
+      { timeout: 35000, validateStatus: () => true }
     );
 
-    if (response.data.statusCode !== 200) {
-      throw new Error(`Cancel failed: ${response.data.message}`);
+    switch (response.status) {
+      case 200: return 'success';
+      case 404: return 'not_found';
+      case 408: return 'timeout';
+      case 409: return 'conflict';
+      default: return 'error';
     }
-  } catch (error) {
-    console.error('[Cancel] Backend notification failed:', error);
-  }
-
-  // Close SSE connection and cleanup
-  if (cleanup) {
-    cleanup();
-    sessionStore.setSseCleanup(null);
+  } catch {
+    return 'error';
   }
 }

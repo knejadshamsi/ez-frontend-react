@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button } from 'antd';
+import { Button, message } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useProgressStore, getProgressStatus, canViewResultsEarly } from './store';
@@ -11,8 +11,9 @@ import {
   useEZOutputPeopleResponseStore,
   useEZOutputTripLegsStore,
 } from '~stores/output';
+import { resetAllEZOutputStores } from '~stores/output';
 import { cancelSimulation } from '~ez/api';
-import { SuccessState, ErrorState, RunningState } from './states';
+import { SuccessState, ErrorState, RunningState, CancellingState } from './states';
 import styles from './Progress.module.less';
 import './locales';
 
@@ -21,6 +22,7 @@ export { decodeProgressAlert } from './decoder';
 
 export const Progress = () => {
   const { t } = useTranslation('ez-progress');
+  const [messageApi, contextHolder] = message.useMessage();
   const state = useProgressStore();
   const setState = useEZServiceStore((state) => state.setState);
   const requestId = useEZSessionStore((state) => state.requestId);
@@ -92,22 +94,54 @@ export const Progress = () => {
 
   if (!state.isVisible) return null;
 
+  if (status === 'cancelling') {
+    return <>{contextHolder}<CancellingState /></>;
+  }
+
   if (status === 'success') {
-    return <SuccessState />;
+    return <>{contextHolder}<SuccessState /></>;
   }
 
   if (status === 'error') {
-    return <ErrorState errorMessage={state.errorMessage} onClose={hideProgress} />;
+    return <>{contextHolder}<ErrorState errorMessage={state.errorMessage} onClose={hideProgress} /></>;
   }
 
-  if (!isNewSimulation) {
-    const handleCancel = async () => {
-      await cancelSimulation(requestId);
-      resetProgress();
-      setState('PARAMETER_SELECTION');
-    };
+  const handleCancel = async () => {
+    useProgressStore.getState().setCancelling(true);
+    const result = await cancelSimulation(requestId);
 
+    switch (result) {
+      case 'success':
+        resetAllEZOutputStores();
+        useEZSessionStore.getState().setSseCleanup(null);
+        resetProgress();
+        setState('PARAMETER_SELECTION');
+        messageApi.success(t('cancellation.success'));
+        break;
+      case 'timeout':
+        useEZSessionStore.getState().abortSseStream();
+        resetProgress();
+        setState('PARAMETER_SELECTION');
+        messageApi.error(t('cancellation.timeout'));
+        break;
+      case 'conflict':
+        resetProgress();
+        setState('PARAMETER_SELECTION');
+        messageApi.warning(t('cancellation.conflict'));
+        break;
+      case 'not_found':
+      case 'error':
+        useEZSessionStore.getState().abortSseStream();
+        resetProgress();
+        setState('PARAMETER_SELECTION');
+        messageApi.error(t('cancellation.failed'));
+        break;
+    }
+  };
+
+  if (!isNewSimulation) {
     return (
+      <>{contextHolder}
       <div className={styles.loadingScenarioContainer}>
         <div className={styles.loadingContent}>
           <LoadingOutlined className={styles.spinner} />
@@ -117,6 +151,7 @@ export const Progress = () => {
           <Button onClick={handleCancel}>{t('buttons.cancel')}</Button>
         </div>
       </div>
+      </>
     );
   }
 
@@ -125,18 +160,14 @@ export const Progress = () => {
     setState('RESULT_VIEW');
   };
 
-  const handleCancel = async () => {
-    await cancelSimulation(requestId);
-    resetProgress();
-    setState('PARAMETER_SELECTION');
-  };
-
   return (
+    <>{contextHolder}
     <RunningState
       completedSteps={state.completedSteps}
       canViewEarly={canViewEarly}
       onViewResults={handleViewResults}
       onCancel={handleCancel}
     />
+    </>
   );
 };

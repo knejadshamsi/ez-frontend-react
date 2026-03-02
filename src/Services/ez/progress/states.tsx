@@ -1,4 +1,4 @@
-import { CheckOutlined } from '@ant-design/icons';
+import { CheckOutlined, LoadingOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { StepStatus, StepName, PREPROCESSING_STEPS, SIMULATING_STEPS, POSTPROCESSING_STEPS } from './store';
 import { StepItem } from './components';
@@ -17,6 +17,19 @@ export const SuccessState = () => {
       <div className={styles.notificationContent}>
         <CheckOutlined className={styles.successIcon} />
         <span className={styles.successMessage}>{t('success.title')}</span>
+      </div>
+    </div>
+  );
+};
+
+export const CancellingState = () => {
+  const { t } = useTranslation('ez-progress');
+
+  return (
+    <div className={styles.simulationNotification}>
+      <div className={styles.loadingContent}>
+        <LoadingOutlined className={styles.spinner} />
+        <span className={styles.loadingText}>{t('cancellation.inProgress')}</span>
       </div>
     </div>
   );

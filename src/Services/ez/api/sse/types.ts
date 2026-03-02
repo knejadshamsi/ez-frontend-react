@@ -156,6 +156,11 @@ export type SSEMessage =
   | { messageType: 'error_map_people_response'; payload: ErrorMessagePayload; timestamp: string }
   | { messageType: 'error_map_trip_legs'; payload: ErrorMessagePayload; timestamp: string }
 
+  // Scenario preamble (load/refetch only)
+  | { messageType: 'scenario_status'; payload: { status: string }; timestamp: string }
+  | { messageType: 'scenario_input'; payload: Record<string, unknown>; timestamp: string }
+  | { messageType: 'scenario_session'; payload: Record<string, unknown>; timestamp: string }
+
   // Catch-all for unknown message types
   | { messageType: string; payload: Record<string, unknown>; timestamp: string };
 
@@ -180,4 +185,7 @@ export interface SimulationStreamConfig {
   onComplete?: () => void;
   onError?: (error: SimulationError) => void;
   onTimelineEvent?: (event: string) => void;
+  onScenarioStatus?: (status: string) => void;
+  onScenarioInput?: (input: Record<string, unknown>) => void;
+  onScenarioSession?: (session: Record<string, unknown>) => void;
 }

@@ -34,6 +34,13 @@ export const locales = {
       postprocessing_people_response: 'People Response',
       postprocessing_trip_legs: 'Trip Legs',
     },
+    cancellation: {
+      inProgress: 'Cancelling simulation...',
+      success: 'Simulation cancelled',
+      failed: 'Failed to cancel simulation',
+      timeout: 'Cancellation timed out — simulation may still be running',
+      conflict: 'Simulation has already completed',
+    },
   },
   fr: {
     loadingScenario: 'Chargement du scénario, veuillez patienter.',
@@ -67,6 +74,13 @@ export const locales = {
       postprocessing_emissions: 'Émissions',
       postprocessing_people_response: 'Réponse des personnes',
       postprocessing_trip_legs: 'Segments de trajet',
+    },
+    cancellation: {
+      inProgress: 'Annulation de la simulation...',
+      success: 'Simulation annulée',
+      failed: 'Échec de l\'annulation de la simulation',
+      timeout: 'Délai d\'annulation dépassé — la simulation peut encore être en cours',
+      conflict: 'La simulation est déjà terminée',
     },
   },
 } as const;

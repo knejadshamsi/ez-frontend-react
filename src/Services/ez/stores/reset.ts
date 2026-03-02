@@ -4,6 +4,7 @@ import { useDrawingStateStore } from './drawingState';
 import { resetAllEZOutputStores } from './output';
 import { useProgressStore } from '../progress/store';
 import { cancelSimulation } from '../api/cancelSimulation';
+import { useScenarioSnapshotStore } from './scenario';
 
 export const resetAllEZStores = async (): Promise<void> => {
   try {
@@ -22,6 +23,7 @@ export const resetAllEZStores = async (): Promise<void> => {
     useAPIPayloadStore.getState().reset();
     useDrawingStateStore.getState().reset();
     useDrawToolStore.getState().reset();
+    useScenarioSnapshotStore.getState().reset();
     useEZServiceStore.getState().reset();
   } catch (error) {
     console.error('[EZ Reset] Error during reset:', error);

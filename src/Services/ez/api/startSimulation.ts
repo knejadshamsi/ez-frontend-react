@@ -11,9 +11,9 @@ import {
 } from '../progress';
 import { useProgressStore } from '../progress/store';
 import { loadDemoData } from '../output/demo';
-import { fetchScenarioMainInput, restoreStoresFromInput } from './fetchScenarioInput';
+import { restoreStoresFromInput } from './fetchScenarioInput';
 import { updateScenarioMetadata } from './updateScenarioMetadata';
-import { fetchScenarioMetadata } from './fetchScenarioMetadata';
+import { useScenarioSnapshotStore } from '~stores/scenario';
 
 export const startSimulation = async (
   setState: (state: EZStateType) => void,
@@ -168,7 +168,8 @@ const runRealSimulation = (
 export const loadScenario = async (
   requestId: string,
   setState: (state: EZStateType) => void,
-  onError: (errorMessage: string) => void
+  onError: (errorMessage: string) => void,
+  onNonCompleted?: (status: string) => void
 ): Promise<void> => {
   const isEzBackendAlive = useEZServiceStore.getState().isEzBackendAlive;
   const setIsNewSimulation = useEZSessionStore.getState().setIsNewSimulation;
@@ -177,39 +178,16 @@ export const loadScenario = async (
   setIsNewSimulation(false);
   setState('AWAIT_RESULTS');
 
+  // Reset snapshot store for fresh load
+  useScenarioSnapshotStore.getState().reset();
+
   if (!isEzBackendAlive) {
     const cleanup = runDemoScenarioLoad(setState);
     setSseCleanup(cleanup);
     return;
   }
 
-  try {
-    // Fetch main input (simulation data)
-    const mainInput = await fetchScenarioMainInput(requestId);
-
-    // Fetch metadata (UI state)
-    const metadata = await fetchScenarioMetadata(requestId);
-
-    // Both succeeded - restore stores from input data
-    restoreStoresFromInput(mainInput, metadata);
-
-  } catch (error) {
-    // Either main input OR metadata failed - reset all stores
-    console.error('[Load Scenario] Failed to load scenario data:', error);
-
-    // CRITICAL: Reset all stores to clean up any partial data
-    const { resetAllEZStores } = await import('~stores/reset');
-    await resetAllEZStores();
-
-    const errorMessage = error instanceof Error
-      ? error.message
-      : 'Failed to load scenario data. Both simulation data and metadata are required.';
-
-    onError(errorMessage);
-    return; // Stop execution
-  }
-
-  runRealScenarioLoad(requestId, setState, onError);
+  runRealScenarioLoad(requestId, setState, onError, onNonCompleted);
 };
 
 const runDemoScenarioLoad = (setState: (state: EZStateType) => void): (() => void) => {
@@ -234,22 +212,61 @@ const runDemoScenarioLoad = (setState: (state: EZStateType) => void): (() => voi
 const runRealScenarioLoad = (
   requestId: string,
   setState: (state: EZStateType) => void,
-  onError: (errorMessage: string) => void
+  onError: (errorMessage: string) => void,
+  onNonCompleted?: (status: string) => void
 ): void => {
   const setSseCleanup = useEZSessionStore.getState().setSseCleanup;
   const backendUrl = getBackendUrl();
+  const snapshotStore = useScenarioSnapshotStore.getState;
 
-  console.log('[REAL BACKEND] Loading scenario output data:', requestId);
+  console.log('[REAL BACKEND] Loading scenario via SSE preamble:', requestId);
 
-  showProgress();
+  let abortStream: (() => void) | null = null;
 
   const cleanup = startSimulationStream({
     endpoint: `${backendUrl}/scenario/${requestId}`,
     payload: null,
     method: 'GET',
 
-    onStarted: (returnedRequestId: string) => {
-      console.log('[SSE] Scenario output stream started:', returnedRequestId);
+    onScenarioStatus: (status: string) => {
+      console.log('[SSE] Scenario status:', status);
+
+      if (status === 'DELETED') {
+        // No input/session will follow — abort immediately
+        if (abortStream) {
+          abortStream();
+          setSseCleanup(null);
+        }
+        if (onNonCompleted) {
+          onNonCompleted(status);
+        } else {
+          onError('This scenario has been deleted');
+        }
+      }
+    },
+
+    onScenarioSession: () => {
+      // Session is the last preamble message — act on status now
+      const status = snapshotStore().status;
+      const input = snapshotStore().input;
+      const session = snapshotStore().session;
+
+      if (status === 'COMPLETED') {
+        // Restore stores and show progress — data messages will follow
+        restoreStoresFromInput(input!, session);
+        showProgress();
+      } else if (status === 'CANCELLED' || status === 'FAILED') {
+        // Non-completed: abort stream, let caller handle UX
+        if (abortStream) {
+          abortStream();
+          setSseCleanup(null);
+        }
+        if (onNonCompleted) {
+          onNonCompleted(status);
+        } else {
+          onError(`Scenario was ${status.toLowerCase()}`);
+        }
+      }
     },
 
     onComplete: () => {
@@ -268,6 +285,7 @@ const runRealScenarioLoad = (
     },
   });
 
+  abortStream = cleanup;
   setSseCleanup(cleanup);
 };
 

@@ -1,8 +1,10 @@
-import { Space, Button, Input, Typography, message } from 'antd'
+import { Space, Button, Input, Typography, message, Modal } from 'antd'
 import { useTranslation } from 'react-i18next'
 import { useEZSessionStore } from '~stores/session'
 import { useEZServiceStore } from '~store'
 import { loadScenario } from '~ez/api'
+import { useScenarioSnapshotStore } from '~stores/scenario'
+import { restoreStoresFromInput } from '~ez/api/fetchScenarioInput'
 import previousScenarios from './previousScenarios.json'
 import './locales'
 import styles from './WelcomeView.module.less'
@@ -22,6 +24,39 @@ export const WelcomeView = () => {
     setState('WELCOME');
   };
 
+  const handleNonCompleted = (status: string) => {
+    if (status === 'DELETED') {
+      messageApi.error(t('errors.scenarioDeleted'));
+      setState('WELCOME');
+      useScenarioSnapshotStore.getState().reset();
+      return;
+    }
+
+    // CANCELLED or FAILED
+    const statusLabel = status === 'CANCELLED' ? t('status.cancelled') : t('status.failed');
+
+    Modal.confirm({
+      title: t('nonCompleted.title'),
+      content: t('nonCompleted.content', { status: statusLabel }),
+      okText: t('nonCompleted.okText'),
+      cancelText: t('nonCompleted.cancelText'),
+      onOk: () => {
+        const snapshot = useScenarioSnapshotStore.getState();
+        if (snapshot.input) {
+          restoreStoresFromInput(snapshot.input, snapshot.session);
+        }
+        // Clear requestId so it's treated as a brand new scenario
+        setRequestId('');
+        useScenarioSnapshotStore.getState().reset();
+        setState('PARAMETER_SELECTION');
+      },
+      onCancel: () => {
+        useScenarioSnapshotStore.getState().reset();
+        setState('WELCOME');
+      },
+    });
+  };
+
   // CLICK HANDLING
 
   const handleViewScenario = async (scenarioRequestId: string) => {
@@ -31,7 +66,7 @@ export const WelcomeView = () => {
     }
 
     setRequestId(scenarioRequestId);
-    await loadScenario(scenarioRequestId, setState, handleScenarioLoadError);
+    await loadScenario(scenarioRequestId, setState, handleScenarioLoadError, handleNonCompleted);
   }
 
   const handleCreateScenario = () => {
@@ -44,7 +79,7 @@ export const WelcomeView = () => {
       return;
     }
 
-    await loadScenario(requestId, setState, handleScenarioLoadError);
+    await loadScenario(requestId, setState, handleScenarioLoadError, handleNonCompleted);
   }
 
 

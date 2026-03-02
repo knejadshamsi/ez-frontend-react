@@ -47,6 +47,13 @@ export function decodeSSEMessage(messageType: string): {
         message: messageType,
       };
 
+    case 'scenario':
+      // Preamble messages: scenario_status, scenario_input, scenario_session
+      return {
+        category: 'progress_alert',
+        message: messageType,
+      };
+
     default:
       console.warn(`[SSE] Unknown message type: ${messageType}`);
       return {

@@ -23,6 +23,17 @@ export const locales = {
       loadFailed: 'Failed to load scenario. Try again',
       invalidId: 'Invalid scenario ID',
       enterValidId: 'Please enter a valid scenario ID',
+      scenarioDeleted: 'This scenario has been deleted',
+    },
+    status: {
+      cancelled: 'cancelled',
+      failed: 'failed',
+    },
+    nonCompleted: {
+      title: 'Scenario not completed',
+      content: 'This scenario was {{status}}. Would you like to view the inputs and try again?',
+      okText: 'View inputs',
+      cancelText: 'Back to welcome',
     },
     scenarios: {
       SC001: {
@@ -57,6 +68,17 @@ export const locales = {
       loadFailed: 'Échec du chargement du scénario. Réessayez',
       invalidId: 'Identifiant de scénario invalide',
       enterValidId: 'Veuillez entrer un identifiant de scénario valide',
+      scenarioDeleted: 'Ce scénario a été supprimé',
+    },
+    status: {
+      cancelled: 'annulé',
+      failed: 'échoué',
+    },
+    nonCompleted: {
+      title: 'Scénario non complété',
+      content: 'Ce scénario a été {{status}}. Voulez-vous voir les paramètres et réessayer?',
+      okText: 'Voir les paramètres',
+      cancelText: 'Retour à l\'accueil',
     },
     scenarios: {
       SC001: {

@@ -20,6 +20,7 @@ interface ProgressState {
   isVisible: boolean;
   completedSteps: StepStatus;
   errorMessage: string;
+  isCancelling: boolean;
 }
 
 interface ProgressActions {
@@ -27,6 +28,7 @@ interface ProgressActions {
   hide: () => void;
   handleEvent: (stepName: string, stepState: StepState) => void;
   setError: (message: string) => void;
+  setCancelling: (value: boolean) => void;
   reset: () => void;
 }
 
@@ -79,6 +81,7 @@ export const useProgressStore = create<ProgressState & ProgressActions>((set) =>
   isVisible: false,
   completedSteps: { ...initialSteps },
   errorMessage: '',
+  isCancelling: false,
 
   show: () => set({
     isVisible: true,
@@ -107,10 +110,15 @@ export const useProgressStore = create<ProgressState & ProgressActions>((set) =>
     errorMessage: message,
   }),
 
+  setCancelling: (value: boolean) => set({
+    isCancelling: value,
+  }),
+
   reset: () => set({
     isVisible: false,
     completedSteps: { ...initialSteps },
     errorMessage: '',
+    isCancelling: false,
   }),
 }));
 
@@ -124,8 +132,9 @@ export const areAllStepsComplete = (steps: StepStatus): boolean => {
   return Object.values(steps).every(state => state === 'completed');
 };
 
-export const getProgressStatus = (state: ProgressState): 'running' | 'success' | 'error' | null => {
+export const getProgressStatus = (state: ProgressState): 'running' | 'success' | 'error' | 'cancelling' | null => {
   if (!state.isVisible) return null;
+  if (state.isCancelling) return 'cancelling';
   if (state.errorMessage) return 'error';
   if (areAllStepsComplete(state.completedSteps)) return 'success';
   return 'running';

@@ -9,6 +9,9 @@ import { decodeProgressAlert } from '../../progress';
 import type { SSEMessage, SimulationStreamConfig } from './types';
 import { decodeSSEMessage } from './decoder';
 import type { OutputComponentState } from '~stores/output/types';
+import { useScenarioSnapshotStore } from '~stores/scenario';
+import type { ScenarioStatus } from '~stores/scenario';
+import type { MainInputPayload, ScenarioMetadata } from '~stores/types';
 
 // === ERROR HANDLER CONFIGURATION ===
 
@@ -155,6 +158,31 @@ function handleProgressAlertMessage(
       break;
     }
 
+    case 'scenario_status': {
+      const data = payload as { status: string };
+      useScenarioSnapshotStore.getState().setStatus(data.status as ScenarioStatus);
+      if (config.onScenarioStatus) {
+        config.onScenarioStatus(data.status);
+      }
+      break;
+    }
+
+    case 'scenario_input': {
+      useScenarioSnapshotStore.getState().setInput(payload as unknown as MainInputPayload);
+      if (config.onScenarioInput) {
+        config.onScenarioInput(payload as Record<string, unknown>);
+      }
+      break;
+    }
+
+    case 'scenario_session': {
+      useScenarioSnapshotStore.getState().setSession(payload as unknown as ScenarioMetadata);
+      if (config.onScenarioSession) {
+        config.onScenarioSession(payload as Record<string, unknown>);
+      }
+      break;
+    }
+
     default:
       console.warn(`[SSE] Unhandled progress alert: ${messageType}`);
       break;
@@ -179,7 +207,7 @@ const SUCCESS_STATE_MAP: Record<string, () => void> = {
 // === DATA MESSAGE HANDLER ===
 
 // Processes data messages and updates output stores
-function handleDataMessage(
+export function handleDataMessage(
   messageType: string,
   payload: SSEMessage['payload']
 ): void {
