@@ -3,14 +3,17 @@ import i18n from '~i18nConfig';
 export const locales = {
   en: {
     exitModal: {
-      exitAnyway: 'Exit Anyway',
-      exitWithoutSaving: 'Exit Without Saving',
+      exit: 'Exit',
       stayInEZ: 'Stay in EZ',
       copy: 'Copy',
-      saveAndExit: 'Save & Exit',
-      saving: 'Saving changes...',
-      saveSuccess: 'Changes saved successfully',
-      saveError: 'Failed to save changes',
+      deleteAndExit: 'Delete & Exit',
+      deletingAndCancelling: 'Cancelling & Deleting...',
+      deleteSuccess: 'Scenario deleted',
+      deleteError: 'Failed to delete scenario',
+      saveDraftAndExit: 'Save Draft & Exit',
+      savingDraft: 'Saving draft...',
+      draftSaved: 'Draft saved: {{draftId}}',
+      draftError: 'Failed to save draft',
     },
     copyRequestId: {
       noIdAvailable: 'No request ID available to copy',
@@ -31,14 +34,17 @@ export const locales = {
   },
   fr: {
     exitModal: {
-      exitAnyway: 'Quitter quand même',
-      exitWithoutSaving: 'Quitter sans sauvegarder',
+      exit: 'Quitter',
       stayInEZ: 'Rester dans EZ',
       copy: 'Copier',
-      saveAndExit: 'Sauvegarder et quitter',
-      saving: 'Sauvegarde en cours...',
-      saveSuccess: 'Modifications sauvegardées avec succès',
-      saveError: 'Échec de la sauvegarde des modifications',
+      deleteAndExit: 'Supprimer et quitter',
+      deletingAndCancelling: 'Annulation et suppression...',
+      deleteSuccess: 'Scénario supprimé',
+      deleteError: 'Échec de la suppression du scénario',
+      saveDraftAndExit: 'Sauvegarder brouillon et quitter',
+      savingDraft: 'Sauvegarde du brouillon...',
+      draftSaved: 'Brouillon sauvegardé: {{draftId}}',
+      draftError: 'Échec de la sauvegarde du brouillon',
     },
     copyRequestId: {
       noIdAvailable: 'Aucun ID de requête disponible à copier',

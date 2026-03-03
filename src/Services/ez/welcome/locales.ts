@@ -13,7 +13,7 @@ export const locales = {
       viewButton: 'View Scenario',
     },
     input: {
-      placeholder: 'Enter request Id',
+      placeholder: 'Enter request ID or draft ID',
     },
     buttons: {
       viewPrevious: 'View Previous Scenario',
@@ -24,6 +24,7 @@ export const locales = {
       invalidId: 'Invalid scenario ID',
       enterValidId: 'Please enter a valid scenario ID',
       scenarioDeleted: 'This scenario has been deleted',
+      draftLoadFailed: 'Failed to load draft',
     },
     status: {
       cancelled: 'cancelled',
@@ -58,7 +59,7 @@ export const locales = {
       viewButton: 'Voir le scénario',
     },
     input: {
-      placeholder: 'Entrez l\'identifiant de requête',
+      placeholder: 'Entrez un identifiant de requête ou de brouillon',
     },
     buttons: {
       viewPrevious: 'Voir le scénario précédent',
@@ -69,6 +70,7 @@ export const locales = {
       invalidId: 'Identifiant de scénario invalide',
       enterValidId: 'Veuillez entrer un identifiant de scénario valide',
       scenarioDeleted: 'Ce scénario a été supprimé',
+      draftLoadFailed: 'Échec du chargement du brouillon',
     },
     status: {
       cancelled: 'annulé',

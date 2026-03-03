@@ -1,5 +1,5 @@
 import { useEZServiceStore, useAPIPayloadStore, useDrawToolStore } from './index';
-import { useEZSessionStore, useEZOutputFiltersStore } from './session';
+import { useEZSessionStore, useEZOutputFiltersStore, useDraftStore } from './session';
 import { useDrawingStateStore } from './drawingState';
 import { resetAllEZOutputStores } from './output';
 import { useProgressStore } from '../progress/store';
@@ -24,6 +24,7 @@ export const resetAllEZStores = async (): Promise<void> => {
     useDrawingStateStore.getState().reset();
     useDrawToolStore.getState().reset();
     useScenarioSnapshotStore.getState().reset();
+    useDraftStore.getState().reset();
     useEZServiceStore.getState().reset();
   } catch (error) {
     console.error('[EZ Reset] Error during reset:', error);

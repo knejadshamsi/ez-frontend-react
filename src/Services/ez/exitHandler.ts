@@ -2,7 +2,6 @@ import i18n from '~i18nConfig';
 import '~ez/locales';
 import { useEZServiceStore, useAPIPayloadStore, useDrawToolStore, createInitialPayload } from '~store';
 import { useEZSessionStore, createInitialSessionState } from '~stores/session';
-import { hasOutputData } from '~stores/output';
 import type { EZStateType } from '~stores/types';
 import type { ExitWarning } from '~stores/session/types';
 import { DEFAULT_ZONE_ID } from '~stores/types';
@@ -35,42 +34,56 @@ export const hasInputChangedFromDefault = (): boolean => {
   return false;
 };
 
-// Checks if zones are configured with coordinates
-const hasConfiguredZones = (): boolean => {
-  const payload = useAPIPayloadStore.getState().payload;
-  return (
-    payload.zones.length > 0 &&
-    payload.zones.some(z => z.coords !== null && z.coords.length > 0)
-  );
-};
-
-// Determines if exit warning is needed based on demo mode or current EZ state
+// Determines if exit warning is needed based on current EZ state
 const getExitWarning = (ezState: EZStateType): ExitWarning | null => {
   const isEzBackendAlive = useEZServiceStore.getState().isEzBackendAlive;
+  if (!isEzBackendAlive) return null;
 
-  if (!isEzBackendAlive) {
-    if (hasInputChangedFromDefault()) {
-      return {
-        title: t('ez-root:exitWarnings.inputDataLost.title'),
-        message: t('ez-root:exitWarnings.inputDataLost.message'),
-      };
-    }
-    return null;
-  }
+  const requestId = useEZSessionStore.getState().requestId;
+  const hasRequestId = requestId && requestId.trim() !== '';
 
   switch (ezState) {
+    // A1 & A2: WELCOME — always simple confirmation
     case 'WELCOME':
-      return null;
+      return {
+        title: t('ez-root:exitWarnings.confirmExit.title'),
+        message: t('ez-root:exitWarnings.confirmExit.message'),
+      };
 
+    // B1 & B2: PARAMETER_SELECTION — warn about losing changes
     case 'PARAMETER_SELECTION':
-      if (hasConfiguredZones()) {
+      if (hasRequestId) {
+        return {
+          title: t('ez-root:exitWarnings.sessionWillBeLost.title'),
+          message: t('ez-root:exitWarnings.sessionWillBeLost.message'),
+        };
+      }
+      if (hasInputChangedFromDefault()) {
         return {
           title: t('ez-root:exitWarnings.unsavedConfiguration.title'),
           message: t('ez-root:exitWarnings.unsavedConfiguration.message'),
         };
       }
-      return null;
+      return {
+        title: t('ez-root:exitWarnings.confirmExit.title'),
+        message: t('ez-root:exitWarnings.confirmExit.message'),
+      };
 
+    // C2: AWAIT_RESULTS — simulation in progress
+    case 'AWAIT_RESULTS':
+      return {
+        title: t('ez-root:exitWarnings.simulationInProgress.title'),
+        message: t('ez-root:exitWarnings.simulationInProgress.message'),
+      };
+
+    // RESULT_VIEW — scenario is saved, safe to exit
+    case 'RESULT_VIEW':
+      return {
+        title: t('ez-root:exitWarnings.sessionWillBeLost.title'),
+        message: t('ez-root:exitWarnings.sessionWillBeLost.message'),
+      };
+
+    // Drawing states — warn about unsaved work
     case 'DRAW_EM_ZONE':
       return {
         title: t('ez-root:exitWarnings.unsavedEmissionZone.title'),
@@ -100,21 +113,6 @@ const getExitWarning = (ezState: EZStateType): ExitWarning | null => {
         title: t('ez-root:exitWarnings.unsavedChangesArea.title'),
         message: t('ez-root:exitWarnings.unsavedChangesArea.message'),
       };
-
-    case 'AWAIT_RESULTS':
-      return {
-        title: t('ez-root:exitWarnings.simulationInProgress.title'),
-        message: t('ez-root:exitWarnings.simulationInProgress.message'),
-      };
-
-    case 'RESULT_VIEW':
-      if (hasOutputData()) {
-        return {
-          title: t('ez-root:exitWarnings.sessionWillBeLost.title'),
-          message: t('ez-root:exitWarnings.sessionWillBeLost.message'),
-        };
-      }
-      return null;
 
     default:
       return null;

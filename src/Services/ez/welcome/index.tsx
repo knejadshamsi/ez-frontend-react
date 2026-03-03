@@ -1,10 +1,12 @@
 import { Space, Button, Input, Typography, message, Modal } from 'antd'
 import { useTranslation } from 'react-i18next'
-import { useEZSessionStore } from '~stores/session'
-import { useEZServiceStore } from '~store'
+import { useEZSessionStore, useDraftStore } from '~stores/session'
+import { useEZServiceStore, useAPIPayloadStore } from '~store'
 import { loadScenario } from '~ez/api'
 import { useScenarioSnapshotStore } from '~stores/scenario'
+import { resetAllEZOutputStores } from '~stores/output'
 import { restoreStoresFromInput } from '~ez/api/fetchScenarioInput'
+import { fetchDraft } from '~ez/api/draft'
 import previousScenarios from './previousScenarios.json'
 import './locales'
 import styles from './WelcomeView.module.less'
@@ -70,8 +72,32 @@ export const WelcomeView = () => {
   }
 
   const handleCreateScenario = () => {
-    setState('PARAMETER_SELECTION')
+    // Clean slate — clear any lingering data from previous scenarios
+    setRequestId('');
+    useScenarioSnapshotStore.getState().reset();
+    useDraftStore.getState().reset();
+    resetAllEZOutputStores();
+    useAPIPayloadStore.getState().reset();
+    useEZSessionStore.getState().reset();
+    setState('PARAMETER_SELECTION');
   }
+
+  const loadDraftScenario = async (draftId: string) => {
+    try {
+      const draft = await fetchDraft(draftId);
+      restoreStoresFromInput(
+        draft.inputData,
+        draft.sessionData
+      );
+      useDraftStore.getState().setDraftId(draftId);
+      setRequestId('');
+      setState('PARAMETER_SELECTION');
+    } catch (error) {
+      console.error('[Load Draft] Failed:', error);
+      const errorMsg = error instanceof Error ? error.message : t('errors.draftLoadFailed');
+      messageApi.error(errorMsg);
+    }
+  };
 
   const handleViewPreviousScenario = async () => {
     if (!requestId || requestId.trim() === '') {
@@ -79,7 +105,11 @@ export const WelcomeView = () => {
       return;
     }
 
-    await loadScenario(requestId, setState, handleScenarioLoadError, handleNonCompleted);
+    if (requestId.startsWith('d_')) {
+      await loadDraftScenario(requestId);
+    } else {
+      await loadScenario(requestId, setState, handleScenarioLoadError, handleNonCompleted);
+    }
   }
 
 

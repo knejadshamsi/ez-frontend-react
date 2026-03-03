@@ -402,3 +402,17 @@ export const useEZOutputFiltersStore = create<EZOutputFiltersStore>((set) => ({
     set(createInitialFiltersState());
   },
 }));
+
+// === DRAFT STORE ===
+
+interface DraftStore {
+  draftId: string | null;
+  setDraftId: (draftId: string | null) => void;
+  reset: () => void;
+}
+
+export const useDraftStore = create<DraftStore>((set) => ({
+  draftId: null,
+  setDraftId: (draftId) => set({ draftId }),
+  reset: () => set({ draftId: null }),
+}));

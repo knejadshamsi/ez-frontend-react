@@ -14,6 +14,8 @@ import { loadDemoData } from '../output/demo';
 import { restoreStoresFromInput } from './fetchScenarioInput';
 import { updateScenarioMetadata } from './updateScenarioMetadata';
 import { useScenarioSnapshotStore } from '~stores/scenario';
+import { useDraftStore } from '~stores/session';
+import { deleteDraft } from './draft';
 
 export const startSimulation = async (
   setState: (state: EZStateType) => void,
@@ -21,6 +23,17 @@ export const startSimulation = async (
 ): Promise<void> => {
   const isEzBackendAlive = useEZServiceStore.getState().isEzBackendAlive;
   const setSseCleanup = useEZSessionStore.getState().setSseCleanup;
+
+  // If starting from a draft, delete it first (absorb errors)
+  const draftStore = useDraftStore.getState();
+  if (draftStore.draftId) {
+    try {
+      await deleteDraft(draftStore.draftId);
+    } catch {
+      // Absorb — simulation requestId is more important
+    }
+    draftStore.reset();
+  }
 
   if (!isEzBackendAlive) {
     const cleanup = runDemoSimulation(setState);

@@ -33,11 +33,15 @@ export const locales = {
       },
       simulationInProgress: {
         title: 'Simulation in Progress',
-        message: 'The simulation is currently running and will be aborted. All progress will be lost. Continue?',
+        message: 'The simulation is currently running. You can exit and your scenario will be saved, or delete it permanently.',
       },
       sessionWillBeLost: {
-        title: 'Session Will Be Lost',
-        message: 'Session will be lost. Make sure to save your request ID before exiting. Continue?',
+        title: 'Exit Simulation',
+        message: 'Your scenario and results are saved. You can exit safely or delete the scenario permanently.',
+      },
+      confirmExit: {
+        title: 'Exit',
+        message: 'Are you sure you want to exit?',
       },
     },
     connectionMessages: {
@@ -123,11 +127,15 @@ export const locales = {
       },
       simulationInProgress: {
         title: 'Simulation en cours',
-        message: 'La simulation est en cours d\'exécution et sera interrompue. Tous les progrès seront perdus. Continuer?',
+        message: 'La simulation est en cours d\'exécution. Vous pouvez quitter et votre scénario sera sauvegardé, ou le supprimer définitivement.',
       },
       sessionWillBeLost: {
-        title: 'Session sera perdue',
-        message: 'La session sera perdue. Assurez-vous de sauvegarder votre ID de requête avant de quitter. Continuer?',
+        title: 'Quitter la simulation',
+        message: 'Votre scénario et vos résultats sont sauvegardés. Vous pouvez quitter en toute sécurité ou supprimer le scénario définitivement.',
+      },
+      confirmExit: {
+        title: 'Quitter',
+        message: 'Êtes-vous sûr de vouloir quitter?',
       },
     },
     connectionMessages: {
