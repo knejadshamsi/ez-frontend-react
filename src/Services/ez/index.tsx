@@ -43,7 +43,7 @@ const EzService = () => {
           RESULT_VIEW: <OutputView />,
         }[ezState]}
       </Drawer>
-      <Progress />
+      {ezState === 'AWAIT_RESULTS' && <Progress />}
       <DrawingControls />
       <ExitModal />
     </>

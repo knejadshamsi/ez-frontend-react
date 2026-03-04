@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Button, message } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import { useProgressStore, getProgressStatus, canViewResultsEarly } from './store';
+import { useProgressStore, canViewResultsEarly } from './store';
 import { useEZServiceStore } from '~store';
 import { useEZSessionStore } from '~stores/session';
 import {
@@ -13,11 +13,11 @@ import {
 } from '~stores/output';
 import { resetAllEZOutputStores } from '~stores/output';
 import { cancelSimulation } from '~ez/api';
-import { SuccessState, ErrorState, RunningState, CancellingState } from './states';
+import { SuccessState, ErrorState, RunningState, CancellingState, PollingState } from './states';
 import styles from './Progress.module.less';
 import './locales';
 
-export { useProgressStore, showProgress, showProgressError } from './store';
+export { useProgressStore } from './store';
 export { decodeProgressAlert } from './decoder';
 
 export const Progress = () => {
@@ -26,10 +26,7 @@ export const Progress = () => {
   const state = useProgressStore();
   const setState = useEZServiceStore((state) => state.setState);
   const requestId = useEZSessionStore((state) => state.requestId);
-  const isNewSimulation = useEZSessionStore((state) => state.isNewSimulation);
   const isEzBackendAlive = useEZServiceStore((state) => state.isEzBackendAlive);
-  const hideProgress = useProgressStore((state) => state.hide);
-  const resetProgress = useProgressStore((state) => state.reset);
 
   const [canTransition, setCanTransition] = useState(false);
 
@@ -40,31 +37,34 @@ export const Progress = () => {
   const peoplePara2 = useEZOutputPeopleResponseStore((state) => state.peopleResponseParagraph2Data);
   const tripLegRecords = useEZOutputTripLegsStore((state) => state.tripLegRecords);
 
-  const status = getProgressStatus(state);
+  const { status } = state;
   const canViewEarly = canViewResultsEarly(state.completedSteps);
 
+  // Auto-transition to RESULT_VIEW on completion
   useEffect(() => {
-    if (status === 'success') {
+    if (status === 'DISPLAY_COMPLETE') {
       const timer = setTimeout(() => {
-        hideProgress();
+        setState('RESULT_VIEW');
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [status, hideProgress]);
+  }, [status, setState]);
 
+  // Scenario load transition timing
   useEffect(() => {
-    if (!isNewSimulation && !isEzBackendAlive) {
+    if (status === 'DISPLAY_SCENARIO_LOAD' && !isEzBackendAlive) {
       const timer = setTimeout(() => {
         setCanTransition(true);
       }, 3000);
       return () => clearTimeout(timer);
-    } else if (!isNewSimulation) {
+    } else if (status === 'DISPLAY_SCENARIO_LOAD') {
       setCanTransition(true);
     }
-  }, [isNewSimulation, isEzBackendAlive]);
+  }, [status, isEzBackendAlive]);
 
+  // Auto-transition to RESULT_VIEW when scenario data arrives
   useEffect(() => {
-    if (!isNewSimulation && canTransition) {
+    if (status === 'DISPLAY_SCENARIO_LOAD' && canTransition) {
       const hasData = !!(
         overviewData ||
         emissionsPara1 ||
@@ -75,12 +75,11 @@ export const Progress = () => {
       );
 
       if (hasData) {
-        hideProgress();
         setState('RESULT_VIEW');
       }
     }
   }, [
-    isNewSimulation,
+    status,
     canTransition,
     overviewData,
     emissionsPara1,
@@ -88,58 +87,66 @@ export const Progress = () => {
     peoplePara1,
     peoplePara2,
     tripLegRecords,
-    hideProgress,
     setState,
   ]);
 
-  if (!state.isVisible) return null;
-
-  if (status === 'cancelling') {
+  if (status === 'DISPLAY_CANCELLATION') {
     return <>{contextHolder}<CancellingState /></>;
   }
 
-  if (status === 'success') {
+  if (status === 'DISPLAY_POLLING_RECOVERY') {
+    return <>{contextHolder}<PollingState pollingProgress={state.pollingProgress} /></>;
+  }
+
+  if (status === 'DISPLAY_COMPLETE') {
     return <>{contextHolder}<SuccessState /></>;
   }
 
-  if (status === 'error') {
-    return <>{contextHolder}<ErrorState errorMessage={state.errorMessage} onClose={hideProgress} /></>;
+  if (status === 'DISPLAY_ERROR') {
+    return (
+      <>{contextHolder}
+      <ErrorState
+        errorMessage={state.errorMessage}
+        onClose={() => setState('PARAMETER_SELECTION')}
+      />
+      </>
+    );
   }
 
   const handleCancel = async () => {
-    useProgressStore.getState().setCancelling(true);
+    useProgressStore.getState().setStatus('DISPLAY_CANCELLATION');
     const result = await cancelSimulation(requestId);
 
     switch (result) {
       case 'success':
         resetAllEZOutputStores();
         useEZSessionStore.getState().setSseCleanup(null);
-        resetProgress();
+        useProgressStore.getState().reset();
         setState('PARAMETER_SELECTION');
         messageApi.success(t('cancellation.success'));
         break;
       case 'timeout':
         useEZSessionStore.getState().abortSseStream();
-        resetProgress();
+        useProgressStore.getState().reset();
         setState('PARAMETER_SELECTION');
         messageApi.error(t('cancellation.timeout'));
         break;
       case 'conflict':
-        resetProgress();
+        useProgressStore.getState().reset();
         setState('PARAMETER_SELECTION');
         messageApi.warning(t('cancellation.conflict'));
         break;
       case 'not_found':
       case 'error':
         useEZSessionStore.getState().abortSseStream();
-        resetProgress();
+        useProgressStore.getState().reset();
         setState('PARAMETER_SELECTION');
         messageApi.error(t('cancellation.failed'));
         break;
     }
   };
 
-  if (!isNewSimulation) {
+  if (status === 'DISPLAY_SCENARIO_LOAD') {
     return (
       <>{contextHolder}
       <div className={styles.loadingScenarioContainer}>
@@ -155,8 +162,8 @@ export const Progress = () => {
     );
   }
 
+  // DISPLAY_SIMULATION
   const handleViewResults = () => {
-    hideProgress();
     setState('RESULT_VIEW');
   };
 

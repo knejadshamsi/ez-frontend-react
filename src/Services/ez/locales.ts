@@ -43,6 +43,10 @@ export const locales = {
         title: 'Exit',
         message: 'Are you sure you want to exit?',
       },
+      offlineDataLost: {
+        title: 'Backend Offline',
+        message: 'The backend is currently offline. Your configuration cannot be saved and will be lost.',
+      },
     },
     connectionMessages: {
       backendOnlineNewSim: 'Connection established! Backend is now online. Please start your simulation again.',
@@ -136,6 +140,10 @@ export const locales = {
       confirmExit: {
         title: 'Quitter',
         message: 'Êtes-vous sûr de vouloir quitter?',
+      },
+      offlineDataLost: {
+        title: 'Serveur hors ligne',
+        message: 'Le serveur est actuellement hors ligne. Votre configuration ne peut pas être sauvegardée et sera perdue.',
       },
     },
     connectionMessages: {

@@ -37,6 +37,7 @@ export default function ExitModal() {
   const [messageApi, contextHolder] = message.useMessage();
   const setActiveService = useServiceStore((state) => state.setActiveService);
   const isResettingRef = useRef(false);
+  const modalInstanceRef = useRef<ReturnType<typeof modal.confirm> | null>(null);
 
   const exitState = useEZSessionStore((state) => state.exitState);
   const exitWarning = useEZSessionStore((state) => state.exitWarning);
@@ -47,17 +48,172 @@ export default function ExitModal() {
   const requestId = useEZSessionStore((state) => state.requestId);
   const draftId = useDraftStore((state) => state.draftId);
 
+  // Builds the footer with fresh state reads
+  const buildFooter = (instance: ReturnType<typeof modal.confirm>) => {
+    const alive = useEZServiceStore.getState().isEzBackendAlive;
+    const currentRequestId = useEZSessionStore.getState().requestId;
+    const currentDraftId = useDraftStore.getState().draftId;
+    const hasReqId = currentRequestId && currentRequestId.trim() !== '';
+    const isWelcome = useEZServiceStore.getState().state === 'WELCOME';
+    const isPS = useEZServiceStore.getState().state === 'PARAMETER_SELECTION';
+    const canDraft = alive && isPS && hasInputChangedFromDefault();
+    const showCopy = alive && hasReqId;
+    const showDelete = alive && hasReqId && !isWelcome;
+
+    if (isWelcome) {
+      return (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+          <Space size={8}>
+            <Button
+              size="small"
+              onClick={() => {
+                cancelExit();
+                instance.destroy();
+                modalInstanceRef.current = null;
+              }}
+            >
+              {t('exitModal.stayInEZ')}
+            </Button>
+            <Button
+              size="small"
+              type="primary"
+              onClick={() => {
+                confirmExit();
+                instance.destroy();
+                modalInstanceRef.current = null;
+              }}
+            >
+              {t('exitModal.exit')}
+            </Button>
+          </Space>
+        </div>
+      );
+    }
+
+    return (
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        {showCopy && (
+          <CopyRequestIdButton
+            requestId={currentRequestId}
+            showText={true}
+            text={t('exitModal.copy')}
+            size="small"
+            type="default"
+            messageApi={messageApi}
+          />
+        )}
+        <Space size={8}>
+          <Button
+            size="small"
+            onClick={() => {
+              cancelExit();
+              instance.destroy();
+              modalInstanceRef.current = null;
+            }}
+          >
+            {t('exitModal.stayInEZ')}
+          </Button>
+          {canDraft && (
+            <Button
+              size="small"
+              onClick={async () => {
+                instance.update({
+                  footer: () => (
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                      <Button size="small" disabled>
+                        <LoadingOutlined /> {t('exitModal.savingDraft')}
+                      </Button>
+                    </div>
+                  ),
+                });
+                try {
+                  const input = buildCurrentInput();
+                  const session = createMetadataPayload();
+                  let savedDraftId: string;
+
+                  if (currentDraftId) {
+                    await updateDraft(currentDraftId, input, session);
+                    savedDraftId = currentDraftId;
+                  } else {
+                    savedDraftId = await createDraft(input, session);
+                  }
+
+                  messageApi.success(t('exitModal.draftSaved', { draftId: savedDraftId }));
+                  confirmExit();
+                  instance.destroy();
+                  modalInstanceRef.current = null;
+                } catch (error) {
+                  const errorMsg = error instanceof Error ? error.message : t('exitModal.draftError');
+                  messageApi.error(errorMsg);
+                  console.error('[Exit Modal] Draft save failed:', error);
+                  instance.destroy();
+                  modalInstanceRef.current = null;
+                  cancelExit();
+                }
+              }}
+            >
+              {t('exitModal.saveDraftAndExit')}
+            </Button>
+          )}
+          {showDelete && (
+            <Button
+              size="small"
+              danger
+              ghost
+              onClick={async () => {
+                instance.update({
+                  footer: () => (
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                      <Button size="small" danger ghost disabled>
+                        <LoadingOutlined /> {t('exitModal.deletingAndCancelling')}
+                      </Button>
+                    </div>
+                  ),
+                });
+                try {
+                  await deleteScenario(currentRequestId);
+                  messageApi.success(t('exitModal.deleteSuccess'));
+                  confirmExit();
+                  instance.destroy();
+                  modalInstanceRef.current = null;
+                } catch (error) {
+                  const errorMsg = error instanceof Error ? error.message : t('exitModal.deleteError');
+                  messageApi.error(errorMsg);
+                  console.error('[Exit Modal] Delete failed:', error);
+                  instance.destroy();
+                  modalInstanceRef.current = null;
+                  cancelExit();
+                }
+              }}
+            >
+              {t('exitModal.deleteAndExit')}
+            </Button>
+          )}
+          <Button
+            size="small"
+            type="primary"
+            onClick={() => {
+              confirmExit();
+              instance.destroy();
+              modalInstanceRef.current = null;
+            }}
+          >
+            {t('exitModal.exit')}
+          </Button>
+        </Space>
+      </div>
+    );
+  };
+
+  // Create modal when exit is requested
   useEffect(() => {
-    if (exitState === 'await_confirmation' && exitWarning) {
-      const hasRequestId = requestId && requestId.trim() !== '';
-      const isWelcome = ezState === 'WELCOME';
-      const isParameterSelection = ezState === 'PARAMETER_SELECTION';
-      const canSaveDraft = isEzBackendAlive && isParameterSelection && hasInputChangedFromDefault();
-
-      // Copy and delete buttons shown when requestId exists and backend is alive
-      const showCopyButton = isEzBackendAlive && hasRequestId;
-      const showDeleteButton = isEzBackendAlive && hasRequestId && !isWelcome;
-
+    if (exitState === 'await_confirmation' && exitWarning && !modalInstanceRef.current) {
       const instance = modal.confirm({
         title: exitWarning.title,
         icon: <ExclamationCircleOutlined />,
@@ -68,158 +224,17 @@ export default function ExitModal() {
         closable: false,
         maskClosable: false,
         keyboard: false,
-        footer: () => {
-          // Simple modal for WELCOME
-          if (isWelcome) {
-            return (
-              <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-                <Space size={8}>
-                  <Button
-                    size="small"
-                    onClick={() => {
-                      cancelExit();
-                      instance.destroy();
-                    }}
-                  >
-                    {t('exitModal.stayInEZ')}
-                  </Button>
-                  <Button
-                    size="small"
-                    type="primary"
-                    onClick={() => {
-                      confirmExit();
-                      instance.destroy();
-                    }}
-                  >
-                    {t('exitModal.exit')}
-                  </Button>
-                </Space>
-              </div>
-            );
-          }
-
-          // Full modal for PS, AWAIT_RESULTS, RESULT_VIEW, drawing states
-          return (
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-            >
-              {showCopyButton && (
-                <CopyRequestIdButton
-                  requestId={requestId}
-                  showText={true}
-                  text={t('exitModal.copy')}
-                  size="small"
-                  type="default"
-                  messageApi={messageApi}
-                />
-              )}
-              <Space size={8}>
-                <Button
-                  size="small"
-                  onClick={() => {
-                    cancelExit();
-                    instance.destroy();
-                  }}
-                >
-                  {t('exitModal.stayInEZ')}
-                </Button>
-                {canSaveDraft && (
-                  <Button
-                    size="small"
-                    onClick={async () => {
-                      instance.update({
-                        footer: () => (
-                          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-                            <Button size="small" disabled>
-                              <LoadingOutlined /> {t('exitModal.savingDraft')}
-                            </Button>
-                          </div>
-                        ),
-                      });
-                      try {
-                        const input = buildCurrentInput();
-                        const session = createMetadataPayload();
-                        let savedDraftId: string;
-
-                        if (draftId) {
-                          await updateDraft(draftId, input, session);
-                          savedDraftId = draftId;
-                        } else {
-                          savedDraftId = await createDraft(input, session);
-                        }
-
-                        messageApi.success(t('exitModal.draftSaved', { draftId: savedDraftId }));
-                        confirmExit();
-                        instance.destroy();
-                      } catch (error) {
-                        const errorMsg = error instanceof Error ? error.message : t('exitModal.draftError');
-                        messageApi.error(errorMsg);
-                        console.error('[Exit Modal] Draft save failed:', error);
-                        instance.destroy();
-                        cancelExit();
-                      }
-                    }}
-                  >
-                    {t('exitModal.saveDraftAndExit')}
-                  </Button>
-                )}
-                {showDeleteButton && (
-                  <Button
-                    size="small"
-                    danger
-                    ghost
-                    onClick={async () => {
-                      instance.update({
-                        footer: () => (
-                          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-                            <Button size="small" danger ghost disabled>
-                              <LoadingOutlined /> {t('exitModal.deletingAndCancelling')}
-                            </Button>
-                          </div>
-                        ),
-                      });
-                      try {
-                        await deleteScenario(requestId);
-                        messageApi.success(t('exitModal.deleteSuccess'));
-                        confirmExit();
-                        instance.destroy();
-                      } catch (error) {
-                        const errorMsg = error instanceof Error ? error.message : t('exitModal.deleteError');
-                        messageApi.error(errorMsg);
-                        console.error('[Exit Modal] Delete failed:', error);
-                        instance.destroy();
-                        cancelExit();
-                      }
-                    }}
-                  >
-                    {t('exitModal.deleteAndExit')}
-                  </Button>
-                )}
-                <Button
-                  size="small"
-                  type="primary"
-                  onClick={() => {
-                    confirmExit();
-                    instance.destroy();
-                  }}
-                >
-                  {t('exitModal.exit')}
-                </Button>
-              </Space>
-            </div>
-          );
-        },
+        footer: () => buildFooter(instance),
         onCancel: () => {
           cancelExit();
+          modalInstanceRef.current = null;
         },
         onOk: () => {
           confirmExit();
+          modalInstanceRef.current = null;
         },
       });
+      modalInstanceRef.current = instance;
     } else if (exitState === 'resetting' && !isResettingRef.current) {
       isResettingRef.current = true;
 
@@ -233,7 +248,16 @@ export default function ExitModal() {
         isResettingRef.current = false;
       });
     }
-  }, [exitState, exitWarning, setExitState, setExitWarning, modal, setActiveService, isEzBackendAlive, requestId, draftId, ezState, messageApi, t]);
+  }, [exitState, exitWarning, setExitState, setExitWarning, modal, setActiveService, messageApi, t]);
+
+  // Reactively update modal when backend status changes while modal is open
+  useEffect(() => {
+    if (modalInstanceRef.current && exitState === 'await_confirmation') {
+      modalInstanceRef.current.update({
+        footer: () => buildFooter(modalInstanceRef.current!),
+      });
+    }
+  }, [isEzBackendAlive]);
 
   return (
     <>

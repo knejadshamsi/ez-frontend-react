@@ -37,21 +37,29 @@ export const hasInputChangedFromDefault = (): boolean => {
 // Determines if exit warning is needed based on current EZ state
 const getExitWarning = (ezState: EZStateType): ExitWarning | null => {
   const isEzBackendAlive = useEZServiceStore.getState().isEzBackendAlive;
-  if (!isEzBackendAlive) return null;
-
   const requestId = useEZSessionStore.getState().requestId;
   const hasRequestId = requestId && requestId.trim() !== '';
 
   switch (ezState) {
-    // A1 & A2: WELCOME — always simple confirmation
+    // WELCOME - simple confirmation (online or offline)
     case 'WELCOME':
+      if (!isEzBackendAlive) return null;
       return {
         title: t('ez-root:exitWarnings.confirmExit.title'),
         message: t('ez-root:exitWarnings.confirmExit.message'),
       };
 
-    // B1 & B2: PARAMETER_SELECTION — warn about losing changes
+    // PARAMETER_SELECTION - warn about losing changes
     case 'PARAMETER_SELECTION':
+      if (!isEzBackendAlive) {
+        if (hasInputChangedFromDefault()) {
+          return {
+            title: t('ez-root:exitWarnings.offlineDataLost.title'),
+            message: t('ez-root:exitWarnings.offlineDataLost.message'),
+          };
+        }
+        return null;
+      }
       if (hasRequestId) {
         return {
           title: t('ez-root:exitWarnings.sessionWillBeLost.title'),
@@ -69,46 +77,76 @@ const getExitWarning = (ezState: EZStateType): ExitWarning | null => {
         message: t('ez-root:exitWarnings.confirmExit.message'),
       };
 
-    // C2: AWAIT_RESULTS — simulation in progress
+    // AWAIT_RESULTS - simulation in progress
     case 'AWAIT_RESULTS':
       return {
         title: t('ez-root:exitWarnings.simulationInProgress.title'),
         message: t('ez-root:exitWarnings.simulationInProgress.message'),
       };
 
-    // RESULT_VIEW — scenario is saved, safe to exit
+    // RESULT_VIEW - scenario is saved, safe to exit
     case 'RESULT_VIEW':
       return {
         title: t('ez-root:exitWarnings.sessionWillBeLost.title'),
         message: t('ez-root:exitWarnings.sessionWillBeLost.message'),
       };
 
-    // Drawing states — warn about unsaved work
+    // Drawing states - warn about unsaved work (online or offline)
     case 'DRAW_EM_ZONE':
+      if (!isEzBackendAlive) {
+        return {
+          title: t('ez-root:exitWarnings.offlineDataLost.title'),
+          message: t('ez-root:exitWarnings.offlineDataLost.message'),
+        };
+      }
       return {
         title: t('ez-root:exitWarnings.unsavedEmissionZone.title'),
         message: t('ez-root:exitWarnings.unsavedEmissionZone.message'),
       };
 
     case 'EDIT_EM_ZONE':
+      if (!isEzBackendAlive) {
+        return {
+          title: t('ez-root:exitWarnings.offlineDataLost.title'),
+          message: t('ez-root:exitWarnings.offlineDataLost.message'),
+        };
+      }
       return {
         title: t('ez-root:exitWarnings.unsavedChangesZone.title'),
         message: t('ez-root:exitWarnings.unsavedChangesZone.message'),
       };
 
     case 'REDRAW_EM_ZONE':
+      if (!isEzBackendAlive) {
+        return {
+          title: t('ez-root:exitWarnings.offlineDataLost.title'),
+          message: t('ez-root:exitWarnings.offlineDataLost.message'),
+        };
+      }
       return {
         title: t('ez-root:exitWarnings.zoneRedrawInProgress.title'),
         message: t('ez-root:exitWarnings.zoneRedrawInProgress.message'),
       };
 
     case 'DRAW_SIM_AREA':
+      if (!isEzBackendAlive) {
+        return {
+          title: t('ez-root:exitWarnings.offlineDataLost.title'),
+          message: t('ez-root:exitWarnings.offlineDataLost.message'),
+        };
+      }
       return {
         title: t('ez-root:exitWarnings.unsavedSimulationArea.title'),
         message: t('ez-root:exitWarnings.unsavedSimulationArea.message'),
       };
 
     case 'EDIT_SIM_AREA':
+      if (!isEzBackendAlive) {
+        return {
+          title: t('ez-root:exitWarnings.offlineDataLost.title'),
+          message: t('ez-root:exitWarnings.offlineDataLost.message'),
+        };
+      }
       return {
         title: t('ez-root:exitWarnings.unsavedChangesArea.title'),
         message: t('ez-root:exitWarnings.unsavedChangesArea.message'),

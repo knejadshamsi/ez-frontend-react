@@ -10,6 +10,7 @@ export const locales = {
     },
     success: {
       title: 'Simulation Complete!',
+      withErrors: '{{count}} component(s) completed with errors',
     },
     error: {
       title: 'Simulation Error',
@@ -38,8 +39,11 @@ export const locales = {
       inProgress: 'Cancelling simulation...',
       success: 'Simulation cancelled',
       failed: 'Failed to cancel simulation',
-      timeout: 'Cancellation timed out — simulation may still be running',
+      timeout: 'Cancellation timed out - simulation may still be running',
       conflict: 'Simulation has already completed',
+    },
+    polling: {
+      reconnecting: 'Connection lost - monitoring simulation progress...',
     },
   },
   fr: {
@@ -51,6 +55,7 @@ export const locales = {
     },
     success: {
       title: 'Simulation terminée !',
+      withErrors: '{{count}} composant(s) terminé(s) avec des erreurs',
     },
     error: {
       title: 'Erreur de simulation',
@@ -79,8 +84,11 @@ export const locales = {
       inProgress: 'Annulation de la simulation...',
       success: 'Simulation annulée',
       failed: 'Échec de l\'annulation de la simulation',
-      timeout: 'Délai d\'annulation dépassé — la simulation peut encore être en cours',
+      timeout: 'Délai d\'annulation dépassé - la simulation peut encore être en cours',
       conflict: 'La simulation est déjà terminée',
+    },
+    polling: {
+      reconnecting: 'Connexion perdue - surveillance de la progression...',
     },
   },
 } as const;

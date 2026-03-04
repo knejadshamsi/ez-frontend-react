@@ -13,9 +13,7 @@ export const resetAllEZStores = async (): Promise<void> => {
       await cancelSimulation(sessionStore.requestId);
     }
 
-    const progressStore = useProgressStore.getState();
-    progressStore.reset();
-    progressStore.hide();
+    useProgressStore.getState().reset();
 
     resetAllEZOutputStores();
     useEZOutputFiltersStore.getState().reset();

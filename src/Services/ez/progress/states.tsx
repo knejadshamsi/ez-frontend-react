@@ -1,6 +1,7 @@
-import { CheckOutlined, LoadingOutlined } from '@ant-design/icons';
+import { CheckOutlined, LoadingOutlined, WarningOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { StepStatus, StepName, PREPROCESSING_STEPS, SIMULATING_STEPS, POSTPROCESSING_STEPS } from './store';
+import { getOutputErrorCount } from '~stores/output';
 import { StepItem } from './components';
 import styles from './Progress.module.less';
 import './locales';
@@ -11,13 +12,23 @@ const allCompleted = (steps: StepStatus, stepNames: StepName[]): boolean => {
 
 export const SuccessState = () => {
   const { t } = useTranslation('ez-progress');
+  const errorCount = getOutputErrorCount();
 
   return (
     <div className={`${styles.simulationNotification} ${styles.successState}`}>
       <div className={styles.notificationContent}>
-        <CheckOutlined className={styles.successIcon} />
+        {errorCount > 0 ? (
+          <WarningOutlined className={styles.warningIcon} />
+        ) : (
+          <CheckOutlined className={styles.successIcon} />
+        )}
         <span className={styles.successMessage}>{t('success.title')}</span>
       </div>
+      {errorCount > 0 && (
+        <div className={styles.errorCount}>
+          {t('success.withErrors', { count: errorCount })}
+        </div>
+      )}
     </div>
   );
 };
@@ -54,6 +65,30 @@ export const ErrorState = ({ errorMessage, onClose }: ErrorStateProps) => {
           {t('buttons.close')}
         </button>
       </div>
+    </div>
+  );
+};
+
+interface PollingStateProps {
+  pollingProgress: string | null;
+}
+
+export const PollingState = ({ pollingProgress }: PollingStateProps) => {
+  const { t } = useTranslation('ez-progress');
+
+  return (
+    <div className={styles.simulationNotification}>
+      <div className={styles.loadingContent}>
+        <LoadingOutlined className={styles.spinner} />
+        <span className={styles.loadingText}>
+          {t('polling.reconnecting')}
+        </span>
+      </div>
+      {pollingProgress && (
+        <div className={styles.pollingProgress}>
+          {pollingProgress}
+        </div>
+      )}
     </div>
   );
 };

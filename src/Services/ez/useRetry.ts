@@ -20,21 +20,19 @@ export const useBackendAliveWatcher = (messageApi: MessageInstance): void => {
   const abortSseStream = useEZSessionStore((state) => state.abortSseStream);
 
   const resetProgress = useProgressStore((state) => state.reset);
-  const hideProgress = useProgressStore((state) => state.hide);
 
   const resetOutputFilters = useEZOutputFiltersStore((state) => state.reset);
 
   useEffect(() => {
     if (!isEzBackendAlive) return;
 
-    if (ezState !== 'AWAIT_RESULTS' && ezState !== 'RESULT_VIEW') return;
+    if (ezState !== 'AWAIT_RESULTS') return;
 
     abortSseStream();
 
     resetAllEZOutputStores();
 
     resetProgress();
-    hideProgress();
 
     resetOutputFilters();
 
@@ -53,7 +51,6 @@ export const useBackendAliveWatcher = (messageApi: MessageInstance): void => {
     isNewSimulation,
     abortSseStream,
     resetProgress,
-    hideProgress,
     resetOutputFilters,
     setRequestId,
     setState,

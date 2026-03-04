@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useEZSessionStore } from '~stores/session';
 
 export type StepState = 'pending' | 'in_progress' | 'completed' | 'failed';
 
@@ -16,19 +17,26 @@ export type StepName =
 
 export type StepStatus = Record<StepName, StepState>;
 
+export type ProgressStatus =
+  | 'DISPLAY_SIMULATION'
+  | 'DISPLAY_SCENARIO_LOAD'
+  | 'DISPLAY_CANCELLATION'
+  | 'DISPLAY_POLLING_RECOVERY'
+  | 'DISPLAY_COMPLETE'
+  | 'DISPLAY_ERROR';
+
 interface ProgressState {
-  isVisible: boolean;
+  status: ProgressStatus;
   completedSteps: StepStatus;
   errorMessage: string;
-  isCancelling: boolean;
+  pollingProgress: string | null;
 }
 
 interface ProgressActions {
-  show: () => void;
-  hide: () => void;
+  setStatus: (status: ProgressStatus) => void;
   handleEvent: (stepName: string, stepState: StepState) => void;
   setError: (message: string) => void;
-  setCancelling: (value: boolean) => void;
+  setPollingProgress: (progress: string | null) => void;
   reset: () => void;
 }
 
@@ -78,18 +86,23 @@ export const POSTPROCESSING_STEPS: StepName[] = [
 ];
 
 export const useProgressStore = create<ProgressState & ProgressActions>((set) => ({
-  isVisible: false,
+  status: (useEZSessionStore.getState().isNewSimulation ? 'DISPLAY_SIMULATION' : 'DISPLAY_SCENARIO_LOAD') as ProgressStatus,
   completedSteps: { ...initialSteps },
   errorMessage: '',
-  isCancelling: false,
+  pollingProgress: null,
 
-  show: () => set({
-    isVisible: true,
-    completedSteps: { ...initialSteps },
-    errorMessage: '',
-  }),
-
-  hide: () => set({ isVisible: false }),
+  setStatus: (status) => {
+    if (status === 'DISPLAY_SIMULATION' || status === 'DISPLAY_SCENARIO_LOAD') {
+      set({
+        status,
+        completedSteps: { ...initialSteps },
+        errorMessage: '',
+        pollingProgress: null,
+      });
+    } else {
+      set({ status });
+    }
+  },
 
   handleEvent: (stepName: string, stepState: StepState) => set((state) => {
     if (!VALID_STEP_NAMES.includes(stepName as StepName)) {
@@ -107,19 +120,23 @@ export const useProgressStore = create<ProgressState & ProgressActions>((set) =>
   }),
 
   setError: (message: string) => set({
+    status: 'DISPLAY_ERROR',
     errorMessage: message,
   }),
 
-  setCancelling: (value: boolean) => set({
-    isCancelling: value,
+  setPollingProgress: (progress: string | null) => set({
+    pollingProgress: progress,
   }),
 
-  reset: () => set({
-    isVisible: false,
-    completedSteps: { ...initialSteps },
-    errorMessage: '',
-    isCancelling: false,
-  }),
+  reset: () => {
+    const isNew = useEZSessionStore.getState().isNewSimulation;
+    set({
+      status: isNew ? 'DISPLAY_SIMULATION' : 'DISPLAY_SCENARIO_LOAD',
+      completedSteps: { ...initialSteps },
+      errorMessage: '',
+      pollingProgress: null,
+    });
+  },
 }));
 
 // Computed values
@@ -130,25 +147,4 @@ export const canViewResultsEarly = (steps: StepStatus): boolean => {
 
 export const areAllStepsComplete = (steps: StepStatus): boolean => {
   return Object.values(steps).every(state => state === 'completed');
-};
-
-export const getProgressStatus = (state: ProgressState): 'running' | 'success' | 'error' | 'cancelling' | null => {
-  if (!state.isVisible) return null;
-  if (state.isCancelling) return 'cancelling';
-  if (state.errorMessage) return 'error';
-  if (areAllStepsComplete(state.completedSteps)) return 'success';
-  return 'running';
-};
-
-// Public API
-
-export const showProgress = (): void => {
-  const store = useProgressStore.getState();
-  if (!store.isVisible) {
-    store.show();
-  }
-};
-
-export const showProgressError = (message: string): void => {
-  useProgressStore.getState().setError(message);
 };
