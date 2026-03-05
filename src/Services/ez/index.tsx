@@ -1,8 +1,10 @@
+import { useEffect } from 'react';
 import { Drawer, message } from 'antd';
 
 import { useServiceStore } from '~globalStores';
 import { useEZServiceStore } from '~store';
 import { useBackendAliveWatcher } from './useRetry';
+import { useHealthCheckPolling } from './useHealthCheckPolling';
 
 import { WelcomeView } from './welcome';
 import { ParameterSelectionView } from './input/ParameterSelectionView';
@@ -20,6 +22,19 @@ const EzService = () => {
   const ezState = useEZServiceStore((state) => state.state);
 
   useBackendAliveWatcher(messageApi);
+  useHealthCheckPolling();
+
+  // Prevent accidental page reload during active simulation
+  useEffect(() => {
+    if (ezState !== 'AWAIT_RESULTS') return;
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [ezState]);
 
   return (
     <>

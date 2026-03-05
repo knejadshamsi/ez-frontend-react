@@ -93,9 +93,10 @@ export const ErrorState = ({ errorMessage, onClose }: ErrorStateProps) => {
 
 interface PollingStateProps {
   pollingProgress: string | null;
+  onCancel: () => void;
 }
 
-export const PollingState = ({ pollingProgress }: PollingStateProps) => {
+export const PollingState = ({ pollingProgress, onCancel }: PollingStateProps) => {
   const { t } = useTranslation('ez-progress');
 
   return (
@@ -111,6 +112,11 @@ export const PollingState = ({ pollingProgress }: PollingStateProps) => {
           {pollingProgress}
         </div>
       )}
+      <div className={styles.notificationFooter}>
+        <button className={styles.cancelButton} onClick={onCancel}>
+          {t('buttons.cancel')}
+        </button>
+      </div>
     </div>
   );
 };

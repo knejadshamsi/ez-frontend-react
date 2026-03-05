@@ -58,6 +58,10 @@ const ERROR_HANDLER_MAP: Record<string, ErrorHandlerConfig> = {
     setState: (state) => useEZOutputPeopleResponseStore.getState().setPeopleResponseTimeImpactChartState(state),
     setError: (error) => useEZOutputPeopleResponseStore.getState().setPeopleResponseTimeImpactChartError(error),
   },
+  error_table_trip_legs: {
+    setState: (state) => useEZOutputTripLegsStore.getState().setTripLegsTableState(state),
+    setError: (error) => useEZOutputTripLegsStore.getState().setTripLegsTableError(error),
+  },
 };
 
 // === PROGRESS ALERT HANDLER ===
@@ -93,11 +97,13 @@ function handleProgressAlertMessage(
 
   // Handle lifecycle events and map-specific events
   switch (messageType) {
-    case 'pa_request_accepted':
-      if (config.onStarted && 'requestId' in payload) {
-        config.onStarted((payload as { requestId: string }).requestId);
+    case 'pa_request_accepted': {
+      const requestId = (payload as { requestId?: string }).requestId;
+      if (config.onStarted && requestId && requestId.trim() !== '') {
+        config.onStarted(requestId);
       }
       break;
+    }
 
     case 'pa_simulation_start':
       if (config.onSimulationStart) {
@@ -211,6 +217,7 @@ const SUCCESS_STATE_MAP: Record<string, () => void> = {
   data_text_paragraph2_people_response: () => useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph2State('success'),
   data_chart_breakdown_people_response: () => useEZOutputPeopleResponseStore.getState().setPeopleResponseBreakdownChartState('success'),
   data_chart_time_impact_people_response: () => useEZOutputPeopleResponseStore.getState().setPeopleResponseTimeImpactChartState('success'),
+  data_table_trip_legs: () => useEZOutputTripLegsStore.getState().setTripLegsTableState('success'),
 };
 
 // === DATA MESSAGE HANDLER ===

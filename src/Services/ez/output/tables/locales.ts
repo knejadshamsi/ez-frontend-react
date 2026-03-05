@@ -6,6 +6,7 @@ export const locales = {
       loadingTip: 'Loading trip legs data...',
       error: 'Error loading trip legs page',
       retry: 'Retry',
+      noData: 'No trip leg data available',
       description: 'All individual trip legs showing the granular impact on emissions and travel time. Click column headers to sort or click a row to toggle visibility on map.',
       columns: {
         personId: 'Person ID',
@@ -22,6 +23,7 @@ export const locales = {
       loadingTip: 'Chargement des données des segments de trajet...',
       error: 'Erreur lors du chargement de la page des segments de trajet',
       retry: 'Réessayer',
+      noData: 'Aucune donnée de segment de trajet disponible',
       description: 'Tous les segments de trajet individuels montrant l\'impact granulaire sur les émissions et le temps de trajet. Cliquez sur les en-têtes de colonnes pour trier ou cliquez sur une rangée pour basculer la visibilité sur la carte.',
       columns: {
         personId: 'ID personne',

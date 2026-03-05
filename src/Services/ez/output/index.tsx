@@ -1,5 +1,6 @@
-import { Divider, Button, Modal, Space } from 'antd';
-import { ArrowLeftOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { Button, Divider, Modal } from 'antd';
+import { ArrowLeftOutlined } from '@ant-design/icons';
+import { showEZModal } from '~ez/components/EZModal';
 import { useTranslation } from 'react-i18next';
 import {
   Chart as ChartJS,
@@ -46,50 +47,34 @@ export const OutputView = () => {
   const setRequestId = useEZSessionStore((state) => state.setRequestId);
 
   const handleEditParameters = () => {
-    const instance = modal.confirm({
+    const instance = showEZModal(modal, {
       title: t('editParametersModal.title'),
-      icon: <ExclamationCircleOutlined />,
       content: t('editParametersModal.content'),
-      okText: t('editParametersModal.keepInputs'),
-      cancelText: t('editParametersModal.cancel'),
-      onOk() {
-        setState('PARAMETER_SELECTION');
-      },
-      footer: () => (
-        <div className={outputStyles.modalFooter}>
-          <Button size="small" onClick={() => instance.destroy()}>
-            {t('editParametersModal.cancel')}
-          </Button>
-          <Space size={8}>
-            <Button
-              size="small"
-              danger
-              ghost
-              onClick={() => {
-                resetApiPayload();
-                resetSession();
-                resetAllEZOutputStores();
-                useScenarioSnapshotStore.getState().reset();
-                setRequestId('');
-                setState('PARAMETER_SELECTION');
-                instance.destroy();
-              }}
-            >
-              {t('editParametersModal.reset')}
-            </Button>
-            <Button
-              size="small"
-              type="primary"
-              onClick={() => {
-                setState('PARAMETER_SELECTION');
-                instance.destroy();
-              }}
-            >
-              {t('editParametersModal.keepInputs')}
-            </Button>
-          </Space>
-        </div>
-      ),
+      actions: [
+        { label: t('editParametersModal.cancel'), onClick: () => instance.destroy() },
+        {
+          label: t('editParametersModal.reset'),
+          danger: true,
+          ghost: true,
+          onClick: () => {
+            resetApiPayload();
+            resetSession();
+            resetAllEZOutputStores();
+            useScenarioSnapshotStore.getState().reset();
+            setRequestId('');
+            setState('PARAMETER_SELECTION');
+            instance.destroy();
+          },
+        },
+        {
+          label: t('editParametersModal.keepInputs'),
+          type: 'primary',
+          onClick: () => {
+            setState('PARAMETER_SELECTION');
+            instance.destroy();
+          },
+        },
+      ],
     });
   };
 

@@ -1,4 +1,5 @@
 import { Space, Button, Input, Typography, message, Modal } from 'antd'
+import { showEZModal } from '~ez/components/EZModal'
 import { useTranslation } from 'react-i18next'
 import { useEZSessionStore, useDraftStore } from '~stores/session'
 import { useEZServiceStore, useAPIPayloadStore } from '~store'
@@ -16,6 +17,7 @@ const { Text } = Typography
 export const WelcomeView = () => {
   const { t } = useTranslation('ez-welcome');
   const [messageApi, contextHolder] = message.useMessage();
+  const [modal, modalContextHolder] = Modal.useModal();
 
   const requestId = useEZSessionStore((state) => state.requestId)
   const setRequestId = useEZSessionStore((state) => state.setRequestId)
@@ -37,25 +39,33 @@ export const WelcomeView = () => {
     // CANCELLED or FAILED
     const statusLabel = status === 'CANCELLED' ? t('status.cancelled') : t('status.failed');
 
-    Modal.confirm({
+    const instance = showEZModal(modal, {
       title: t('nonCompleted.title'),
       content: t('nonCompleted.content', { status: statusLabel }),
-      okText: t('nonCompleted.okText'),
-      cancelText: t('nonCompleted.cancelText'),
-      onOk: () => {
-        const snapshot = useScenarioSnapshotStore.getState();
-        if (snapshot.input) {
-          restoreStoresFromInput(snapshot.input, snapshot.session);
-        }
-        // Clear requestId so it's treated as a brand new scenario
-        setRequestId('');
-        useScenarioSnapshotStore.getState().reset();
-        setState('PARAMETER_SELECTION');
-      },
-      onCancel: () => {
-        useScenarioSnapshotStore.getState().reset();
-        setState('WELCOME');
-      },
+      actions: [
+        {
+          label: t('nonCompleted.cancelText'),
+          onClick: () => {
+            useScenarioSnapshotStore.getState().reset();
+            setState('WELCOME');
+            instance.destroy();
+          },
+        },
+        {
+          label: t('nonCompleted.okText'),
+          type: 'primary',
+          onClick: () => {
+            const snapshot = useScenarioSnapshotStore.getState();
+            if (snapshot.input) {
+              restoreStoresFromInput(snapshot.input, snapshot.session);
+            }
+            setRequestId('');
+            useScenarioSnapshotStore.getState().reset();
+            setState('PARAMETER_SELECTION');
+            instance.destroy();
+          },
+        },
+      ],
     });
   };
 
@@ -116,6 +126,7 @@ export const WelcomeView = () => {
   return (
     <div className={styles.container}>
       {contextHolder}
+      {modalContextHolder}
       <div className={styles.welcomeText}>
         <br />
         {t('welcome.title')}

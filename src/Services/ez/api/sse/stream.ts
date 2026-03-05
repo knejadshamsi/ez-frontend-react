@@ -20,6 +20,7 @@ export function startSimulationStream(config: SimulationStreamConfig): () => voi
   let heartbeatTimeoutId: NodeJS.Timeout | null = null;
   let connectionTimeoutId: NodeJS.Timeout | null = null;
   let universalTimeoutId: NodeJS.Timeout | null = null;
+  let reachedTerminalState = false;
 
   const resetHeartbeatTimer = () => {
     if (heartbeatTimeoutId) {
@@ -132,6 +133,8 @@ export function startSimulationStream(config: SimulationStreamConfig): () => voi
         buffer = lines.pop() || '';
 
         for (const line of lines) {
+          if (reachedTerminalState) break;
+
           if (line.startsWith('data: ')) {
             try {
               const jsonStr = line.slice(6);
@@ -144,7 +147,16 @@ export function startSimulationStream(config: SimulationStreamConfig): () => voi
                 resetUniversalTimer();
               }
 
+              // Check for terminal messages before handling
+              const isTerminal = message.messageType === 'success_process'
+                || message.messageType === 'pa_cancelled_process'
+                || message.messageType === 'error_global';
+
               handleSSEMessage(message, config);
+
+              if (isTerminal) {
+                reachedTerminalState = true;
+              }
             } catch (parseError) {
               console.error('[SSE] Failed to parse message:', line, parseError);
             }

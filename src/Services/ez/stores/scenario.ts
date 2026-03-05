@@ -19,7 +19,7 @@ export const useScenarioSnapshotStore = create<ScenarioSnapshotStore>((set) => (
   status: null,
   input: null,
   session: null,
-  setStatus: (status) => set({ status }),
+  setStatus: (status) => set({ status, input: null, session: null }),
   setInput: (input) => set({ input }),
   setSession: (session) => set({ session }),
   reset: () => set({ status: null, input: null, session: null }),

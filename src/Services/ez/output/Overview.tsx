@@ -14,7 +14,8 @@ import './locales';
  * SSE Message: data_text_overview
  */
 export const Overview = () => {
-  const { t } = useTranslation('ez-output');
+  const { t, i18n } = useTranslation('ez-output');
+  const locale = i18n.language === 'fr' ? 'fr-CA' : 'en-US';
   const [messageApi, contextHolder] = message.useMessage();
   const overviewData = useEZOutputOverviewStore((state) => state.overviewData);
   const overviewState = useEZOutputOverviewStore((state) => state.overviewState);
@@ -106,12 +107,12 @@ export const Overview = () => {
           i18nKey="overview.description"
           ns="ez-output"
           values={{
-            totalPersonCount: overviewData.totalPersonCount.toLocaleString(),
-            totalLegCount: overviewData.totalLegCount.toLocaleString(),
+            totalPersonCount: overviewData.totalPersonCount.toLocaleString(locale),
+            totalLegCount: overviewData.totalLegCount.toLocaleString(locale),
             totalAreaCoverageKm2: overviewData.totalAreaCoverageKm2,
-            totalNetworkNodes: overviewData.totalNetworkNodes.toLocaleString(),
-            totalNetworkLinks: overviewData.totalNetworkLinks.toLocaleString(),
-            totalKilometersTraveled: overviewData.totalKilometersTraveled.toLocaleString(),
+            totalNetworkNodes: overviewData.totalNetworkNodes.toLocaleString(locale),
+            totalNetworkLinks: overviewData.totalNetworkLinks.toLocaleString(locale),
+            totalKilometersTraveled: overviewData.totalKilometersTraveled.toLocaleString(locale),
           }}
           components={{
             strong: <span className={outputStyles.highlightedNumber} />,

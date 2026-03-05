@@ -13,11 +13,10 @@ export const resetAllEZStores = async (): Promise<void> => {
       await cancelSimulation(sessionStore.requestId);
     }
 
-    useProgressStore.getState().reset();
-
     resetAllEZOutputStores();
     useEZOutputFiltersStore.getState().reset();
     useEZSessionStore.getState().reset();
+    useProgressStore.getState().reset();
     useAPIPayloadStore.getState().reset();
     useDrawingStateStore.getState().reset();
     useDrawToolStore.getState().reset();

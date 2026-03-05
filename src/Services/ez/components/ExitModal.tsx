@@ -250,6 +250,16 @@ export default function ExitModal() {
     }
   }, [exitState, exitWarning, setExitState, setExitWarning, modal, setActiveService, messageApi, t]);
 
+  // Cleanup modal on unmount
+  useEffect(() => {
+    return () => {
+      if (modalInstanceRef.current) {
+        modalInstanceRef.current.destroy();
+        modalInstanceRef.current = null;
+      }
+    };
+  }, []);
+
   // Reactively update modal when backend status changes while modal is open
   useEffect(() => {
     if (modalInstanceRef.current && exitState === 'await_confirmation') {

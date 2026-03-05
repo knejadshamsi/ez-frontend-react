@@ -119,7 +119,9 @@ export function calculateComparisonData(
   const slightThreshold = options?.slightThreshold ?? DEFAULT_COMPARISON_THRESHOLDS.slight;
   const dramaticThreshold = options?.dramaticThreshold ?? DEFAULT_COMPARISON_THRESHOLDS.dramatic;
 
-  const percentChange = Math.abs(((postValue - baseline) / baseline) * 100);
+  const percentChange = baseline === 0
+    ? (postValue === 0 ? 0 : 100)
+    : Math.abs(((postValue - baseline) / baseline) * 100);
 
   let magnitude: ComparisonMagnitude;
   let direction: ComparisonDirection;

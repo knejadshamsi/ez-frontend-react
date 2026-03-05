@@ -158,6 +158,7 @@ export const DrawingControls = () => {
   const customSimulationAreas = useAPIPayloadStore(state => state.payload.customSimulationAreas);
   const scaledSimulationAreas = useAPIPayloadStore(state => state.payload.scaledSimulationAreas);
   const removeCustomSimulationArea = useAPIPayloadStore(state => state.removeCustomSimulationArea);
+  const removeZone = useAPIPayloadStore(state => state.removeZone);
   const updateZone = useAPIPayloadStore(state => state.updateZone);
   const updateCustomSimulationArea = useAPIPayloadStore(state => state.updateCustomSimulationArea);
   const drawToolGeoJson = useDrawToolStore(state => state.drawToolGeoJson);
@@ -175,10 +176,17 @@ export const DrawingControls = () => {
 
   // For both draw mode or edit mode.
   const handleCancel = () => {
- 
-      if (isDrawMode && ezState === 'DRAW_SIM_AREA' && activeCustomArea) removeCustomSimulationArea(activeCustomArea);
+    if (isDrawMode && ezState === 'DRAW_SIM_AREA' && activeCustomArea) {
+      removeCustomSimulationArea(activeCustomArea);
+    }
 
-  
+    // Remove zone if it was never drawn (no coords)
+    if (ezState === 'DRAW_EM_ZONE' && activeZone) {
+      const zone = zones.find(z => z.id === activeZone);
+      if (zone && !zone.coords) {
+        removeZone(activeZone);
+      }
+    }
 
     resetDrawTool();
     resetDrawingState();

@@ -12,6 +12,7 @@ import {
   useEZOutputTripLegsStore,
 } from '~stores/output';
 import { resetAllEZOutputStores } from '~stores/output';
+import { useScenarioSnapshotStore } from '~stores/scenario';
 import { cancelSimulation } from '~ez/api';
 import { QueuedState, SuccessState, ErrorState, RunningState, CancellingState, PollingState } from './states';
 import styles from './Progress.module.less';
@@ -94,10 +95,6 @@ export const Progress = () => {
     return <>{contextHolder}<CancellingState /></>;
   }
 
-  if (status === 'DISPLAY_POLLING_RECOVERY') {
-    return <>{contextHolder}<PollingState pollingProgress={state.pollingProgress} /></>;
-  }
-
   if (status === 'DISPLAY_COMPLETE') {
     return <>{contextHolder}<SuccessState /></>;
   }
@@ -114,24 +111,32 @@ export const Progress = () => {
   }
 
   const handleCancel = async () => {
+    const currentStatus = useProgressStore.getState().status;
+    if (currentStatus === 'DISPLAY_CANCELLATION') return;
+
     useProgressStore.getState().setStatus('DISPLAY_CANCELLATION');
     const result = await cancelSimulation(requestId);
 
     switch (result) {
       case 'success':
+        useEZSessionStore.getState().abortSseStream();
         resetAllEZOutputStores();
-        useEZSessionStore.getState().setSseCleanup(null);
+        useScenarioSnapshotStore.getState().reset();
         useProgressStore.getState().reset();
         setState('PARAMETER_SELECTION');
         messageApi.success(t('cancellation.success'));
         break;
       case 'timeout':
         useEZSessionStore.getState().abortSseStream();
+        resetAllEZOutputStores();
+        useScenarioSnapshotStore.getState().reset();
         useProgressStore.getState().reset();
         setState('PARAMETER_SELECTION');
         messageApi.error(t('cancellation.timeout'));
         break;
       case 'conflict':
+        resetAllEZOutputStores();
+        useScenarioSnapshotStore.getState().reset();
         useProgressStore.getState().reset();
         setState('PARAMETER_SELECTION');
         messageApi.warning(t('cancellation.conflict'));
@@ -139,6 +144,8 @@ export const Progress = () => {
       case 'not_found':
       case 'error':
         useEZSessionStore.getState().abortSseStream();
+        resetAllEZOutputStores();
+        useScenarioSnapshotStore.getState().reset();
         useProgressStore.getState().reset();
         setState('PARAMETER_SELECTION');
         messageApi.error(t('cancellation.failed'));
@@ -148,6 +155,10 @@ export const Progress = () => {
 
   if (status === 'DISPLAY_QUEUED') {
     return <>{contextHolder}<QueuedState onCancel={handleCancel} /></>;
+  }
+
+  if (status === 'DISPLAY_POLLING_RECOVERY') {
+    return <>{contextHolder}<PollingState pollingProgress={state.pollingProgress} onCancel={handleCancel} /></>;
   }
 
   if (status === 'DISPLAY_SCENARIO_LOAD') {

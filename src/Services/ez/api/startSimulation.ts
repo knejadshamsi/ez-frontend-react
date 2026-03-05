@@ -132,8 +132,6 @@ const runRealSimulation = (
     scenarioDescription
   );
 
-  let abortStream: (() => void) | null = null;
-
   const cleanup = startSimulationStream({
     endpoint: `${backendUrl}/simulate`,
     payload: apiRequest as unknown as Record<string, unknown>,
@@ -146,15 +144,8 @@ const runRealSimulation = (
         await updateScenarioMetadata(requestId);
         console.log('[EZ API] Metadata sent successfully');
       } catch (error) {
-        console.error('[EZ API] CRITICAL: Failed to send metadata:', error);
-
-        if (abortStream) {
-          abortStream();
-          setSseCleanup(null);
-          useProgressStore.getState().reset();
-          onError('Failed to send scenario metadata. Please try again.');
-        }
-        return;
+        // Metadata is non-critical (title/description only) - log and continue
+        console.error('[EZ API] Failed to send metadata:', error);
       }
     },
 
@@ -167,7 +158,7 @@ const runRealSimulation = (
       console.log('[SSE] Server confirmed cancellation:', reason);
       setSseCleanup(null);
       resetAllEZOutputStores();
-      useEZSessionStore.getState().setSseCleanup(null);
+      useScenarioSnapshotStore.getState().reset();
       useProgressStore.getState().reset();
       setState('PARAMETER_SELECTION');
     },
@@ -199,9 +190,7 @@ const runRealSimulation = (
     },
   });
 
-  abortStream = cleanup;
   setSseCleanup(cleanup);
-  console.log('[SSE] Stream started, cleanup function stored');
 };
 
 export const loadScenario = async (
@@ -216,9 +205,6 @@ export const loadScenario = async (
 
   setIsNewSimulation(false);
   setState('AWAIT_RESULTS');
-
-  // Reset snapshot store for fresh load
-  useScenarioSnapshotStore.getState().reset();
 
   if (!isEzBackendAlive) {
     const cleanup = runDemoScenarioLoad(setState);
@@ -286,8 +272,22 @@ const runRealScenarioLoad = (
       const input = snapshotStore().input;
       const session = snapshotStore().session;
 
+      // Both input and session are mandatory - abort if either is missing
+      if (!input || !session) {
+        console.error('[SSE] Missing preamble data - input:', !!input, 'session:', !!session);
+        if (abortStream) {
+          abortStream();
+          setSseCleanup(null);
+        }
+        resetAllEZOutputStores();
+        useScenarioSnapshotStore.getState().reset();
+        useProgressStore.getState().reset();
+        onError(t('ez-progress:error.title'));
+        return;
+      }
+
       if (status === 'COMPLETED') {
-        restoreStoresFromInput(input!, session);
+        restoreStoresFromInput(input, session);
       } else if (status === 'CANCELLED' || status === 'FAILED') {
         if (abortStream) {
           abortStream();
@@ -305,7 +305,7 @@ const runRealScenarioLoad = (
       console.log('[SSE] Server cancelled scenario load:', reason);
       setSseCleanup(null);
       resetAllEZOutputStores();
-      useEZSessionStore.getState().setSseCleanup(null);
+      useScenarioSnapshotStore.getState().reset();
       useProgressStore.getState().reset();
       setState('PARAMETER_SELECTION');
     },
@@ -332,6 +332,7 @@ const runRealScenarioLoad = (
 };
 
 const POLL_INTERVAL_MS = 5000;
+const MAX_POLL_ATTEMPTS = 24; // 24 x 5s = 2 minutes max
 
 const startPollingRecovery = (
   requestId: string,
@@ -341,7 +342,21 @@ const startPollingRecovery = (
   const progressStore = useProgressStore.getState();
   progressStore.setStatus('DISPLAY_POLLING_RECOVERY');
 
+  let attempts = 0;
+
   const poll = async () => {
+    attempts++;
+
+    if (attempts > MAX_POLL_ATTEMPTS) {
+      console.error('[Polling] Max attempts reached - giving up');
+      useProgressStore.getState().reset();
+      resetAllEZOutputStores();
+      useEZSessionStore.getState().setRequestId('');
+      useScenarioSnapshotStore.getState().reset();
+      onError(t('ez-progress:timeout.heartbeat'));
+      return;
+    }
+
     try {
       const response = await fetchScenarioStatus(requestId);
       const { status, progress } = response;
@@ -349,6 +364,7 @@ const startPollingRecovery = (
       if (isTerminalStatus(status)) {
         if (status === 'COMPLETED') {
           console.log('[Polling] Simulation completed - loading results via SSE');
+          useScenarioSnapshotStore.getState().reset();
           loadScenario(requestId, setState, onError);
         } else {
           console.log('[Polling] Simulation ended with status:', status);
@@ -366,7 +382,7 @@ const startPollingRecovery = (
       setTimeout(poll, POLL_INTERVAL_MS);
     } catch (error) {
       console.error('[Polling] Status check failed:', error);
-      // Network still down - keep polling
+      // Network still down - keep polling (up to max attempts)
       useProgressStore.getState().setPollingProgress(null);
       setTimeout(poll, POLL_INTERVAL_MS);
     }

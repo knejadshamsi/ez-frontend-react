@@ -11,7 +11,8 @@ import { hasInputChangedFromDefault } from '~ez/exitHandler'
 import { useScenarioSnapshotStore, hasInputChanged } from '~stores/scenario'
 
 import { Button, Input, Modal, message } from 'antd'
-import { ArrowLeftOutlined, SendOutlined, EditOutlined, SaveOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, SendOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons'
+import { showEZModal } from '~ez/components/EZModal'
 import '~ez/locales'
 
 import styles from './ParameterSelectionView.module.less'
@@ -34,6 +35,7 @@ export const ParameterSelectionView = () => {
 
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState(scenarioTitle);
+  const [isStarting, setIsStarting] = useState(false);
 
   useEffect(() => {
     setEditedTitle(scenarioTitle);
@@ -57,22 +59,28 @@ export const ParameterSelectionView = () => {
     // Determine which warning message to show
     const warningKey = hasOutput ? 'both' : 'inputOnly';
 
-    // Show warning modal
-    modal.confirm({
+    const instance = showEZModal(modal, {
       title: t('parameterSelection.backToWelcomeWarning.title'),
-      icon: <ExclamationCircleOutlined />,
       content: t(`parameterSelection.backToWelcomeWarning.${warningKey}`),
-      okText: t('parameterSelection.backToWelcomeWarning.confirm'),
-      cancelText: t('parameterSelection.cancel'),
-      okButtonProps: { danger: true },
-      async onOk() {
-        await resetAllEZStores();
-        setState('WELCOME');
-      },
+      actions: [
+        { label: t('parameterSelection.cancel'), onClick: () => instance.destroy() },
+        {
+          label: t('parameterSelection.backToWelcomeWarning.confirm'),
+          type: 'primary',
+          danger: true,
+          onClick: async () => {
+            await resetAllEZStores();
+            setState('WELCOME');
+            instance.destroy();
+          },
+        },
+      ],
     });
   };
 
   const handleStartSimulation = () => {
+    if (isStarting) return;
+
     const apiRequest = createAPIRequest(apiPayload, scenarioTitle, scenarioDescription);
     const validation = validateAPIRequest(apiRequest);
 
@@ -84,13 +92,15 @@ export const ParameterSelectionView = () => {
     const outputExists = hasOutputData();
 
     if (outputExists && !hasInputChanged()) {
-      // Input identical to snapshot — silently return to results
+      // Input identical to snapshot - silently return to results
       setState('RESULT_VIEW');
       return;
     }
 
+    setIsStarting(true);
+
     if (outputExists) {
-      // Input changed — clean slate before new simulation
+      // Input changed - clean slate before new simulation
       const setRequestId = useEZSessionStore.getState().setRequestId;
       setRequestId('');
       useScenarioSnapshotStore.getState().reset();
@@ -155,6 +165,8 @@ export const ParameterSelectionView = () => {
         <Button
           type="primary"
           onClick={handleStartSimulation}
+          disabled={isStarting}
+          loading={isStarting}
           className={styles.simulationButton}
         >
           <div className={styles.buttonText}>

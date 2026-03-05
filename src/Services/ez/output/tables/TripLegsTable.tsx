@@ -103,6 +103,7 @@ export const TripLegsTable = () => {
         size="small"
         className={outputStyles.legPerformanceTable}
         rowKey="legId"
+        locale={{ emptyText: t('tripLegsTable.noData') }}
         onRow={(record) => ({
           onClick: () => toggleTripLegVisibility(record.legId),
           className: outputStyles.clickableRow
