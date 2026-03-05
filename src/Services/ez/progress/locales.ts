@@ -45,6 +45,14 @@ export const locales = {
     polling: {
       reconnecting: 'Connection lost - monitoring simulation progress...',
     },
+    queued: {
+      waiting: 'Simulation queued - waiting for available capacity...',
+    },
+    timeout: {
+      connection: 'Could not connect to simulation server. Please check your connection and try again.',
+      heartbeat: 'Connection to server was lost.',
+      universal: 'Simulation timed out.',
+    },
   },
   fr: {
     loadingScenario: 'Chargement du scénario, veuillez patienter.',
@@ -89,6 +97,14 @@ export const locales = {
     },
     polling: {
       reconnecting: 'Connexion perdue - surveillance de la progression...',
+    },
+    queued: {
+      waiting: 'Simulation en file d\'attente - en attente de capacité disponible...',
+    },
+    timeout: {
+      connection: 'Impossible de se connecter au serveur de simulation. Veuillez vérifier votre connexion et réessayer.',
+      heartbeat: 'La connexion au serveur a été perdue.',
+      universal: 'La simulation a expiré.',
     },
   },
 } as const;

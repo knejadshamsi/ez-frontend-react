@@ -105,6 +105,15 @@ function handleProgressAlertMessage(
       }
       break;
 
+    case 'pa_cancelled_process': {
+      const cancelData = payload as { status: string; reason: string };
+      console.log('[SSE] Server confirmed cancellation:', cancelData.reason);
+      if (config.onCancelled) {
+        config.onCancelled(cancelData.reason);
+      }
+      break;
+    }
+
     case 'heartbeat':
       break;
 

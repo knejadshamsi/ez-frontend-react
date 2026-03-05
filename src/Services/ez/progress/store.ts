@@ -18,6 +18,7 @@ export type StepName =
 export type StepStatus = Record<StepName, StepState>;
 
 export type ProgressStatus =
+  | 'DISPLAY_QUEUED'
   | 'DISPLAY_SIMULATION'
   | 'DISPLAY_SCENARIO_LOAD'
   | 'DISPLAY_CANCELLATION'
@@ -86,13 +87,13 @@ export const POSTPROCESSING_STEPS: StepName[] = [
 ];
 
 export const useProgressStore = create<ProgressState & ProgressActions>((set) => ({
-  status: (useEZSessionStore.getState().isNewSimulation ? 'DISPLAY_SIMULATION' : 'DISPLAY_SCENARIO_LOAD') as ProgressStatus,
+  status: (useEZSessionStore.getState().isNewSimulation ? 'DISPLAY_QUEUED' : 'DISPLAY_SCENARIO_LOAD') as ProgressStatus,
   completedSteps: { ...initialSteps },
   errorMessage: '',
   pollingProgress: null,
 
   setStatus: (status) => {
-    if (status === 'DISPLAY_SIMULATION' || status === 'DISPLAY_SCENARIO_LOAD') {
+    if (status === 'DISPLAY_QUEUED' || status === 'DISPLAY_SIMULATION' || status === 'DISPLAY_SCENARIO_LOAD') {
       set({
         status,
         completedSteps: { ...initialSteps },
@@ -131,7 +132,7 @@ export const useProgressStore = create<ProgressState & ProgressActions>((set) =>
   reset: () => {
     const isNew = useEZSessionStore.getState().isNewSimulation;
     set({
-      status: isNew ? 'DISPLAY_SIMULATION' : 'DISPLAY_SCENARIO_LOAD',
+      status: isNew ? 'DISPLAY_QUEUED' : 'DISPLAY_SCENARIO_LOAD',
       completedSteps: { ...initialSteps },
       errorMessage: '',
       pollingProgress: null,

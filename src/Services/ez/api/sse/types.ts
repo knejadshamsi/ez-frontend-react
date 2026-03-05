@@ -127,6 +127,7 @@ export type SSEMessage =
   | { messageType: 'heartbeat'; payload: Record<string, never>; timestamp: string }
   | { messageType: 'success_process'; payload: Record<string, never>; timestamp: string }
   | { messageType: 'error_global'; payload: ErrorPayload; timestamp: string }
+  | { messageType: 'pa_cancelled_process'; payload: { status: string; reason: string }; timestamp: string }
 
   // Overview data
   | { messageType: 'data_text_overview'; payload: OverviewPayload; timestamp: string }
@@ -185,6 +186,7 @@ export interface SimulationStreamConfig {
   onComplete?: () => void;
   onError?: (error: SimulationError) => void;
   onTimelineEvent?: (event: string) => void;
+  onCancelled?: (reason: string) => void;
   onScenarioStatus?: (status: string) => void;
   onScenarioInput?: (input: Record<string, unknown>) => void;
   onScenarioSession?: (session: Record<string, unknown>) => void;

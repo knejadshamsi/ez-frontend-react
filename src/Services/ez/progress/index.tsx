@@ -13,7 +13,7 @@ import {
 } from '~stores/output';
 import { resetAllEZOutputStores } from '~stores/output';
 import { cancelSimulation } from '~ez/api';
-import { SuccessState, ErrorState, RunningState, CancellingState, PollingState } from './states';
+import { QueuedState, SuccessState, ErrorState, RunningState, CancellingState, PollingState } from './states';
 import styles from './Progress.module.less';
 import './locales';
 
@@ -145,6 +145,10 @@ export const Progress = () => {
         break;
     }
   };
+
+  if (status === 'DISPLAY_QUEUED') {
+    return <>{contextHolder}<QueuedState onCancel={handleCancel} /></>;
+  }
 
   if (status === 'DISPLAY_SCENARIO_LOAD') {
     return (

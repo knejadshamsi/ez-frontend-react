@@ -6,6 +6,8 @@ import { startSimulationStream } from './sse';
 import { getBackendUrl, isBackendConfigured } from './config';
 import { decodeProgressAlert } from '../progress';
 import { useProgressStore } from '../progress/store';
+import i18n from '~i18nConfig';
+import '../progress/locales';
 import { loadDemoData } from '../output/demo';
 import { restoreStoresFromInput } from './fetchScenarioInput';
 import { updateScenarioMetadata } from './updateScenarioMetadata';
@@ -14,6 +16,21 @@ import { useDraftStore } from '~stores/session';
 import { deleteDraft } from './draft';
 import { fetchScenarioStatus, isTerminalStatus } from './scenarioStatus';
 import { resetAllEZOutputStores } from '~stores/output';
+
+const t = i18n.t.bind(i18n);
+
+const TIMEOUT_ERROR_KEYS: Record<string, string> = {
+  CONNECTION_TIMEOUT: 'ez-progress:timeout.connection',
+  HEARTBEAT_TIMEOUT: 'ez-progress:timeout.heartbeat',
+  UNIVERSAL_TIMEOUT: 'ez-progress:timeout.universal',
+};
+
+const getErrorMessage = (error: { code?: string; message?: string }): string => {
+  if (error.code && TIMEOUT_ERROR_KEYS[error.code]) {
+    return t(TIMEOUT_ERROR_KEYS[error.code]);
+  }
+  return error.message || 'Simulation failed';
+};
 
 export const startSimulation = async (
   setState: (state: EZStateType) => void,
@@ -141,6 +158,20 @@ const runRealSimulation = (
       }
     },
 
+    onSimulationStart: () => {
+      console.log('[SSE] Simulation now actively running');
+      useProgressStore.getState().setStatus('DISPLAY_SIMULATION');
+    },
+
+    onCancelled: (reason: string) => {
+      console.log('[SSE] Server confirmed cancellation:', reason);
+      setSseCleanup(null);
+      resetAllEZOutputStores();
+      useEZSessionStore.getState().setSseCleanup(null);
+      useProgressStore.getState().reset();
+      setState('PARAMETER_SELECTION');
+    },
+
     onComplete: () => {
       console.log('[SSE] Simulation completed successfully');
       setSseCleanup(null);
@@ -163,9 +194,8 @@ const runRealSimulation = (
       }
 
       // No requestId - connection failed before simulation started
-      const errorMessage = error.message || 'Simulation failed';
       useProgressStore.getState().reset();
-      onError(errorMessage);
+      onError(getErrorMessage(error));
     },
   });
 
@@ -271,6 +301,15 @@ const runRealScenarioLoad = (
       }
     },
 
+    onCancelled: (reason: string) => {
+      console.log('[SSE] Server cancelled scenario load:', reason);
+      setSseCleanup(null);
+      resetAllEZOutputStores();
+      useEZSessionStore.getState().setSseCleanup(null);
+      useProgressStore.getState().reset();
+      setState('PARAMETER_SELECTION');
+    },
+
     onComplete: () => {
       console.log('[SSE] Scenario output stream completed');
       setSseCleanup(null);
@@ -317,7 +356,7 @@ const startPollingRecovery = (
           resetAllEZOutputStores();
           useEZSessionStore.getState().setRequestId('');
           useScenarioSnapshotStore.getState().reset();
-          onError(`Simulation ${status.toLowerCase()}`);
+          onError(t('ez-progress:cancellation.failed'));
         }
         return;
       }

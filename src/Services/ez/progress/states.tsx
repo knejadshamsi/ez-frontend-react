@@ -33,6 +33,28 @@ export const SuccessState = () => {
   );
 };
 
+interface QueuedStateProps {
+  onCancel: () => void;
+}
+
+export const QueuedState = ({ onCancel }: QueuedStateProps) => {
+  const { t } = useTranslation('ez-progress');
+
+  return (
+    <div className={styles.simulationNotification}>
+      <div className={styles.loadingContent}>
+        <LoadingOutlined className={styles.spinner} />
+        <span className={styles.loadingText}>{t('queued.waiting')}</span>
+      </div>
+      <div className={styles.notificationFooter}>
+        <button className={styles.cancelButton} onClick={onCancel}>
+          {t('buttons.cancel')}
+        </button>
+      </div>
+    </div>
+  );
+};
+
 export const CancellingState = () => {
   const { t } = useTranslation('ez-progress');
 
