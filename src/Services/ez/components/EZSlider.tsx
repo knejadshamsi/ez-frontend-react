@@ -16,6 +16,8 @@ interface EZSliderProps {
   trackBg?: string
   handleColor?: string
   style?: CSSProperties
+  className?: string
+  ariaLabel?: string
 }
 
 const EZSlider = ({
@@ -29,6 +31,8 @@ const EZSlider = ({
   trackBg = '#1677ff',
   handleColor = '#1677ff',
   style = {},
+  className,
+  ariaLabel,
 }: EZSliderProps): ReactElement => {
   const [isDragging, setIsDragging] = useState<boolean>(false)
   const [showTooltip, setShowTooltip] = useState<boolean>(false)
@@ -54,9 +58,6 @@ const EZSlider = ({
         setIsDragging(true)
         setShowTooltip(true)
         break
-      case 'mouseup':
-        handleMouseUp()
-        break
       case 'mouseenter':
         setShowTooltip(true)
         break
@@ -79,7 +80,7 @@ const EZSlider = ({
 
   return (
     <div
-      className={styles['ez-slider-container']}
+      className={`${styles['ez-slider-container']}${className ? ` ${className}` : ''}`}
       style={style}
       onMouseEnter={handleAction('mouseenter')}
       onMouseLeave={handleAction('mouseleave')}
@@ -127,6 +128,7 @@ const EZSlider = ({
           value={value}
           onChange={handleAction('change')}
           onMouseDown={handleAction('mousedown')}
+          aria-label={ariaLabel}
         />
       </div>
     </div>

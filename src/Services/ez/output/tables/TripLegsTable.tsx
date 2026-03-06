@@ -106,6 +106,15 @@ export const TripLegsTable = () => {
         locale={{ emptyText: t('tripLegsTable.noData') }}
         onRow={(record) => ({
           onClick: () => toggleTripLegVisibility(record.legId),
+          onKeyDown: (e: React.KeyboardEvent) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              toggleTripLegVisibility(record.legId);
+            }
+          },
+          tabIndex: 0,
+          role: 'button' as const,
+          'aria-label': t('tripLegsTable.toggleVisibility', { legId: record.legId }),
           className: outputStyles.clickableRow
         })}
         rowClassName={(record) => visibleTripLegIds.has(record.legId) ? outputStyles.visibleRow : ''}

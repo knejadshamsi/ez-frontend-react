@@ -45,6 +45,7 @@ export const MapContainer = ({
               danger
               onClick={onRetry}
               loading={isLoading}
+              aria-label={t('mapContainer.retryAriaLabel', { title })}
             >
               {t('mapContainer.retry')}
             </Button>
@@ -72,6 +73,7 @@ export const MapContainer = ({
           onClick={onToggle}
           className={styles.toggleButton}
           disabled={isLoading}
+          aria-label={isShown ? t('mapContainer.hideMapAriaLabel', { title }) : t('mapContainer.viewMapAriaLabel', { title })}
         >
           {isShown ? t('mapContainer.hideMap') : t('mapContainer.viewMap')}
         </Button>

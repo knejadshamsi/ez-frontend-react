@@ -1,6 +1,6 @@
 import i18n from '~i18nConfig';
 
-export const locales = {
+const locales = {
   en: {
     section: {
       title: '3. SIMULATION OPTIONS',
@@ -29,6 +29,10 @@ export const locales = {
           highEmission: 'High Em.',
         },
         minCategoryWarning: 'At least one emission category must remain enabled',
+        ariaLabels: {
+          toggleCategory: 'Toggle {{category}}',
+          divider: 'Distribution divider at {{position}}%',
+        },
       },
     },
     dataSources: {
@@ -54,6 +58,9 @@ export const locales = {
         subway: 'Subway',
         bus: 'Bus',
         car: 'Car',
+      },
+      ariaLabels: {
+        modeCard: '{{mode}}, level {{level}}',
       },
     },
   },
@@ -85,6 +92,10 @@ export const locales = {
           highEmission: 'Haute ém.',
         },
         minCategoryWarning: 'Au moins une catégorie d\'émissions doit rester activée',
+        ariaLabels: {
+          toggleCategory: 'Basculer {{category}}',
+          divider: 'Séparateur de distribution à {{position}} %',
+        },
       },
     },
     dataSources: {
@@ -111,6 +122,9 @@ export const locales = {
         bus: 'Autobus',
         car: 'Voiture',
       },
+      ariaLabels: {
+        modeCard: '{{mode}}, niveau {{level}}',
+      },
     },
   },
 } as const;
@@ -118,4 +132,3 @@ export const locales = {
 i18n.addResourceBundle('en', 'ez-simulation-options', locales.en);
 i18n.addResourceBundle('fr', 'ez-simulation-options', locales.fr);
 
-export type EZSimulationOptionsLocale = typeof locales.en;

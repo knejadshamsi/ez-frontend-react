@@ -22,7 +22,7 @@ const BlockEditor = ({ activeBlock, onUpdate, onDelete }: BlockEditorProps) => {
     <div className={styles.editorContainer}>
       <div className={styles.editorHeader}>
         <h3 className={styles.editorTitle}>{t('vehicleRestrictions.blockEditor.settings')}</h3>
-        <button className={styles.deleteButton} onClick={handleDelete}>
+        <button className={styles.deleteButton} onClick={handleDelete} aria-label={t('vehicleRestrictions.blockEditor.delete')}>
           <DeleteOutlined className={styles.deleteIcon} />
         </button>
       </div>

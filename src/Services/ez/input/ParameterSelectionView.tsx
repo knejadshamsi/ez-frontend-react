@@ -140,6 +140,7 @@ export const ParameterSelectionView = () => {
                 type="text"
                 size="small"
                 icon={<SaveOutlined />}
+                aria-label={t('parameterSelection.saveTitle')}
                 onClick={() => {
                   setScenarioTitle(editedTitle.slice(0, MAX_NAME_LENGTH));
                   setIsEditingTitle(false);
@@ -154,6 +155,7 @@ export const ParameterSelectionView = () => {
                   type="text"
                   size="small"
                   icon={<EditOutlined className={styles.editIcon} />}
+                  aria-label={t('parameterSelection.editTitle')}
                   onClick={() => setIsEditingTitle(true)}
                 />
               </div>

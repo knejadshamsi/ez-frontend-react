@@ -1,6 +1,6 @@
 import i18n from '~i18nConfig';
 
-export const locales = {
+const locales = {
   en: {
     emissions: {
       title: 'Emissions Map Visualization',
@@ -48,11 +48,6 @@ export const locales = {
       title: 'Trip Leg Visualization',
       description: 'Line layer showing the selected trip route on the network',
       loadingTip: 'Preparing trip legs map...',
-      pathsLoaded: '{{count}} paths loaded. Select row from table below to view it on the map.',
-      buttons: {
-        showAll: 'Show all',
-        hideAll: 'Hide all',
-      },
     },
   },
   fr: {
@@ -102,11 +97,6 @@ export const locales = {
       title: 'Visualisation des segments de trajet',
       description: 'Couche de lignes montrant l\'itinéraire du trajet sélectionné sur le réseau',
       loadingTip: 'Préparation de la carte des segments de trajet...',
-      pathsLoaded: '{{count}} chemins chargés. Sélectionnez une ligne du tableau ci-dessous pour l\'afficher sur la carte.',
-      buttons: {
-        showAll: 'Tout afficher',
-        hideAll: 'Tout masquer',
-      },
     },
   },
 } as const;
@@ -114,4 +104,3 @@ export const locales = {
 i18n.addResourceBundle('en', 'ez-output-maps', locales.en);
 i18n.addResourceBundle('fr', 'ez-output-maps', locales.fr);
 
-export type EZOutputMapsLocale = typeof locales.en;

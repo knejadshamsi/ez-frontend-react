@@ -131,6 +131,7 @@ const ZoneSettings = ({ zoneId }) => {
                   type="default"
                   icon={<FormOutlined />}
                   className={styles.editZoneButton}
+                  aria-label={t('zoneSettings.boundaries.editTooltip')}
                 />
               </Tooltip>
             </div>

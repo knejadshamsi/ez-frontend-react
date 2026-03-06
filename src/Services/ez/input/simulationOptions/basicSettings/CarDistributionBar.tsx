@@ -10,7 +10,6 @@ import '../locales';
 
 const SEGMENT_COLORS = VEHICLE_TYPE_COLORS;
 
-// Calculate mouse position as percentage with 5% snapping
 const calculateSnappedPercentage = (mouseX: number, barRect: DOMRect): number => {
   const rawPercentage = (mouseX / barRect.width) * 100;
   const snappedPercentage = Math.round(rawPercentage / 5) * 5;
@@ -174,7 +173,12 @@ const CarDistributionBar = () => {
             <div
               key={key}
               className={styles.legendItem}
+              role="button"
+              tabIndex={0}
+              aria-label={t('basicSettings.vehicleDistribution.ariaLabels.toggleCategory', { category: label })}
+              aria-pressed={isEnabled}
               onClick={() => handleLegendClick(key)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleLegendClick(key); } }}
               style={{
                 cursor: 'pointer',
                 opacity: isEnabled ? 1 : 0.5,
@@ -212,6 +216,10 @@ const CarDistributionBar = () => {
           <div
             key={`divider-${index}`}
             className={`${styles.dividerBar} ${isDragging === index ? styles.dividerActive : ''}`}
+            role="separator"
+            tabIndex={0}
+            aria-label={t('basicSettings.vehicleDistribution.ariaLabels.divider', { position: pos })}
+            aria-valuenow={pos}
             style={{ left: `${pos}%` }}
             onMouseDown={handleMouseDown(index)}
           />

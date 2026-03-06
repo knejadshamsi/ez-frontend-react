@@ -117,7 +117,7 @@ export const CopyRequestIdButton = ({
         onClick={handleCopy}
         disabled={disabled || copyState === 'copying'}
         className={className}
-        aria-label="Copy Request ID to clipboard"
+        aria-label={t('copyRequestId.tooltipCopyId')}
       >
         {getButtonText()}
       </Button>

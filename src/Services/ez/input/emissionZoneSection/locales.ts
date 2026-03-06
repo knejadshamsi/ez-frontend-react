@@ -1,10 +1,12 @@
 import i18n from '~i18nConfig';
 
-export const locales = {
+const locales = {
   en: {
     section: {
       title: '1. CONFIGURE EMISSION ZONES',
       addMoreZones: 'Add More Zones',
+      scrollLeft: 'Scroll zones left',
+      scrollRight: 'Scroll zones right',
     },
     addZoneCard: {
       text: 'Add New Zone',
@@ -18,6 +20,8 @@ export const locales = {
         duplicateZone: 'Duplicate zone',
         changeColor: 'Change color',
         deleteZone: 'Delete zone',
+        dragToReorder: 'Drag to reorder zone',
+        colorSwatch: 'Zone color swatch',
       },
       boundaries: {
         title: 'BOUNDARIES',
@@ -44,6 +48,7 @@ export const locales = {
         midEmission: 'Mid Em.',
         highEmission: 'High Em.',
       },
+      columnHeader: 'Vehicle Type',
       blockEditor: {
         settings: 'Settings',
         type: 'Type',
@@ -51,6 +56,13 @@ export const locales = {
         ban: 'Ban',
         penalty: 'Penalty',
         interval: 'Interval (s)',
+        delete: 'Delete restriction',
+        penaltyFormat: '${{penalty}}/{{interval}}s',
+      },
+      a11y: {
+        restrictionBlock: '{{type}} restriction from {{start}} to {{end}}',
+        toggleVehicle: 'Toggle {{vehicle}} category',
+        selectVehicle: 'Select {{vehicle}}',
       },
     },
   },
@@ -58,6 +70,8 @@ export const locales = {
     section: {
       title: '1. CONFIGURER LES ZONES D\'ÉMISSION',
       addMoreZones: 'Ajouter des zones',
+      scrollLeft: 'Défiler les zones à gauche',
+      scrollRight: 'Défiler les zones à droite',
     },
     addZoneCard: {
       text: 'Nouvelle zone',
@@ -71,6 +85,8 @@ export const locales = {
         duplicateZone: 'Dupliquer la zone',
         changeColor: 'Changer la couleur',
         deleteZone: 'Supprimer la zone',
+        dragToReorder: 'Glisser pour réordonner la zone',
+        colorSwatch: 'Échantillon de couleur de zone',
       },
       boundaries: {
         title: 'FRONTIÈRES',
@@ -97,6 +113,7 @@ export const locales = {
         midEmission: 'Moy. ém.',
         highEmission: 'Haute ém.',
       },
+      columnHeader: 'Type de vehicule',
       blockEditor: {
         settings: 'Paramètres',
         type: 'Type',
@@ -104,6 +121,13 @@ export const locales = {
         ban: 'Interdire',
         penalty: 'Pénalité',
         interval: 'Intervalle (s)',
+        delete: 'Supprimer la restriction',
+        penaltyFormat: '{{penalty}}$/{{interval}}s',
+      },
+      a11y: {
+        restrictionBlock: 'Restriction {{type}} de {{start}} a {{end}}',
+        toggleVehicle: 'Activer/desactiver la categorie {{vehicle}}',
+        selectVehicle: 'Selectionner {{vehicle}}',
       },
     },
   },
@@ -111,5 +135,3 @@ export const locales = {
 
 i18n.addResourceBundle('en', 'ez-emission-zone-section', locales.en);
 i18n.addResourceBundle('fr', 'ez-emission-zone-section', locales.fr);
-
-export type EZEmissionZoneSectionLocale = typeof locales.en;

@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import ZoneCard from './ZoneCard';
 import ZoneCardContent from './ZoneCardContent';
 import AddZoneCard from './AddZoneCard';
@@ -25,6 +26,7 @@ const SCROLL_AMOUNT = 176 * 2;
 const EDGE_THRESHOLD = 10;
 
 const ZoneCardList = () => {
+  const { t } = useTranslation('ez-emission-zone-section');
   const apiZones = useAPIPayloadStore(state => state.payload.zones);
   const sessionZones = useEZSessionStore(state => state.zones);
   const activeZone = useEZSessionStore(state => state.activeZone);
@@ -117,6 +119,7 @@ const ZoneCardList = () => {
           {showPrev && (
             <button
               className={`${containerStyles.navigationButton} ${containerStyles.prevButton}`}
+              aria-label={t('section.scrollLeft')}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -145,6 +148,7 @@ const ZoneCardList = () => {
           {showNext && (
             <button
               className={`${containerStyles.navigationButton} ${containerStyles.nextButton}`}
+              aria-label={t('section.scrollRight')}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();

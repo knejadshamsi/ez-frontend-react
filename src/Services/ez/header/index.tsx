@@ -107,6 +107,7 @@ export default function EzHeader() {
             <button
               onClick={handleRetryConnection}
               title={t('retryConnection.tooltip')}
+              aria-label={t('retryConnection.tooltip')}
               className={styles.retryButton}
               disabled={retrying}
             >
@@ -120,6 +121,7 @@ export default function EzHeader() {
       </div>
       <button
         title={t('header.toggleLanguage')}
+        aria-label={t('header.toggleLanguage')}
         className={styles.headerButton}
         onClick={toggleLanguage}
       >
@@ -128,6 +130,7 @@ export default function EzHeader() {
       </button>
       <button
         title={t('header.exit')}
+        aria-label={t('header.exit')}
         className={`${styles.headerButton} ${i18n.language === 'fr' ? styles.headerButtonFr : ''}`}
         onClick={handleExitClick}
       >

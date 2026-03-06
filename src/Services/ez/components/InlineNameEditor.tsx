@@ -89,6 +89,7 @@ export const InlineNameEditor = ({
             onClick={handleSave}
             className={styles.button}
             title={t('inlineNameEditor.tooltipSave')}
+            aria-label={t('inlineNameEditor.tooltipSave')}
           />
           <Button
             type="text"
@@ -97,6 +98,7 @@ export const InlineNameEditor = ({
             onClick={handleCancel}
             className={styles.button}
             title={t('inlineNameEditor.tooltipCancel')}
+            aria-label={t('inlineNameEditor.tooltipCancel')}
           />
         </>
       ) : (
@@ -113,6 +115,7 @@ export const InlineNameEditor = ({
             disabled={disabled}
             className={`${styles.button} ${styles.editButton}`}
             title={t('inlineNameEditor.tooltipEdit')}
+            aria-label={t('inlineNameEditor.tooltipEdit')}
           />
         </>
       )}

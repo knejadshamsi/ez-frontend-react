@@ -1,6 +1,6 @@
 import i18n from '~i18nConfig';
 
-export const locales = {
+const locales = {
   en: {
     tripLegsTable: {
       loadingTip: 'Loading trip legs data...',
@@ -16,6 +16,7 @@ export const locales = {
         timeDeltaMinutes: 'Time Δ (min)',
         impact: 'Impact',
       },
+      toggleVisibility: 'Toggle visibility for trip leg {{legId}}',
     },
   },
   fr: {
@@ -33,11 +34,10 @@ export const locales = {
         timeDeltaMinutes: 'Δ temps (min)',
         impact: 'Impact',
       },
+      toggleVisibility: 'Basculer la visibilité du segment de trajet {{legId}}',
     },
   },
 } as const;
 
 i18n.addResourceBundle('en', 'ez-output-tables', locales.en);
 i18n.addResourceBundle('fr', 'ez-output-tables', locales.fr);
-
-export type EZOutputTablesLocale = typeof locales.en;

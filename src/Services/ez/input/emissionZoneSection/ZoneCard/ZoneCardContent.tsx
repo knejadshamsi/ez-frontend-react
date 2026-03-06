@@ -72,6 +72,8 @@ const ZoneCardContent = ({
             className={styles.dragHandle}
             style={{ cursor: isDragging ? 'grabbing' : 'grab', touchAction: 'none' }}
             onClick={(e) => e.stopPropagation()}
+            role="button"
+            aria-label={t('zoneSettings.zoneCard.dragToReorder')}
           >
             <MinusOutlined />
           </div>
@@ -86,17 +88,17 @@ const ZoneCardContent = ({
       {isSelected && (
         <div className={styles.actionToolbar}>
           <Tooltip title={isHidden ? t('zoneSettings.zoneCard.showZone') : t('zoneSettings.zoneCard.hideZone')}>
-            <div className={styles.toolbarIcon} onClick={handleAction('toggle')}>
+            <div className={styles.toolbarIcon} onClick={handleAction('toggle')} role="button" tabIndex={0} aria-label={isHidden ? t('zoneSettings.zoneCard.showZone') : t('zoneSettings.zoneCard.hideZone')}>
               {isHidden ? <EyeOutlined /> : <EyeInvisibleOutlined />}
             </div>
           </Tooltip>
           <Tooltip title={t('zoneSettings.zoneCard.duplicateZone')}>
-            <div className={styles.toolbarIcon} onClick={handleAction('duplicate')}>
+            <div className={styles.toolbarIcon} onClick={handleAction('duplicate')} role="button" tabIndex={0} aria-label={t('zoneSettings.zoneCard.duplicateZone')}>
               <CopyOutlined />
             </div>
           </Tooltip>
           <Tooltip title={t('zoneSettings.zoneCard.changeColor')}>
-            <div className={styles.toolbarIcon} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.toolbarIcon} onClick={(e) => e.stopPropagation()} role="button" tabIndex={0} aria-label={t('zoneSettings.zoneCard.changeColor')}>
               <ColorPicker
                 value={baseColor}
                 onChange={(color) => onColorChange?.(color.toHexString())}
@@ -104,13 +106,14 @@ const ZoneCardContent = ({
                 <div
                   className={styles.colorTrigger}
                   style={{ backgroundColor: baseColor }}
+                  aria-label={t('zoneSettings.zoneCard.colorSwatch')}
                 />
               </ColorPicker>
             </div>
           </Tooltip>
           <Tooltip title={t('zoneSettings.zoneCard.deleteZone')}>
-            <div className={styles.toolbarIcon} onClick={handleAction('delete')}>
-              <DeleteOutlined style={{ color: 'red' }} />
+            <div className={styles.toolbarIcon} onClick={handleAction('delete')} role="button" tabIndex={0} aria-label={t('zoneSettings.zoneCard.deleteZone')}>
+              <DeleteOutlined className={styles.deleteIcon} />
             </div>
           </Tooltip>
         </div>
