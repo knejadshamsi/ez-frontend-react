@@ -1,3 +1,6 @@
+// ============= SHARED PRIMITIVE TYPES =============
+export type OriginType = 'center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+
 // ============= CONSTANTS =============
 export const DEFAULT_ZONE_ID = 'default-zone-00000000';
 
@@ -51,7 +54,7 @@ export interface Zone {
   policies: Policy[];        // Restriction policies (can have multiple)
 }
 
-export interface SourceDetails {
+interface SourceDetails {
   year: number;
   name: string;
 }
@@ -120,7 +123,7 @@ export interface ScenarioMetadata {
       color: string;
       hidden: boolean;
       description?: string;
-      scale: [number, string];
+      scale: [number, OriginType];
     };
   };
 
@@ -149,7 +152,7 @@ export interface ScenarioMetadata {
 
   scaledAreaSessionData: {
     [areaId: string]: {
-      scale: [number, string];
+      scale: [number, OriginType];
       color: string;
     };
   };

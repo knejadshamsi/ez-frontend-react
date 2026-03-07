@@ -4,9 +4,7 @@ import i18n from '~i18nConfig';
 import '~ez/locales';
 import { useEZServiceStore } from '~store';
 import { useEZSessionStore } from '~stores/session';
-import { useEZOutputFiltersStore } from '~stores/session';
-import { useProgressStore } from './progress/store';
-import { resetAllEZOutputStores } from '~stores/output';
+import { resetOutputState } from '~stores/reset';
 
 const t = i18n.t.bind(i18n);
 
@@ -19,10 +17,6 @@ export const useBackendAliveWatcher = (messageApi: MessageInstance): void => {
   const setRequestId = useEZSessionStore((state) => state.setRequestId);
   const abortSseStream = useEZSessionStore((state) => state.abortSseStream);
 
-  const resetProgress = useProgressStore((state) => state.reset);
-
-  const resetOutputFilters = useEZOutputFiltersStore((state) => state.reset);
-
   useEffect(() => {
     if (!isEzBackendAlive) return;
 
@@ -30,11 +24,7 @@ export const useBackendAliveWatcher = (messageApi: MessageInstance): void => {
 
     abortSseStream();
 
-    resetAllEZOutputStores();
-
-    resetProgress();
-
-    resetOutputFilters();
+    resetOutputState();
 
     setRequestId('');
 
@@ -50,8 +40,6 @@ export const useBackendAliveWatcher = (messageApi: MessageInstance): void => {
     ezState,
     isNewSimulation,
     abortSseStream,
-    resetProgress,
-    resetOutputFilters,
     setRequestId,
     setState,
     messageApi,

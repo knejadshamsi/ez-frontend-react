@@ -6,6 +6,13 @@ import { useProgressStore } from '../progress/store';
 import { cancelSimulation } from '../api/cancelSimulation';
 import { useScenarioSnapshotStore } from './scenario';
 
+export const resetOutputState = (): void => {
+  resetAllEZOutputStores();
+  useEZOutputFiltersStore.getState().reset();
+  useScenarioSnapshotStore.getState().reset();
+  useProgressStore.getState().reset();
+};
+
 export const resetAllEZStores = async (): Promise<void> => {
   try {
     const sessionStore = useEZSessionStore.getState();

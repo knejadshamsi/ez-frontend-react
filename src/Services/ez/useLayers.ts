@@ -18,6 +18,8 @@ import { selectEmissionsMapPoints, selectPeopleResponseMapPoints } from '~utils/
 import { mapZoneOpacityToAlpha, mapSimulationAreaOpacityToAlpha } from '~utils/opacityMapping';
 import type { Coordinate, EZStateType } from './stores/types';
 
+const DEFAULT_FILL_OPACITY = 51; // 20% opacity - matches FILL_OPACITY_LIGHT
+
 // Helper interface and function for polygon completion
 interface PolygonCompletionConfig {
   coords: Coordinate[][];
@@ -152,7 +154,6 @@ export function useLayers() {
     if (activeService !== 'EZ') return;
 
     if (isPolygonMode) {
-      console.log('[useLayers] Entering polygon mode - hiding all layers');
       hideAllZones();
       hideAllAreas();
       setOtherLayersExpanded(false);
@@ -199,10 +200,6 @@ export function useLayers() {
       }
     }
 
-    // Handle vertex modifications (drawToolGeoJson updated in real time)
-    if (editType === 'updateFeature' || editType === 'movePosition') {
-      // Real-time update already handled by setDrawToolGeoJson above
-    }
   }, [
     activeZone,
     activeCustomArea,
@@ -353,11 +350,11 @@ export function useLayers() {
 
   const createDrawingModeDisplayLayers = (
     mode: 'zone' | 'area',
-    activeZone: string | null,
-    activeArea: string | null
+    excludedZoneId: string | null,
+    excludedAreaId: string | null
   ) => {
     const filteredZones = apiZones.filter(zone => {
-      if (mode === 'zone' && zone.id === activeZone) return false;
+      if (mode === 'zone' && zone.id === excludedZoneId) return false;
       if (!zone.coords) return false;
       const sessionData = sessionZones[zone.id];
       if (!sessionData || sessionData.hidden) return false;
@@ -365,7 +362,7 @@ export function useLayers() {
     });
 
     const filteredCustomAreas = customSimulationAreas.filter(area => {
-      if (mode === 'area' && area.id === activeArea) return false;
+      if (mode === 'area' && area.id === excludedAreaId) return false;
       if (!area.coords) return false;
       return visibleAreaIds.has(area.id);
     });
@@ -480,7 +477,7 @@ export function useLayers() {
     ? (() => {
         const alphaValue = mapSimulationAreaOpacityToAlpha(
           inputSimulationAreaLayerOpacity,
-          simulationAreaDisplay.fillOpacity || 51
+          simulationAreaDisplay.fillOpacity || DEFAULT_FILL_OPACITY
         );
         if (alphaValue === null) return null;
 

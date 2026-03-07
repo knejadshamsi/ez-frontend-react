@@ -1,3 +1,5 @@
+import type { OriginType } from '~ez/stores/types';
+
 // === SESSION TYPES ===
 
 // Simulation area display configuration
@@ -14,7 +16,7 @@ export interface ZoneSessionData {
   color: string;
   hidden: boolean;
   description?: string;
-  scale: [number, string];
+  scale: [number, OriginType];
 }
 
 // Custom simulation area session data
@@ -25,7 +27,7 @@ export interface CustomAreaSessionData {
 
 // Scaled simulation area session data
 export interface ScaledAreaSessionData {
-  scale: [number, string];
+  scale: [number, OriginType];
   color: string;
 }
 
@@ -38,6 +40,9 @@ export interface CarDistributionCategories {
   highEmission: boolean;
   [key: string]: boolean;
 }
+
+// Exit flow state
+export type ExitState = 'idle' | 'await_confirmation' | 'resetting';
 
 // Exit warning information
 export interface ExitWarning {
@@ -60,7 +65,7 @@ export interface EZSessionStore {
   isNewSimulation: boolean;
   simulationAreaDisplay: SimulationAreaDisplayConfig;
   carDistributionCategories: CarDistributionCategories;
-  exitState: 'idle' | 'await_confirmation' | 'resetting';
+  exitState: ExitState;
   exitWarning: ExitWarning | null;
 
   setScenarioTitle: (title: string) => void;
@@ -83,7 +88,7 @@ export interface EZSessionStore {
   setIsNewSimulation: (value: boolean) => void;
   setSimulationAreaDisplay: (config: Partial<SimulationAreaDisplayConfig>) => void;
   toggleCarDistributionCategory: (category: string) => void;
-  setExitState: (state: 'idle' | 'await_confirmation' | 'resetting') => void;
+  setExitState: (state: ExitState) => void;
   setExitWarning: (warning: ExitWarning | null) => void;
   reset: () => void;
 }

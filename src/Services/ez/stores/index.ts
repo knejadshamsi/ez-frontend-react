@@ -19,6 +19,17 @@ import { useEZSessionStore } from './session';
 import { generateDefaultName, generateDuplicateName } from '~utils/zoneNames';
 import { DEFAULT_CUSTOM_AREA_COLOR } from '~utils/colors';
 
+// ============= CONSTANTS =============
+const DEFAULT_SIMULATION_ITERATIONS = 5;
+const DEFAULT_SIMULATION_PERCENTAGE = 5;
+const DEFAULT_CAR_DISTRIBUTION = {
+  zeroEmission: 30,
+  nearZeroEmission: 35,
+  lowEmission: 35,
+  midEmission: 0,
+  highEmission: 0
+};
+
 // ============= DEFAULT VALUE =============
 export const createInitialPayload = (): APIPayload => ({
   zones: [{
@@ -44,16 +55,10 @@ export const createInitialPayload = (): APIPayload => ({
     }
   },
   simulationOptions: {
-    iterations: 5,
-    percentage: 5
+    iterations: DEFAULT_SIMULATION_ITERATIONS,
+    percentage: DEFAULT_SIMULATION_PERCENTAGE
   },
-  carDistribution: {
-    zeroEmission: 30,
-    nearZeroEmission: 35,
-    lowEmission: 35,
-    midEmission: 0,
-    highEmission: 0
-  },
+  carDistribution: { ...DEFAULT_CAR_DISTRIBUTION },
   modeUtilities: {
     walk: 0,
     bike: 0,
@@ -171,10 +176,10 @@ export const useAPIPayloadStore = create<APIPayloadStore>((set, get) => ({
 
     const newZoneId = uuidv4();
 
-    set((state) => ({
+    set((s) => ({
       payload: {
-        ...state.payload,
-        zones: [...state.payload.zones, {
+        ...s.payload,
+        zones: [...s.payload.zones, {
           id: newZoneId,
           coords: zoneToDuplicate.coords
             ? zoneToDuplicate.coords.map(polygon =>
@@ -200,7 +205,7 @@ export const useAPIPayloadStore = create<APIPayloadStore>((set, get) => ({
         color: sessionData.color,
         hidden: sessionData.hidden,
         description: sessionData.description,
-        scale: [...sessionData.scale] as [number, string]
+        scale: [...sessionData.scale]
       });
     }
   },
@@ -368,10 +373,10 @@ export const useAPIPayloadStore = create<APIPayloadStore>((set, get) => ({
 
     if (existingArea) {
       // Update coords in payload
-      set((state) => ({
+      set((s) => ({
         payload: {
-          ...state.payload,
-          scaledSimulationAreas: state.payload.scaledSimulationAreas.map(area =>
+          ...s.payload,
+          scaledSimulationAreas: s.payload.scaledSimulationAreas.map(area =>
             area.zoneId === zoneId ? { ...area, coords } : area
           )
         }

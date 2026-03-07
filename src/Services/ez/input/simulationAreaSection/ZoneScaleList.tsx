@@ -19,8 +19,16 @@ import type { OriginType, ScaleUpdate, ValidatedZone } from './types'
 import type { Coordinate } from '~stores/types'
 import './locales'
 
-const ORIGIN_OPTIONS: OriginType[] = ['center', 'top-left', 'top-right', 'bottom-left', 'bottom-right']
 const DEFAULT_SCALE: [number, OriginType] = [100, 'center']
+
+const ORIGIN_OPTIONS: OriginType[] = ['center', 'top-left', 'top-right', 'bottom-left', 'bottom-right']
+
+// Color shader multipliers for zone scale cards
+const SHADE_CARD_BG = 1.9
+const SHADE_CARD_BORDER = 1.75
+const SHADE_SELECTED = 1.3
+const SHADE_UNSELECTED = 2.0
+const SHADE_SLIDER_TRACK = 1.5
 
 const calculateMaxAllowedScale = (coords: Coordinate[][]): number => {
   try {
@@ -50,8 +58,6 @@ const getOriginIcon = (origin: OriginType): ReactElement => {
       return <RadiusUprightOutlined />
     case 'bottom-right':
       return <RadiusUpleftOutlined />
-    default:
-      return <AimOutlined />
   }
 }
 
@@ -80,7 +86,7 @@ const ZoneScaleList = (): ReactElement => {
 
     const newScale: [number, OriginType] = [
       updates.percentage ?? currentPercentage,
-      (updates.origin ?? currentOrigin) as OriginType
+      updates.origin ?? currentOrigin
     ]
 
     setZoneProperty(zoneId, 'scale', newScale)
@@ -112,8 +118,8 @@ const ZoneScaleList = (): ReactElement => {
                 key={zone.id}
                 className={selectorStyles.zoneScaleCard}
                 style={{
-                  backgroundColor: colorShader(sessionData.color, 1.9),
-                  border: `2px solid ${colorShader(sessionData.color, 1.75)}`,
+                  backgroundColor: colorShader(sessionData.color, SHADE_CARD_BG),
+                  border: `2px solid ${colorShader(sessionData.color, SHADE_CARD_BORDER)}`,
                 }}
               >
                 <div className={selectorStyles.zoneScaleNameLabel}>
@@ -135,11 +141,11 @@ const ZoneScaleList = (): ReactElement => {
                             minWidth: '24px',
                             height: '24px',
                             backgroundColor: isSelected
-                              ? `${colorShader(sessionData.color, 1.3)}`
-                              : `${colorShader(sessionData.color, 2.0)}`,
+                              ? `${colorShader(sessionData.color, SHADE_SELECTED)}`
+                              : `${colorShader(sessionData.color, SHADE_UNSELECTED)}`,
                             borderColor: isSelected
                               ? `${sessionData.color}`
-                              : `${colorShader(sessionData.color, 1.75)}`,
+                              : `${colorShader(sessionData.color, SHADE_CARD_BORDER)}`,
                             color: isSelected ? '#fff' : '#000',
                             boxShadow: 'none',
                           }}
@@ -156,17 +162,14 @@ const ZoneScaleList = (): ReactElement => {
 
                 <div className={selectorStyles.zoneScaleSliderContainer}>
                   <EZSlider
-                    style={{
-                      width: '80px',
-                      margin: 0,
-                    }}
+                    className={selectorStyles.zoneScaleSlider}
                     min={100}
                     max={maxAllowedScale}
                     value={scalePercentage}
                     onChange={(value: number) => updateZoneSettings(zone.id, { percentage: value })}
                     tooltip={{ formatter: (value: number | undefined) => `${value}%` }}
-                    railBg={colorShader(sessionData.color, 2.0)}
-                    trackBg={colorShader(sessionData.color, 1.5)}
+                    railBg={colorShader(sessionData.color, SHADE_UNSELECTED)}
+                    trackBg={colorShader(sessionData.color, SHADE_SLIDER_TRACK)}
                     handleColor={sessionData.color}
                   />
                   <span className={selectorStyles.zoneScalePercentage}>

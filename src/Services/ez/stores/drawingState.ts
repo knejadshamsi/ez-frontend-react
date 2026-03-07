@@ -30,19 +30,17 @@ const createInitialState = () => ({
   isOtherLayersExpanded: false,
 });
 
+const toggleId = (ids: Set<string>, id: string): Set<string> => {
+  const next = new Set(ids);
+  if (next.has(id)) { next.delete(id); } else { next.add(id); }
+  return next;
+};
+
 export const useDrawingStateStore = create<DrawingStateStore>((set) => ({
   ...createInitialState(),
 
   toggleZoneVisibility: (zoneId: string) =>
-    set((state) => {
-      const newVisibleIds = new Set(state.visibleZoneIds);
-      if (newVisibleIds.has(zoneId)) {
-        newVisibleIds.delete(zoneId);
-      } else {
-        newVisibleIds.add(zoneId);
-      }
-      return { visibleZoneIds: newVisibleIds };
-    }),
+    set((state) => ({ visibleZoneIds: toggleId(state.visibleZoneIds, zoneId) })),
 
   showAllZones: (zoneIds: string[]) =>
     set({ visibleZoneIds: new Set(zoneIds) }),
@@ -51,15 +49,7 @@ export const useDrawingStateStore = create<DrawingStateStore>((set) => ({
     set({ visibleZoneIds: new Set<string>() }),
 
   toggleAreaVisibility: (areaId: string) =>
-    set((state) => {
-      const newVisibleIds = new Set(state.visibleAreaIds);
-      if (newVisibleIds.has(areaId)) {
-        newVisibleIds.delete(areaId);
-      } else {
-        newVisibleIds.add(areaId);
-      }
-      return { visibleAreaIds: newVisibleIds };
-    }),
+    set((state) => ({ visibleAreaIds: toggleId(state.visibleAreaIds, areaId) })),
 
   showAllAreas: (areaIds: string[]) =>
     set({ visibleAreaIds: new Set(areaIds) }),

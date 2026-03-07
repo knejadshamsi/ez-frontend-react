@@ -2,14 +2,16 @@
 import { ScreenGridLayer } from '@deck.gl/aggregation-layers';
 import type { MapPointData } from '~stores/output';
 
-export interface CreatePeopleResponseGridLayerInput {
+const DEFAULT_GRID_COLOR: [number, number, number] = [255, 140, 0];
+
+interface CreatePeopleResponseGridLayerInput {
   data: MapPointData[]; // Array of response points with position and weight
   color?: [number, number, number]; // Color for the grid cells
   idSuffix?: string; // Optional layer ID suffix
 }
 
 // Color mapping for different response types
-export const RESPONSE_TYPE_COLORS: Record<string, [number, number, number]> = {
+const RESPONSE_TYPE_COLORS: Record<string, [number, number, number]> = {
   paidPenalty: [201, 201, 201],      // Gray
   rerouted: [255, 212, 163],          // Light orange
   switchedToBus: [184, 212, 232],   // Light blue
@@ -23,7 +25,7 @@ export const RESPONSE_TYPE_COLORS: Record<string, [number, number, number]> = {
 // Create a screen grid layer for people response visualization
 export const createPeopleResponseGridLayer = ({
   data,
-  color = [255, 140, 0],
+  color = DEFAULT_GRID_COLOR,
   idSuffix = '',
 }: CreatePeopleResponseGridLayerInput) => {
   return new ScreenGridLayer<MapPointData>({
@@ -50,7 +52,7 @@ export const createPeopleResponseGridLayerForType = (
   data: MapPointData[],
   responseType: string
 ) => {
-  const color = RESPONSE_TYPE_COLORS[responseType] || [255, 140, 0];
+  const color = RESPONSE_TYPE_COLORS[responseType] || DEFAULT_GRID_COLOR;
   return createPeopleResponseGridLayer({
     data,
     color,

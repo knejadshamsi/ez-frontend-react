@@ -3,7 +3,7 @@ import { HexagonLayer } from '@deck.gl/aggregation-layers';
 import type { MapPointData } from '~stores/output';
 import { EMISSIONS_COLOR_GRADIENT } from './constants';
 
-export interface CreateEmissionsHexagonLayerInput {
+interface CreateEmissionsHexagonLayerInput {
   data: MapPointData[]; // Array of emission points with position and weight
   idSuffix?: string; // Optional layer ID suffix
 }

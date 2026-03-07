@@ -161,31 +161,23 @@ const getExitWarning = (ezState: EZStateType): ExitWarning | null => {
 
 // Handles exit from EZ service
 export const handleExit = (): void => {
-  console.log('[EZ Exit] handleExit called');
-
   const ezState = useEZServiceStore.getState().state;
-  console.log('[EZ Exit] Current EZ state:', ezState);
 
   const sessionStore = useEZSessionStore.getState();
   const { exitState, setExitState, setExitWarning } = sessionStore;
-  console.log('[EZ Exit] Current exit state:', exitState);
 
   // Guard: Already processing an exit
   if (exitState !== 'idle') {
-    console.log('[EZ Exit] Already processing, ignoring');
     return;
   }
 
   // Check if warning needed
   const warning = getExitWarning(ezState);
-  console.log('[EZ Exit] Warning:', warning);
 
   if (warning) {
-    console.log('[EZ Exit] Setting state to await_confirmation');
     setExitState('await_confirmation');
     setExitWarning(warning);
   } else {
-    console.log('[EZ Exit] Setting state to resetting');
     setExitState('resetting');
   }
 };

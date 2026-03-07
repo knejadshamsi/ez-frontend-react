@@ -17,7 +17,7 @@ export type StepName =
 
 export type StepStatus = Record<StepName, StepState>;
 
-export type ProgressStatus =
+type ProgressStatus =
   | 'DISPLAY_QUEUED'
   | 'DISPLAY_SIMULATION'
   | 'DISPLAY_SCENARIO_LOAD'
@@ -54,19 +54,6 @@ const initialSteps: StepStatus = {
   postprocessing_trip_legs: 'pending',
 };
 
-const VALID_STEP_NAMES: StepName[] = [
-  'preprocessing_population',
-  'preprocessing_network',
-  'preprocessing_transit',
-  'preprocessing_config',
-  'simulation_base',
-  'simulation_policy',
-  'postprocessing_overview',
-  'postprocessing_emissions',
-  'postprocessing_people_response',
-  'postprocessing_trip_legs',
-];
-
 export const PREPROCESSING_STEPS: StepName[] = [
   'preprocessing_population',
   'preprocessing_network',
@@ -84,6 +71,12 @@ export const POSTPROCESSING_STEPS: StepName[] = [
   'postprocessing_emissions',
   'postprocessing_people_response',
   'postprocessing_trip_legs',
+];
+
+const VALID_STEP_NAMES: StepName[] = [
+  ...PREPROCESSING_STEPS,
+  ...SIMULATING_STEPS,
+  ...POSTPROCESSING_STEPS,
 ];
 
 export const useProgressStore = create<ProgressState & ProgressActions>((set) => ({
@@ -146,6 +139,3 @@ export const canViewResultsEarly = (steps: StepStatus): boolean => {
   return POSTPROCESSING_STEPS.some(step => steps[step] === 'completed');
 };
 
-export const areAllStepsComplete = (steps: StepStatus): boolean => {
-  return Object.values(steps).every(state => state === 'completed');
-};

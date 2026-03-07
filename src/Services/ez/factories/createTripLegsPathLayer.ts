@@ -2,7 +2,10 @@
 import { PathLayer } from '@deck.gl/layers';
 import type { MapPathData } from '~stores/output';
 
-export interface CreateTripLegsPathLayerInput {
+const CO2_DELTA_MIN = -500;
+const CO2_DELTA_MAX = 500;
+
+interface CreateTripLegsPathLayerInput {
   data: MapPathData[]; // Array of path data
   selectedPathId?: string | null; // ID of selected path to highlight
   idSuffix?: string; // Optional layer ID suffix
@@ -15,8 +18,8 @@ const getPathColor = (co2Delta: number, isSelected: boolean): [number, number, n
   }
 
   // Normalize and interpolate color
-  const normalizedDelta = Math.max(-500, Math.min(500, co2Delta));
-  const ratio = (normalizedDelta + 500) / 1000;
+  const normalizedDelta = Math.max(CO2_DELTA_MIN, Math.min(CO2_DELTA_MAX, co2Delta));
+  const ratio = (normalizedDelta - CO2_DELTA_MIN) / (CO2_DELTA_MAX - CO2_DELTA_MIN);
   const r = Math.round(ratio * 255);
   const g = Math.round((1 - ratio) * 200);
   const b = 50;

@@ -10,9 +10,10 @@ import type {
   PollutantType,
   ResponseLayerView,
   BehavioralResponseType,
+  ExitWarning,
+  ExitState,
 } from './types';
-import type { ExitWarning } from './types';
-import { OPACITY_STATES } from '~utils/opacityMapping';
+import { OPACITY_STATES, type OpacityState } from '~utils/opacityMapping';
 import {
   DEFAULT_SCENARIO_TITLE,
   DEFAULT_SCENARIO_DESCRIPTION,
@@ -30,6 +31,7 @@ import { useAPIPayloadStore } from '../index';
 import type { CarDistribution } from '../types';
 
 const MINIMUM_PERCENTAGE = 5;
+const MAX_SCENARIO_TITLE_LENGTH = 50;
 
 const findBiggestCategory = (
   distribution: CarDistribution,
@@ -76,8 +78,6 @@ const redistributeOnEnable = (
 
 // === SESSION STORE ===
 
-export type ExitState = 'idle' | 'await_confirmation' | 'resetting';
-
 export const createInitialSessionState = () => ({
   scenarioTitle: DEFAULT_SCENARIO_TITLE,
   scenarioDescription: DEFAULT_SCENARIO_DESCRIPTION,
@@ -86,23 +86,23 @@ export const createInitialSessionState = () => ({
     [DEFAULT_ZONE_ID]: DEFAULT_ZONE_SESSION_DATA
   },
   customAreas: {} as Record<string, { name: string; color: string }>,
-  scaledAreas: {} as Record<string, { scale: [number, string]; color: string }>,
+  scaledAreas: {} as Record<string, ScaledAreaSessionData>,
   activeZone: DEFAULT_ZONE_ID,
-  activeCustomArea: null as string | null,
+  activeCustomArea: null,
   colorPalette: [...COLOR_PALETTE],
-  sseCleanup: null as (() => void) | null,
+  sseCleanup: null,
   isNewSimulation: true,
   simulationAreaDisplay: { ...DEFAULT_SIMULATION_AREA_DISPLAY },
   carDistributionCategories: { ...DEFAULT_CAR_DISTRIBUTION_CATEGORIES },
   exitState: 'idle' as ExitState,
-  exitWarning: null as ExitWarning | null,
+  exitWarning: null,
 });
 
 export const useEZSessionStore = create<EZSessionStore>((set, get) => ({
   ...createInitialSessionState(),
 
   setScenarioTitle: (scenarioTitle: string) =>
-    set({ scenarioTitle: scenarioTitle.slice(0, 50) }),
+    set({ scenarioTitle: scenarioTitle.slice(0, MAX_SCENARIO_TITLE_LENGTH) }),
 
   setScenarioDescription: (scenarioDescription: string) =>
     set({ scenarioDescription }),
@@ -280,9 +280,9 @@ export const useEZSessionStore = create<EZSessionStore>((set, get) => ({
       payloadStore.setCarDistribution(newDistribution);
 
       // Update session
-      set((state) => ({
+      set((s) => ({
         carDistributionCategories: {
-          ...state.carDistributionCategories,
+          ...s.carDistributionCategories,
           [category]: false
         }
       }));
@@ -301,9 +301,9 @@ export const useEZSessionStore = create<EZSessionStore>((set, get) => ({
       payloadStore.setCarDistribution(newDistribution);
 
       // Update session
-      set((state) => ({
+      set((s) => ({
         carDistributionCategories: {
-          ...state.carDistributionCategories,
+          ...s.carDistributionCategories,
           [category]: true
         }
       }));
@@ -340,6 +340,11 @@ const createInitialFiltersState = () => ({
   inputZoneLayerOpacity: OPACITY_STATES.HIDDEN,
   inputSimulationAreaLayerOpacity: OPACITY_STATES.HIDDEN,
 });
+
+const cycleOpacity = (current: OpacityState): OpacityState => {
+  const cycle: OpacityState[] = [OPACITY_STATES.HIDDEN, OPACITY_STATES.LOW, OPACITY_STATES.MEDIUM, OPACITY_STATES.NORMAL];
+  return cycle[(cycle.indexOf(current) + 1) % cycle.length];
+};
 
 export const useEZOutputFiltersStore = create<EZOutputFiltersStore>((set) => ({
   ...createInitialFiltersState(),
@@ -383,20 +388,10 @@ export const useEZOutputFiltersStore = create<EZOutputFiltersStore>((set) => ({
     set({ visibleTripLegIds: new Set<string>() }),
 
   cycleInputZoneLayerOpacity: () =>
-    set((state) => {
-      const cycle = [OPACITY_STATES.HIDDEN, OPACITY_STATES.LOW, OPACITY_STATES.MEDIUM, OPACITY_STATES.NORMAL];
-      const currentIndex = cycle.indexOf(state.inputZoneLayerOpacity);
-      const nextIndex = (currentIndex + 1) % cycle.length;
-      return { inputZoneLayerOpacity: cycle[nextIndex] };
-    }),
+    set((state) => ({ inputZoneLayerOpacity: cycleOpacity(state.inputZoneLayerOpacity) })),
 
   cycleInputSimulationAreaLayerOpacity: () =>
-    set((state) => {
-      const cycle = [OPACITY_STATES.HIDDEN, OPACITY_STATES.LOW, OPACITY_STATES.MEDIUM, OPACITY_STATES.NORMAL];
-      const currentIndex = cycle.indexOf(state.inputSimulationAreaLayerOpacity);
-      const nextIndex = (currentIndex + 1) % cycle.length;
-      return { inputSimulationAreaLayerOpacity: cycle[nextIndex] };
-    }),
+    set((state) => ({ inputSimulationAreaLayerOpacity: cycleOpacity(state.inputSimulationAreaLayerOpacity) })),
 
   reset: () => {
     set(createInitialFiltersState());

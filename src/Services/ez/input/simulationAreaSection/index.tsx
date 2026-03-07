@@ -10,7 +10,6 @@ import { polygon, transformScale, bbox, center } from '@turf/turf'
 import type { OriginType } from './types'
 import type { Zone, Coordinate } from '~ez/stores/types'
 import './locales'
-
 import styles from './simulationAreaSection.module.less'
 
 const DEFAULT_SCALE: [number, OriginType] = [100, 'center']
@@ -89,7 +88,7 @@ const SimulationAreaSection = (): ReactElement => {
       if (percentage !== 100) {
         zoneIdsWithScaling.add(zone.id)
 
-        const scaledCoords = calculateScaledCoordinates(zone, percentage, origin as OriginType)
+        const scaledCoords = calculateScaledCoordinates(zone, percentage, origin)
         if (scaledCoords) {
           upsertScaledSimulationArea(zone.id, scaledCoords)
         }
@@ -109,8 +108,6 @@ const SimulationAreaSection = (): ReactElement => {
     const newAreaId = addCustomSimulationArea()
     setActiveCustomArea(newAreaId)
     setState('DRAW_SIM_AREA')
-
-    console.log('[SimulationAreaSection] Created custom area:', { id: newAreaId })
   }
 
   return (

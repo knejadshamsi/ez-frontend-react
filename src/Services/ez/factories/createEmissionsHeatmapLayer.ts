@@ -3,7 +3,7 @@ import { HeatmapLayer } from '@deck.gl/aggregation-layers';
 import type { MapPointData } from '~stores/output';
 import { EMISSIONS_COLOR_GRADIENT } from './constants';
 
-export interface CreateEmissionsHeatmapLayerInput {
+interface CreateEmissionsHeatmapLayerInput {
   data: MapPointData[]; // Array of emission points with position and weight
   idSuffix?: string; // Optional layer ID suffix
 }

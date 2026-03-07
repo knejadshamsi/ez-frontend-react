@@ -14,6 +14,7 @@ import type {
 
 const DEMO_CONFIG = {
   pointsPerCategory: 150,
+  tripLegPaths: 10,
   defaultBbox: [-73.65, 45.45, -73.50, 45.55] as BBox,
   networkDelayMs: 2000,
   weight: { min: 1, max: 11 },
@@ -95,7 +96,7 @@ const generateRandomPaths = (count: number, bounds: BBox): MapPathData[] => {
   return paths;
 };
 
-export const generateDemoEmissionsMapData = (): EmissionsMapData => {
+const generateDemoEmissionsMapData = (): EmissionsMapData => {
   const bounds = computeZonesBoundingBox();
 
   return {
@@ -106,7 +107,7 @@ export const generateDemoEmissionsMapData = (): EmissionsMapData => {
   };
 };
 
-export const generateDemoPeopleResponseMapData = (): PeopleResponseMapData => {
+const generateDemoPeopleResponseMapData = (): PeopleResponseMapData => {
   const bounds = computeZonesBoundingBox();
 
   const mult = DEMO_CONFIG.responseTypeMultipliers;
@@ -129,15 +130,14 @@ export const generateDemoPeopleResponseMapData = (): PeopleResponseMapData => {
   };
 };
 
-export const generateDemoTripLegsMapData = (): MapPathData[] => {
+const generateDemoTripLegsMapData = (): MapPathData[] => {
   const bounds = computeZonesBoundingBox();
-  return generateRandomPaths(10, bounds);
+  return generateRandomPaths(DEMO_CONFIG.tripLegPaths, bounds);
 };
 
 type MapType = 'emissions' | 'peopleResponse' | 'tripLegs';
 
 const loadMapDataWithDelay = <T>(
-  mapType: MapType,
   dataGetter: () => T | T[],
   setState: (state: OutputComponentState) => void,
   setData: (data: T) => void,
@@ -161,7 +161,6 @@ export const loadDemoMapData = (mapType: MapType): void => {
   switch (mapType) {
     case 'emissions':
       loadMapDataWithDelay(
-        'emissions',
         () => store.emissionsMapData,
         store.setEmissionsMapState,
         store.setEmissionsMapData,
@@ -171,7 +170,6 @@ export const loadDemoMapData = (mapType: MapType): void => {
 
     case 'peopleResponse':
       loadMapDataWithDelay(
-        'peopleResponse',
         () => store.peopleResponseMapData,
         store.setPeopleResponseMapState,
         store.setPeopleResponseMapData,
@@ -181,7 +179,6 @@ export const loadDemoMapData = (mapType: MapType): void => {
 
     case 'tripLegs':
       loadMapDataWithDelay<MapPathData[]>(
-        'tripLegs',
         () => store.tripLegsMapData,
         store.setTripLegsMapState,
         store.setTripLegsMapData,

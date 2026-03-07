@@ -10,10 +10,14 @@ import { detectDefaultNameType, convertDefaultName } from '~utils/zoneNames';
  *
  * Custom user-edited names are preserved.
  */
+type SupportedLang = 'en' | 'fr';
+const isSupportedLang = (lng: string): lng is SupportedLang => lng === 'en' || lng === 'fr';
+
 export const useAutoTranslateDefaultNames = () => {
   useEffect(() => {
     const translateAllDefaultNames = (lng: string) => {
-      const targetLang = lng as 'en' | 'fr';
+      if (!isSupportedLang(lng)) return;
+      const targetLang = lng;
 
       // Translate scenario title
       const scenarioTitle = useEZSessionStore.getState().scenarioTitle;
@@ -59,7 +63,6 @@ export const useAutoTranslateDefaultNames = () => {
         }
       });
 
-      console.log('[AutoTranslate] Default names translated to:', targetLang);
     };
 
     // Run translation on mount to handle existing default names

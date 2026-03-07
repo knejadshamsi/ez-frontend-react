@@ -1,6 +1,6 @@
-import type { Coordinate, Zone } from '~ez/stores/types'
+import type { Coordinate, Zone, OriginType } from '~ez/stores/types'
 
-export type OriginType = 'center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
+export type { OriginType }
 
 export interface ScaleUpdate {
   percentage?: number

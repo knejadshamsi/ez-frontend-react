@@ -152,7 +152,9 @@ export const generateDuplicateName = (originalName: string, existingNames: strin
   const copyPatternFr = /\s*\(Copie\)(\s+\d+)?$/;
 
   // Remove copy suffix in any language
-  let baseName = originalName.replace(copyPatternEn, '').replace(copyPatternFr, '');
+  let baseName = copyPatternEn.test(originalName)
+    ? originalName.replace(copyPatternEn, '')
+    : originalName.replace(copyPatternFr, '');
 
   let candidateName = `${baseName} (${copyText})`;
   if (!existingNames.includes(candidateName)) {

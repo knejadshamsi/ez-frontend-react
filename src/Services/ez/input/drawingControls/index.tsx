@@ -174,7 +174,12 @@ export const DrawingControls = () => {
 
   if (activeService !== 'EZ' || (!isDrawMode && !isEditMode)) return null;
 
-  // For both draw mode or edit mode.
+  const exitDrawing = () => {
+    resetDrawTool();
+    resetDrawingState();
+    setState('PARAMETER_SELECTION');
+  };
+
   const handleCancel = () => {
     if (isDrawMode && ezState === 'DRAW_SIM_AREA' && activeCustomArea) {
       removeCustomSimulationArea(activeCustomArea);
@@ -188,9 +193,7 @@ export const DrawingControls = () => {
       }
     }
 
-    resetDrawTool();
-    resetDrawingState();
-    setState('PARAMETER_SELECTION');
+    exitDrawing();
   };
 
   const handleDone = () => {
@@ -219,9 +222,7 @@ export const DrawingControls = () => {
       }
     }
 
-    resetDrawTool();
-    resetDrawingState();
-    setState('PARAMETER_SELECTION');
+    exitDrawing();
   };
 
   const otherZones = getOtherZones(
