@@ -1,6 +1,6 @@
 import i18n from '~i18nConfig';
 
-export const locales = {
+const locales = {
   en: {
     emissionsBar: {
       description: 'Breakdown by pollutant type comparing baseline and post-policy emissions.',
@@ -18,6 +18,13 @@ export const locales = {
       labels: {
         baseline: 'Baseline',
         postPolicy: 'Post-Policy',
+      },
+      vehicleTypes: {
+        zeroEmission: 'Zero Emission Vehicles',
+        nearZeroEmission: 'Near-Zero Emission Vehicles',
+        lowEmission: 'Low Emission Vehicles',
+        midEmission: 'Mid Emission Vehicles',
+        highEmission: 'High Emission Vehicles',
       },
     },
     responseBreakdown: {
@@ -70,6 +77,13 @@ export const locales = {
         baseline: 'Référence',
         postPolicy: 'Post-politique',
       },
+      vehicleTypes: {
+        zeroEmission: 'Véhicules zéro émission',
+        nearZeroEmission: 'Véhicules quasi-zéro émission',
+        lowEmission: 'Véhicules à faibles émissions',
+        midEmission: 'Véhicules à émissions moyennes',
+        highEmission: 'Véhicules à fortes émissions',
+      },
     },
     responseBreakdown: {
       description: 'Répartition des réponses comportementales pour tous les trajets affectés.',
@@ -107,5 +121,3 @@ export const locales = {
 
 i18n.addResourceBundle('en', 'ez-output-charts', locales.en);
 i18n.addResourceBundle('fr', 'ez-output-charts', locales.fr);
-
-export type EZOutputChartsLocale = typeof locales.en;

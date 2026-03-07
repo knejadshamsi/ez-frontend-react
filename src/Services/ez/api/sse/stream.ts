@@ -123,7 +123,6 @@ export function startSimulationStream(config: SimulationStreamConfig): () => voi
         const { done, value } = await reader.read();
 
         if (done) {
-          console.log('[SSE] Stream ended');
           break;
         }
 
@@ -167,9 +166,7 @@ export function startSimulationStream(config: SimulationStreamConfig): () => voi
       cleanup();
     })
     .catch((error) => {
-      if (error.name === 'AbortError') {
-        console.log('[SSE] Stream aborted');
-      } else {
+      if (error.name !== 'AbortError') {
         console.error('[SSE] Stream error:', error);
         config.onError?.({
           code: 'STREAM_ERROR',

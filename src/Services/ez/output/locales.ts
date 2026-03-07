@@ -1,6 +1,6 @@
 import i18n from '~i18nConfig';
 
-export const locales = {
+const locales = {
   en: {
     backToParameters: 'Back to Parameter Selection',
     sections: {
@@ -79,5 +79,3 @@ export const locales = {
 
 i18n.addResourceBundle('en', 'ez-output', locales.en);
 i18n.addResourceBundle('fr', 'ez-output', locales.fr);
-
-export type EZOutputLocale = typeof locales.en;

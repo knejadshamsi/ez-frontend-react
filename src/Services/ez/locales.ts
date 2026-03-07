@@ -3,10 +3,6 @@ import i18n from '~i18nConfig';
 export const locales = {
   en: {
     exitWarnings: {
-      inputDataLost: {
-        title: 'Input Data Will Be Lost',
-        message: 'You have configured input parameters. All input data will be lost. Continue?',
-      },
       unsavedConfiguration: {
         title: 'Unsaved Configuration',
         message: 'You have configured emission zones and parameters. Session will be lost. Continue?',
@@ -79,32 +75,39 @@ export const locales = {
       failed: 'Failed to connect to backend',
       configError: 'Backend configuration error',
     },
+    errors: {
+      timeout: 'Data not received within timeout period',
+    },
     demoMode: {
       label: 'DEMO MODE',
+      scenarioTitle: 'Demo Scenario',
     },
     parameterSelection: {
       backToWelcome: 'Back to Welcome page',
       newScenario: 'New Scenario',
       startSimulation: 'Start Simulation',
-      previousResultsFound: 'Previous Results Found',
-      previousResultsMessage: 'You have previous simulation results. Do you want to return to them or start a new simulation?',
-      startNewSimulation: 'Start New Simulation',
       cancel: 'Cancel',
-      returnToOutput: 'Return to Output',
+      editTitle: 'Edit scenario title',
+      saveTitle: 'Save scenario title',
+      simulationFailed: 'Simulation failed',
       backToWelcomeWarning: {
         title: 'Return to Welcome?',
         both: 'All configuration and simulation results will be lost. This action cannot be undone.',
         inputOnly: 'All configuration will be lost. This action cannot be undone.',
         confirm: 'Yes, Return to Welcome',
       },
+      validation: {
+        noZones: 'At least one emission zone with coordinates must be selected.',
+        invalidZones: 'All zones must have valid coordinates.',
+        carDistributionTotal: 'Vehicle distribution must sum to 100%.',
+        noCategories: 'At least one emission category must be enabled.',
+        invalidIterations: 'Simulation iterations must be between 1 and 10.',
+        invalidPercentage: 'Simulation percentage must be between 1 and 10.',
+      },
     },
   },
   fr: {
     exitWarnings: {
-      inputDataLost: {
-        title: 'Données d\'entrée seront perdues',
-        message: 'Vous avez configuré des paramètres d\'entrée. Toutes les données seront perdues. Continuer?',
-      },
       unsavedConfiguration: {
         title: 'Configuration non sauvegardée',
         message: 'Vous avez configuré des zones d\'émission et des paramètres. La session sera perdue. Continuer?',
@@ -177,23 +180,34 @@ export const locales = {
       failed: 'Échec de la connexion au serveur',
       configError: 'Erreur de configuration du serveur',
     },
+    errors: {
+      timeout: 'Données non reçues dans le délai imparti',
+    },
     demoMode: {
       label: 'MODE DÉMO',
+      scenarioTitle: 'Scenario de demonstration',
     },
     parameterSelection: {
       backToWelcome: 'Retour à la page d\'accueil',
       newScenario: 'Nouveau scénario',
       startSimulation: 'Lancer la simulation',
-      previousResultsFound: 'Résultats précédents trouvés',
-      previousResultsMessage: 'Vous avez des résultats de simulation précédents. Voulez-vous y retourner ou démarrer une nouvelle simulation?',
-      startNewSimulation: 'Nouvelle simulation',
       cancel: 'Annuler',
-      returnToOutput: 'Retour aux résultats',
+      editTitle: 'Modifier le titre du scénario',
+      saveTitle: 'Enregistrer le titre du scénario',
+      simulationFailed: 'Échec de la simulation',
       backToWelcomeWarning: {
         title: 'Retourner à l\'accueil?',
         both: 'Toute la configuration et les résultats de simulation seront perdus. Cette action est irréversible.',
         inputOnly: 'Toute la configuration sera perdue. Cette action est irréversible.',
         confirm: 'Oui, retourner à l\'accueil',
+      },
+      validation: {
+        noZones: 'Au moins une zone d\'émission avec des coordonnées doit être sélectionnée.',
+        invalidZones: 'Toutes les zones doivent avoir des coordonnées valides.',
+        carDistributionTotal: 'La distribution des véhicules doit totaliser 100%.',
+        noCategories: 'Au moins une catégorie d\'émission doit être activée.',
+        invalidIterations: 'Le nombre d\'itérations doit être entre 1 et 10.',
+        invalidPercentage: 'Le pourcentage de simulation doit être entre 1 et 10.',
       },
     },
   },
@@ -201,5 +215,3 @@ export const locales = {
 
 i18n.addResourceBundle('en', 'ez-root', locales.en);
 i18n.addResourceBundle('fr', 'ez-root', locales.fr);
-
-export type EZRootLocale = typeof locales.en;

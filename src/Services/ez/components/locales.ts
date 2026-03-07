@@ -67,5 +67,3 @@ export const locales = {
 
 i18n.addResourceBundle('en', 'ez-components', locales.en);
 i18n.addResourceBundle('fr', 'ez-components', locales.fr);
-
-export type EZComponentsLocale = typeof locales.en;

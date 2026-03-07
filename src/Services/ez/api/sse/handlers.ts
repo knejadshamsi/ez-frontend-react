@@ -89,9 +89,9 @@ function handleProgressAlertMessage(
   // Check if this is a component error that uses the configuration map
   if (messageType in ERROR_HANDLER_MAP) {
     const errorData = payload as { message: string };
-    const config = ERROR_HANDLER_MAP[messageType];
-    config.setState('error');
-    config.setError(errorData.message);
+    const errorHandler = ERROR_HANDLER_MAP[messageType];
+    errorHandler.setState('error');
+    errorHandler.setError(errorData.message);
     return;
   }
 
@@ -113,7 +113,6 @@ function handleProgressAlertMessage(
 
     case 'pa_cancelled_process': {
       const cancelData = payload as { status: string; reason: string };
-      console.log('[SSE] Server confirmed cancellation:', cancelData.reason);
       if (config.onCancelled) {
         config.onCancelled(cancelData.reason);
       }

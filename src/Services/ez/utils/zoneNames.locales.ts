@@ -1,6 +1,6 @@
 import i18n from '~i18nConfig';
 
-export const locales = {
+const locales = {
   en: {
     newZone: 'New Zone',
     customArea: 'Custom Area',
@@ -18,4 +18,3 @@ export const locales = {
 i18n.addResourceBundle('en', 'ez-zone-names', locales.en);
 i18n.addResourceBundle('fr', 'ez-zone-names', locales.fr);
 
-export type EZZoneNamesLocale = typeof locales.en;

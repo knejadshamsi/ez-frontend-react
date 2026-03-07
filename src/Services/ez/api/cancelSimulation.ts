@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { getBackendUrl } from './config';
 
-export type CancelResult = 'success' | 'conflict' | 'timeout' | 'not_found' | 'error';
+const CANCEL_TIMEOUT_MS = 35000;
+
+type CancelResult = 'success' | 'conflict' | 'timeout' | 'not_found' | 'error';
 
 // Cancels a running simulation via long-poll REST endpoint.
 // The backend blocks until cancellation is confirmed (up to 30s).
@@ -13,7 +15,7 @@ export async function cancelSimulation(requestId: string): Promise<CancelResult>
     const response = await axios.post(
       `${backendUrl}/scenario/${requestId}/cancel`,
       null,
-      { timeout: 35000, validateStatus: () => true }
+      { timeout: CANCEL_TIMEOUT_MS, validateStatus: () => true }
     );
 
     switch (response.status) {

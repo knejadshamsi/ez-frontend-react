@@ -1,6 +1,6 @@
 import i18n from '~i18nConfig';
 
-export const locales = {
+const locales = {
   en: {
     welcome: {
       title: 'Welcome to ',
@@ -99,4 +99,3 @@ export const locales = {
 i18n.addResourceBundle('en', 'ez-welcome', locales.en);
 i18n.addResourceBundle('fr', 'ez-welcome', locales.fr);
 
-export type EZWelcomeLocale = typeof locales.en;

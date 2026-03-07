@@ -2,7 +2,9 @@ import axios from 'axios';
 import { getBackendUrl } from './config';
 import { ApiResponse, unwrapResponse } from './apiResponse';
 
-export interface ScenarioStatusResponse {
+const STATUS_CHECK_TIMEOUT_MS = 10000;
+
+interface ScenarioStatusResponse {
   status: string;
   progress: string | null;
 }
@@ -13,7 +15,7 @@ export const fetchScenarioStatus = async (
   const backendUrl = getBackendUrl();
   const response = await axios.get<ApiResponse<ScenarioStatusResponse>>(
     `${backendUrl}/scenario/${requestId}/status`,
-    { timeout: 10000 }
+    { timeout: STATUS_CHECK_TIMEOUT_MS }
   );
   return unwrapResponse(response);
 };

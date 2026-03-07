@@ -168,7 +168,7 @@ export type SSEMessage =
 // === EXTERNAL API TYPES ===
 
 // Error structure for consumer callbacks
-export interface SimulationError {
+interface SimulationError {
   code: string;
   message: string;
   details?: string;

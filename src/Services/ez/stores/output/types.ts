@@ -133,7 +133,6 @@ export interface EZEmissionsBarChartConfig {
 
 export interface EZVehicleEmissionsChartConfig {
   vehicleTypeIds: string[];
-  vehicleTypeLabels: string[];
   vehicleTypeColors: string[];
 }
 

@@ -4,6 +4,8 @@ import { ScenarioMetadata } from '~stores/types';
 import { useEZSessionStore } from '~stores/session';
 import { ApiResponse } from './apiResponse';
 
+const REQUEST_TIMEOUT_MS = 10000;
+
 export const createMetadataPayload = (): ScenarioMetadata => {
   const sessionStore = useEZSessionStore.getState();
 
@@ -29,7 +31,7 @@ export const updateScenarioMetadata = async (
   const payload = metadata || createMetadataPayload();
 
   const response = await axios.post<ApiResponse<void>>(url, payload, {
-    timeout: 10000,
+    timeout: REQUEST_TIMEOUT_MS,
     headers: {
       'Content-Type': 'application/json'
     }

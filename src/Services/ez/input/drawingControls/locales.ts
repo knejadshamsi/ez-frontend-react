@@ -1,6 +1,6 @@
 import i18n from '~i18nConfig';
 
-export const locales = {
+const locales = {
   en: {
     layerVisibility: {
       showAll: 'Show All',
@@ -55,5 +55,3 @@ export const locales = {
 
 i18n.addResourceBundle('en', 'ez-drawing-controls', locales.en);
 i18n.addResourceBundle('fr', 'ez-drawing-controls', locales.fr);
-
-export type EZDrawingControlsLocale = typeof locales.en;

@@ -8,6 +8,8 @@ import { getBackendUrl } from './config';
 import { ApiResponse } from './apiResponse';
 import { handleDataMessage } from './sse/handlers';
 
+const RETRY_TIMEOUT_MS = 10000;
+
 interface RetryPayload {
   messageType: string;
   payload: Record<string, unknown>;
@@ -115,7 +117,7 @@ export async function retryComponentData(
     const response = await axios.post<ApiResponse<RetryPayload>>(
       `${backendUrl}/scenario/${requestId}/retry`,
       { messageType },
-      { timeout: 10000 }
+      { timeout: RETRY_TIMEOUT_MS }
     );
 
     if (response.data.statusCode !== 200) {

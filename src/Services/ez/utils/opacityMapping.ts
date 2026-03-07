@@ -1,3 +1,6 @@
+const OPACITY_LOW = 0.05;
+const OPACITY_MEDIUM = 0.10;
+
 export const OPACITY_STATES = {
   HIDDEN: 'hidden',
   LOW: 'low',
@@ -14,13 +17,11 @@ export const mapZoneOpacityToAlpha = (
     case 'hidden':
       return null;
     case 'low':
-      return Math.round(255 * 0.05);
+      return Math.round(255 * OPACITY_LOW);
     case 'medium':
-      return Math.round(255 * 0.10);
+      return Math.round(255 * OPACITY_MEDIUM);
     case 'normal':
       return 80;
-    default:
-      return null;
   }
 };
 
@@ -32,27 +33,10 @@ export const mapSimulationAreaOpacityToAlpha = (
     case 'hidden':
       return null;
     case 'low':
-      return Math.round(255 * 0.05);
+      return Math.round(255 * OPACITY_LOW);
     case 'medium':
-      return Math.round(255 * 0.10);
+      return Math.round(255 * OPACITY_MEDIUM);
     case 'normal':
       return normalOpacity;
-    default:
-      return null;
-  }
-};
-
-export const getOpacityLabel = (opacityState: OpacityState): string => {
-  switch (opacityState) {
-    case 'hidden':
-      return 'Hidden';
-    case 'low':
-      return '5%';
-    case 'medium':
-      return '10%';
-    case 'normal':
-      return 'Normal';
-    default:
-      return 'Hidden';
   }
 };

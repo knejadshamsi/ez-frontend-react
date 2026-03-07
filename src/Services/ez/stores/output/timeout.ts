@@ -1,3 +1,4 @@
+import i18n from '~i18nConfig';
 import {
   useEZOutputOverviewStore,
   useEZOutputEmissionsStore,
@@ -8,7 +9,7 @@ import { useEZOutputMapStore } from './map';
 
 // Sets all incomplete components to error state. Called by universal timeout when simulation times out
 export const setIncompleteComponentsToError = (): void => {
-  const errorMessage = 'Data not received within timeout period';
+  const errorMessage = i18n.t('ez-root:errors.timeout');
 
   const overviewStore = useEZOutputOverviewStore.getState();
   const emissionsStore = useEZOutputEmissionsStore.getState();

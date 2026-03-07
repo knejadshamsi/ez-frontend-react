@@ -35,8 +35,8 @@ export const colorShader = (hex: string, multiplier: number): string | undefined
   newB = Math.max(0, Math.min(255, newB));
 
   const toHex = (n: number): string => {
-    const hex = n.toString(16);
-    return hex.length === 1 ? '0' + hex : hex;
+    const h = n.toString(16);
+    return h.length === 1 ? '0' + h : h;
   };
 
   return '#' + toHex(newR) + toHex(newG) + toHex(newB);

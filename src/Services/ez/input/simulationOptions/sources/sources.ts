@@ -2,7 +2,7 @@ export const populationYears = [2024, 2025] as const;
 export const networkYears = [2025] as const;
 export const publicTransportYears = [2024, 2025] as const;
 
-export type Year = 2024 | 2025;
+type Year = 2024 | 2025;
 
 interface DataSource {
   value: string;

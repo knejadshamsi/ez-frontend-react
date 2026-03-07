@@ -5,8 +5,8 @@
 
 // TYPE DEFINITIONS
 
-export type ComparisonDirection = 'increase' | 'decrease' | 'stable';
-export type ComparisonMagnitude = 'stable' | 'slight' | 'moderate' | 'dramatic';
+type ComparisonDirection = 'increase' | 'decrease' | 'stable';
+type ComparisonMagnitude = 'stable' | 'slight' | 'moderate' | 'dramatic';
 export type Pollutant = 'pm25' | 'pm10' | 'no2';
 
 export interface ComparisonData {
@@ -17,12 +17,12 @@ export interface ComparisonData {
   direction: ComparisonDirection;
 }
 
-export interface WHOThresholds {
+interface WHOThresholds {
   guideline: number;
   interimTargets: readonly number[];
 }
 
-export interface WHOTargetAnalysis {
+interface WHOTargetAnalysis {
   meetsGuideline: boolean;
   targetIndex: number; // -1 if exceeds all targets, 0-n for interim target index
   differenceFromGuideline: number;
@@ -31,7 +31,7 @@ export interface WHOTargetAnalysis {
 
 // CONSTANTS - COMPARISON THRESHOLDS
 
-export const DEFAULT_COMPARISON_THRESHOLDS = {
+const DEFAULT_COMPARISON_THRESHOLDS = {
   stable: 5,
   slight: 10,
   dramatic: 50
@@ -72,7 +72,7 @@ export const LEZ_BENCHMARKS = {
 
 // CONSTANTS - BOX MODEL PHYSICS
 
-export const BOX_MODEL_CONSTANTS = {
+const BOX_MODEL_CONSTANTS = {
   MICROGRAMS_PER_TONNE: 1e12,
   SQUARE_METERS_PER_KM2: 1e6,
   DEFAULT_MIXING_HEIGHT_M: 1000,
@@ -102,7 +102,8 @@ export const ELASTICITY_THRESHOLDS = {
 
 export const REROUTING_THRESHOLDS = {
   TIME_SAVINGS: -1,
-  TIME_PENALTY: 3
+  TIME_PENALTY: 3,
+  MIN_PCT: 5
 } as const;
 
 // CALCULATION FUNCTIONS

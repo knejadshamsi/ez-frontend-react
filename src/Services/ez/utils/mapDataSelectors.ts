@@ -17,10 +17,10 @@ export const selectEmissionsMapPoints = (
 export const selectPeopleResponseMapPoints = (
   data: PeopleResponseMapData | null,
   view: 'origin' | 'destination',
-  responseType: string
+  responseType: keyof PeopleResponseMapData['origin']
 ): MapPointData[] => {
   if (!data) return [];
   const viewData = data[view];
   if (!viewData) return [];
-  return (viewData as Record<string, MapPointData[]>)[responseType] || [];
+  return viewData[responseType] || [];
 };

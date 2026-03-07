@@ -1,18 +1,6 @@
-import axios from 'axios';
 import { useAPIPayloadStore } from '~store';
 import { useEZSessionStore } from '~stores/session';
-import { getBackendUrl } from './config';
 import type { MainInputPayload, ScenarioMetadata } from '~ez/stores/types';
-import { ApiResponse, unwrapResponse } from './apiResponse';
-
-export async function fetchScenarioMainInput(requestId: string): Promise<MainInputPayload> {
-  const backendUrl = getBackendUrl();
-  const response = await axios.get<ApiResponse<MainInputPayload>>(
-    `${backendUrl}/scenario/${requestId}/input/main`,
-    { timeout: 10000 }
-  );
-  return unwrapResponse(response);
-}
 
 export function restoreStoresFromInput(
   mainInput: MainInputPayload,
@@ -101,7 +89,6 @@ export function restoreStoresFromInput(
       }
     }
 
-    console.log('[Input Data] Successfully restored input parameters and metadata');
   } catch (error) {
     console.error('[Input Data] Failed to restore input data:', error);
     throw error;

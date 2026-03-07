@@ -4,4 +4,4 @@
 export { startSimulationStream } from './stream';
 
 /* Public type definitions for consumers */
-export type { SSEMessage, SimulationError, SimulationStreamConfig } from './types';
+export type { SSEMessage, SimulationStreamConfig } from './types';

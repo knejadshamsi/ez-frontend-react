@@ -43,7 +43,7 @@ export const MTL_AREA: Coordinate[] = [
 const mtlAreaPolygon = polygon([MTL_AREA]);
 
 // Constants for area validation (in square meters)
-export const EMISSION_ZONE_CONSTRAINTS = {
+const EMISSION_ZONE_CONSTRAINTS = {
   MIN_AREA_SQ_KM: 0.5,
   MAX_AREA_SQ_KM: 5,
   MIN_AREA_SQ_M: 0.5 * 1_000_000,  // 500,000 sq meters
@@ -57,7 +57,7 @@ export const SIMULATION_AREA_CONSTRAINTS = {
   MAX_AREA_SQ_M: 6 * 1_000_000,   // 6,000,000 sq meters
 } as const;
 
-export interface PolygonValidationResult {
+interface PolygonValidationResult {
   isValid: boolean;
   error?: string;
   errorType?: 'boundary' | 'area_too_small' | 'area_too_large';

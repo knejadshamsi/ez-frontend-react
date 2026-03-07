@@ -1,6 +1,6 @@
 import i18n from '~i18nConfig';
 
-export const locales = {
+const locales = {
   en: {
     loadingScenario: 'Loading scenario, please wait.',
     buttons: {
@@ -14,6 +14,11 @@ export const locales = {
     },
     error: {
       title: 'Simulation Error',
+      fallback: 'Simulation failed',
+      scenarioDeleted: 'This scenario has been deleted',
+      scenarioCancelled: 'Scenario was cancelled',
+      scenarioFailed: 'Scenario failed',
+      backendNotConfigured: 'Backend URL not configured',
     },
     progress: {
       title: 'Simulation Progress',
@@ -46,7 +51,8 @@ export const locales = {
       reconnecting: 'Connection lost - monitoring simulation progress...',
     },
     queued: {
-      waiting: 'Simulation queued - waiting for available capacity...',
+      title: 'Simulation queued',
+      subtitle: 'Waiting for available capacity...',
     },
     timeout: {
       connection: 'Could not connect to simulation server. Please check your connection and try again.',
@@ -67,6 +73,11 @@ export const locales = {
     },
     error: {
       title: 'Erreur de simulation',
+      fallback: 'La simulation a echoue',
+      scenarioDeleted: 'Ce scenario a ete supprime',
+      scenarioCancelled: 'Le scenario a ete annule',
+      scenarioFailed: 'Le scenario a echoue',
+      backendNotConfigured: 'URL du serveur non configuree',
     },
     progress: {
       title: 'Progression de la simulation',
@@ -99,7 +110,8 @@ export const locales = {
       reconnecting: 'Connexion perdue - surveillance de la progression...',
     },
     queued: {
-      waiting: 'Simulation en file d\'attente - en attente de capacité disponible...',
+      title: 'Simulation en file d\'attente',
+      subtitle: 'En attente de capacite disponible...',
     },
     timeout: {
       connection: 'Impossible de se connecter au serveur de simulation. Veuillez vérifier votre connexion et réessayer.',
@@ -112,4 +124,3 @@ export const locales = {
 i18n.addResourceBundle('en', 'ez-progress', locales.en);
 i18n.addResourceBundle('fr', 'ez-progress', locales.fr);
 
-export type EZProgressLocale = typeof locales.en;

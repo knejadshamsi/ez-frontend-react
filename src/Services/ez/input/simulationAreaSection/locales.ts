@@ -1,6 +1,6 @@
 import i18n from '~i18nConfig';
 
-export const locales = {
+const locales = {
   en: {
     section: {
       title: '2. SELECT SIMULATION AREA',
@@ -91,5 +91,3 @@ export const locales = {
 
 i18n.addResourceBundle('en', 'ez-simulation-area-section', locales.en);
 i18n.addResourceBundle('fr', 'ez-simulation-area-section', locales.fr);
-
-export type EZSimulationAreaSectionLocale = typeof locales.en;

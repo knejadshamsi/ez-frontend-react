@@ -30,7 +30,6 @@ export const DEFAULT_EMISSIONS_BAR_CHART_CONFIG: EZEmissionsBarChartConfig = {
 
 export const DEFAULT_VEHICLE_EMISSIONS_CHART_CONFIG: EZVehicleEmissionsChartConfig = {
   vehicleTypeIds: ['zeroEmission', 'nearZeroEmission', 'lowEmission', 'midEmission', 'highEmission'],
-  vehicleTypeLabels: ['Zero Emission Vehicles', 'Near-Zero Emission Vehicles', 'Low Emission Vehicles', 'Mid Emission Vehicles', 'High Emission Vehicles'],
   vehicleTypeColors: Object.values(VEHICLE_TYPE_COLORS),
 };
 

@@ -5,6 +5,8 @@ import { useEZServiceStore } from '~store';
 import { getBackendUrl } from './config';
 import { ApiResponse, unwrapResponse } from './apiResponse';
 
+const TRIP_LEGS_FETCH_TIMEOUT_MS = 15000;
+
 interface TripLegsPageResponse {
   records: EZTripLegRecord[];
   page: number;
@@ -56,7 +58,6 @@ export const fetchTripLegsPage = async (page: number): Promise<void> => {
   }
 
   if (pagination.currentPage === page && store.tripLegRecords.length > 0) {
-    console.log('[TripLegsFetch] Already on page', page);
     return;
   }
 
@@ -70,7 +71,6 @@ export const fetchTripLegsPage = async (page: number): Promise<void> => {
       const records = generateDemoTripLegsPage(page, pagination.pageSize, pagination.totalRecords);
       store.setTripLegsPage(page, records);
       store.setTripLegsTableState('success');
-      console.log(`[TripLegsFetch] Demo page ${page} loaded with ${records.length} records`);
     } else {
       // Real mode
       const backendUrl = getBackendUrl();
@@ -83,14 +83,13 @@ export const fetchTripLegsPage = async (page: number): Promise<void> => {
             page,
             pageSize: pagination.pageSize,
           },
-          timeout: 15000,
+          timeout: TRIP_LEGS_FETCH_TIMEOUT_MS,
         }
       );
 
       const data = unwrapResponse(response);
       store.setTripLegsPage(page, data.records);
       store.setTripLegsTableState('success');
-      console.log(`[TripLegsFetch] Page ${page} loaded with ${data.records.length} records`);
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to fetch trip legs page';
