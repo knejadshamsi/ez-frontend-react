@@ -14,8 +14,7 @@ import {
 } from 'chart.js';
 import { useAPIPayloadStore, useEZServiceStore } from '~store';
 import { useEZSessionStore } from '~stores/session';
-import { resetAllEZOutputStores } from '~stores/output';
-import { useScenarioSnapshotStore } from '~stores/scenario';
+import { resetOutputState } from '~stores/reset';
 import outputStyles from './Output.module.less';
 import parameterStyles from '../input/ParameterSelectionView.module.less';
 import { useDemoDataLoader } from './demo';
@@ -59,8 +58,7 @@ export const OutputView = () => {
           onClick: () => {
             resetApiPayload();
             resetSession();
-            resetAllEZOutputStores();
-            useScenarioSnapshotStore.getState().reset();
+            resetOutputState();
             setRequestId('');
             setState('PARAMETER_SELECTION');
             instance.destroy();

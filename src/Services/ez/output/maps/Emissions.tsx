@@ -12,21 +12,21 @@ import './locales';
 // Interactive emissions map with pollutant selector and visualization toggle
 export const Emissions = () => {
   const { t } = useTranslation('ez-output-maps');
-  const state = useEZOutputMapStore((state) => state.emissionsMapState);
-  const error = useEZOutputMapStore((state) => state.emissionsMapError);
+  const state = useEZOutputMapStore((s) => s.emissionsMapState);
+  const error = useEZOutputMapStore((s) => s.emissionsMapError);
 
-  const setState = useEZOutputMapStore((state) => state.setEmissionsMapState);
-  const setError = useEZOutputMapStore((state) => state.setEmissionsMapError);
+  const setState = useEZOutputMapStore((s) => s.setEmissionsMapState);
+  const setError = useEZOutputMapStore((s) => s.setEmissionsMapError);
 
-  const visualizationType = useEZOutputFiltersStore((state) => state.selectedVisualizationType);
-  const selectedPollutant = useEZOutputFiltersStore((state) => state.selectedPollutantType);
-  const isMapVisible = useEZOutputFiltersStore((state) => state.isEmissionsMapVisible);
+  const visualizationType = useEZOutputFiltersStore((s) => s.selectedVisualizationType);
+  const selectedPollutant = useEZOutputFiltersStore((s) => s.selectedPollutantType);
+  const isMapVisible = useEZOutputFiltersStore((s) => s.isEmissionsMapVisible);
 
-  const setVisualizationType = useEZOutputFiltersStore((state) => state.setSelectedVisualizationType);
-  const setSelectedPollutant = useEZOutputFiltersStore((state) => state.setSelectedPollutantType);
-  const toggleMapVisibility = useEZOutputFiltersStore((state) => state.toggleEmissionsMapVisibility);
+  const setVisualizationType = useEZOutputFiltersStore((s) => s.setSelectedVisualizationType);
+  const setSelectedPollutant = useEZOutputFiltersStore((s) => s.setSelectedPollutantType);
+  const toggleMapVisibility = useEZOutputFiltersStore((s) => s.toggleEmissionsMapVisibility);
 
-  const isDemoMode = !useEZServiceStore((state) => state.isEzBackendAlive);
+  const isDemoMode = !useEZServiceStore((s) => s.isEzBackendAlive);
 
   useEffect(() => {
     if (isMapVisible && state === 'success_initial') {

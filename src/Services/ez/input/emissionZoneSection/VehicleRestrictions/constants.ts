@@ -16,6 +16,9 @@ export const DEFAULT_BLOCK_SPAN = 2;    // 1 hour default
 export const DEFAULT_PENALTY = 25;
 export const DEFAULT_INTERVAL = 1800;   // 30 minutes in seconds
 
+// Derived grid counts
+export const TWO_HOUR_DIVISIONS = TIME_COLUMNS / 4 + 1; // 13 marks for 2-hour intervals
+
 // Display thresholds
 export const ICON_ONLY_THRESHOLD = 4;   // Blocks ≤4 columns show icon only
 export const FULL_LABEL_THRESHOLD = 160; // Width in pixels for full labels

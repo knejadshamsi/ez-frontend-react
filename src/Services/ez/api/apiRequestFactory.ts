@@ -1,6 +1,9 @@
 import { APIPayload, Coordinate, CarDistribution } from '~stores/types';
 import { useEZSessionStore } from '~stores/session';
 
+const MIN_SIMULATION_OPTIONS = 1;
+const MAX_SIMULATION_OPTIONS = 10;
+
 export interface APIRequest {
   scenarioTitle: string;
   scenarioDescription?: string;
@@ -26,13 +29,7 @@ export interface APIRequest {
     iterations: number;
     percentage: number;
   };
-  carDistribution: {
-    zeroEmission: number;
-    nearZeroEmission: number;
-    lowEmission: number;
-    midEmission: number;
-    highEmission: number;
-  };
+  carDistribution: Partial<CarDistribution>;
   modeUtilities: {
     walk: number;
     bike: number;
@@ -98,7 +95,7 @@ export const createAPIRequest = (
     simulationArea,
     sources: payload.sources,
     simulationOptions: payload.simulationOptions,
-    carDistribution: enabledDistribution as CarDistribution,
+    carDistribution: enabledDistribution,
     modeUtilities: payload.modeUtilities
   };
 };
@@ -107,7 +104,7 @@ export const validateAPIRequest = (request: APIRequest): { isValid: boolean; err
   if (request.zones.length === 0) {
     return {
       isValid: false,
-      error: 'At least one emission zone with coordinates must be selected'
+      error: 'parameterSelection.validation.noZones'
     };
   }
 
@@ -115,7 +112,7 @@ export const validateAPIRequest = (request: APIRequest): { isValid: boolean; err
   if (hasInvalidZone) {
     return {
       isValid: false,
-      error: 'All zones must have valid coordinates'
+      error: 'parameterSelection.validation.invalidZones'
     };
   }
 
@@ -124,7 +121,7 @@ export const validateAPIRequest = (request: APIRequest): { isValid: boolean; err
   if (Math.abs(total - 100) > 0.01) {
     return {
       isValid: false,
-      error: `Car distribution must sum to 100% (currently ${total}%)`
+      error: 'parameterSelection.validation.carDistributionTotal'
     };
   }
 
@@ -137,21 +134,21 @@ export const validateAPIRequest = (request: APIRequest): { isValid: boolean; err
   if (enabledCategories.length === 0) {
     return {
       isValid: false,
-      error: 'At least one emission category must be enabled'
+      error: 'parameterSelection.validation.noCategories'
     };
   }
 
-  if (request.simulationOptions.iterations < 1 || request.simulationOptions.iterations > 10) {
+  if (request.simulationOptions.iterations < MIN_SIMULATION_OPTIONS || request.simulationOptions.iterations > MAX_SIMULATION_OPTIONS) {
     return {
       isValid: false,
-      error: 'Simulation iterations must be between 1 and 10'
+      error: 'parameterSelection.validation.invalidIterations'
     };
   }
 
-  if (request.simulationOptions.percentage < 1 || request.simulationOptions.percentage > 10) {
+  if (request.simulationOptions.percentage < MIN_SIMULATION_OPTIONS || request.simulationOptions.percentage > MAX_SIMULATION_OPTIONS) {
     return {
       isValid: false,
-      error: 'Simulation percentage must be between 1 and 10'
+      error: 'parameterSelection.validation.invalidPercentage'
     };
   }
 

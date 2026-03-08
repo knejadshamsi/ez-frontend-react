@@ -1,6 +1,9 @@
+import { useTranslation } from 'react-i18next';
 import { RestrictionBlockProps } from '../types';
 import { columnToTime } from '../policyConversions';
-import { VEHICLE_COLUMN_WIDTH, ROW_HEIGHT, BLOCK_HEIGHT_RATIO, RESIZE_ZONE_RATIO, DRAG_ZONE_RATIO, ICON_ONLY_THRESHOLD, FULL_LABEL_THRESHOLD } from '../constants';
+import { HEADER_HEIGHT, VEHICLE_COLUMN_WIDTH, ROW_HEIGHT, BLOCK_HEIGHT_RATIO, RESIZE_ZONE_RATIO, DRAG_ZONE_RATIO, ICON_ONLY_THRESHOLD, FULL_LABEL_THRESHOLD } from '../constants';
+import styles from '../styles/restrictionBlock.module.less';
+import '../../locales';
 
 export const RestrictionBlock = ({
   block,
@@ -11,8 +14,9 @@ export const RestrictionBlock = ({
   onMouseDown,
   onClick
 }: RestrictionBlockProps) => {
+  const { t } = useTranslation('ez-emission-zone-section');
   const blockHeight = ROW_HEIGHT * BLOCK_HEIGHT_RATIO;
-  const rowY = 35 + rowIndex * ROW_HEIGHT; // HEADER_HEIGHT + rowIndex * ROW_HEIGHT
+  const rowY = HEADER_HEIGHT + rowIndex * ROW_HEIGHT;
   const blockY = rowY + (ROW_HEIGHT - blockHeight) / 2;
   const blockX = VEHICLE_COLUMN_WIDTH + block.start * timeColumnWidth;
   const blockWidth = (block.end - block.start) * timeColumnWidth;
@@ -41,7 +45,7 @@ export const RestrictionBlock = ({
       // restricted blocks spesifics
       const width = blockDuration * timeColumnWidth;
       if (width > FULL_LABEL_THRESHOLD) {
-        return `${timeText} | $${block.penalty}/${block.interval}s`;
+        return `${timeText} | ${t('vehicleRestrictions.blockEditor.penaltyFormat', { penalty: block.penalty, interval: block.interval })}`;
       } else {
         return timeText;
       }
@@ -61,7 +65,7 @@ export const RestrictionBlock = ({
         fill={blockFill}
         stroke={isSelected ? "#3b82f6" : blockStroke}
         strokeWidth={isSelected ? 2 : 1}
-        style={{ cursor: 'default' }}
+        className={styles.cursorDefault}
       />
       {/* Left 25% - Resize left edge */}
       <rect
@@ -70,7 +74,7 @@ export const RestrictionBlock = ({
         width={blockWidth * RESIZE_ZONE_RATIO}
         height={blockHeight}
         fill="transparent"
-        style={{ cursor: 'ew-resize' }}
+        className={styles.cursorResize}
         onMouseDown={(e) => onMouseDown(e, vehicleType, block.id, 'resize', 'start')}
       />
 
@@ -81,7 +85,7 @@ export const RestrictionBlock = ({
         width={blockWidth * DRAG_ZONE_RATIO}
         height={blockHeight}
         fill="transparent"
-        style={{ cursor: 'move' }}
+        className={styles.cursorMove}
         onMouseDown={(e) => onMouseDown(e, vehicleType, block.id, 'move')}
       />
 
@@ -92,7 +96,7 @@ export const RestrictionBlock = ({
         width={blockWidth * RESIZE_ZONE_RATIO}
         height={blockHeight}
         fill="transparent"
-        style={{ cursor: 'ew-resize' }}
+        className={styles.cursorResize}
         onMouseDown={(e) => onMouseDown(e, vehicleType, block.id, 'resize', 'end')}
       />
 
@@ -104,7 +108,14 @@ export const RestrictionBlock = ({
         textAnchor="middle"
         fill={textColor}
         fontSize={blockDuration <= ICON_ONLY_THRESHOLD ? "14" : "11"}
-        style={{ cursor: 'pointer' }}
+        className={styles.cursorPointer}
+        role="button"
+        tabIndex={0}
+        aria-label={t('vehicleRestrictions.a11y.restrictionBlock', {
+          type: block.type,
+          start: columnToTime(block.start),
+          end: columnToTime(block.end)
+        })}
         onClick={(event) => {
           event.stopPropagation();
           onClick(vehicleType, block, rowIndex, event);

@@ -4,27 +4,50 @@ import { useEZOutputMapStore } from '~stores/output';
 import { getBackendUrl } from './config';
 import { loadDemoMapData } from '../output/demoMapData';
 import { ApiResponse, unwrapResponse } from './apiResponse';
+import type { OutputComponentState } from '~stores/output/types';
+
+const MAP_DATA_FETCH_TIMEOUT_MS = 15000;
 
 type MapType = 'emissions' | 'peopleResponse' | 'tripLegs';
 
-const MAP_CONFIG = {
-  emissions: {
-    endpoint: 'emissions',
-    dataProp: 'emissionsMapData' as const,
-  },
-  peopleResponse: {
-    endpoint: 'people-response',
-    dataProp: 'peopleResponseMapData' as const,
-  },
-  tripLegs: {
-    endpoint: 'trip-legs',
-    dataProp: 'tripLegsMapData' as const,
-  },
-} as const;
+interface MapTypeConfig {
+  endpoint: string;
+  dataProp: 'emissionsMapData' | 'peopleResponseMapData' | 'tripLegsMapData';
+  setState: (state: OutputComponentState) => void;
+  setError: (error: string | null) => void;
+  setData: (data: unknown) => void;
+}
+
+const getMapConfig = (): Record<MapType, MapTypeConfig> => {
+  const store = useEZOutputMapStore.getState();
+  return {
+    emissions: {
+      endpoint: 'emissions',
+      dataProp: 'emissionsMapData',
+      setState: (state) => store.setEmissionsMapState(state),
+      setError: (error) => store.setEmissionsMapError(error),
+      setData: (data) => store.setEmissionsMapData(data as Parameters<typeof store.setEmissionsMapData>[0]),
+    },
+    peopleResponse: {
+      endpoint: 'people-response',
+      dataProp: 'peopleResponseMapData',
+      setState: (state) => store.setPeopleResponseMapState(state),
+      setError: (error) => store.setPeopleResponseMapError(error),
+      setData: (data) => store.setPeopleResponseMapData(data as Parameters<typeof store.setPeopleResponseMapData>[0]),
+    },
+    tripLegs: {
+      endpoint: 'trip-legs',
+      dataProp: 'tripLegsMapData',
+      setState: (state) => store.setTripLegsMapState(state),
+      setError: (error) => store.setTripLegsMapError(error),
+      setData: (data) => store.setTripLegsMapData(data as Parameters<typeof store.setTripLegsMapData>[0]),
+    },
+  };
+};
 
 const fetchMapDataInternal = async (type: MapType): Promise<void> => {
   const store = useEZOutputMapStore.getState();
-  const config = MAP_CONFIG[type];
+  const config = getMapConfig()[type];
 
   // Check if already loaded
   const data = store[config.dataProp];
@@ -32,12 +55,8 @@ const fetchMapDataInternal = async (type: MapType): Promise<void> => {
     return;
   }
 
-  // Capitalize first letter for method names (emissions -> Emissions)
-  const typeCapitalized = type.charAt(0).toUpperCase() + type.slice(1);
-
-  // Set loading state and clear error
-  (store as any)[`set${typeCapitalized}MapState`]('loading');
-  (store as any)[`set${typeCapitalized}MapError`](null);
+  config.setState('loading');
+  config.setError(null);
 
   try {
     const backendUrl = getBackendUrl();
@@ -45,28 +64,16 @@ const fetchMapDataInternal = async (type: MapType): Promise<void> => {
 
     const response = await axios.get<ApiResponse<unknown>>(
       `${backendUrl}/scenario/${requestId}/maps/${config.endpoint}`,
-      { timeout: 15000 }
+      { timeout: MAP_DATA_FETCH_TIMEOUT_MS }
     );
 
-    (store as any)[`set${typeCapitalized}MapData`](unwrapResponse(response));
-    (store as any)[`set${typeCapitalized}MapState`]('success');
+    config.setData(unwrapResponse(response));
+    config.setState('success');
   } catch (error) {
     const message = error instanceof Error ? error.message : `Failed to fetch ${type} map data`;
-    (store as any)[`set${typeCapitalized}MapError`](message);
-    (store as any)[`set${typeCapitalized}MapState`]('error');
+    config.setError(message);
+    config.setState('error');
   }
-};
-
-export const fetchEmissionsMapData = async (): Promise<void> => {
-  return fetchMapDataInternal('emissions');
-};
-
-export const fetchPeopleResponseMapData = async (): Promise<void> => {
-  return fetchMapDataInternal('peopleResponse');
-};
-
-export const fetchTripLegsMapData = async (): Promise<void> => {
-  return fetchMapDataInternal('tripLegs');
 };
 
 export const fetchMapData = async (

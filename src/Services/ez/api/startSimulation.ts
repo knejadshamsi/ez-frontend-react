@@ -8,6 +8,7 @@ import { decodeProgressAlert } from '../progress';
 import { useProgressStore } from '../progress/store';
 import i18n from '~i18nConfig';
 import '../progress/locales';
+import '../locales';
 import { loadDemoData } from '../output/demo';
 import { restoreStoresFromInput } from './fetchScenarioInput';
 import { updateScenarioMetadata } from './updateScenarioMetadata';
@@ -15,9 +16,11 @@ import { useScenarioSnapshotStore } from '~stores/scenario';
 import { useDraftStore } from '~stores/session';
 import { deleteDraft } from './draft';
 import { fetchScenarioStatus, isTerminalStatus } from './scenarioStatus';
-import { resetAllEZOutputStores } from '~stores/output';
+import { resetOutputState } from '~stores/reset';
 
 const t = i18n.t.bind(i18n);
+const RESULT_TRANSITION_DELAY_MS = 2000;
+const SCENARIO_LOAD_TRANSITION_DELAY_MS = 500;
 
 const TIMEOUT_ERROR_KEYS: Record<string, string> = {
   CONNECTION_TIMEOUT: 'ez-progress:timeout.connection',
@@ -29,7 +32,7 @@ const getErrorMessage = (error: { code?: string; message?: string }): string => 
   if (error.code && TIMEOUT_ERROR_KEYS[error.code]) {
     return t(TIMEOUT_ERROR_KEYS[error.code]);
   }
-  return error.message || 'Simulation failed';
+  return error.message || t('ez-progress:error.fallback');
 };
 
 export const startSimulation = async (
@@ -58,8 +61,9 @@ export const startSimulation = async (
   }
 };
 
+const DEMO_QUEUED_DELAY_MS = 1500;
+
 const runDemoSimulation = (setState: (state: EZStateType) => void): (() => void) => {
-  console.log('[DEMO MODE] Starting demo simulation');
 
   const demoEvents = [
     { event: 'preprocessing_population_started', delay: 100 },
@@ -86,20 +90,24 @@ const runDemoSimulation = (setState: (state: EZStateType) => void): (() => void)
 
   const timeoutIds: NodeJS.Timeout[] = [];
 
+  // Transition from queued to running progress after a brief delay
+  const simulationStartId = setTimeout(() => {
+    useProgressStore.getState().setStatus('DISPLAY_SIMULATION');
+  }, DEMO_QUEUED_DELAY_MS);
+  timeoutIds.push(simulationStartId);
+
   demoEvents.forEach(({ event, delay }) => {
     const id = setTimeout(() => {
       decodeProgressAlert(event);
-    }, delay);
+    }, DEMO_QUEUED_DELAY_MS + delay);
     timeoutIds.push(id);
   });
 
   const dataLoadId = setTimeout(() => {
     loadDemoData();
-    const transitionId = setTimeout(() => {
-      setState('RESULT_VIEW');
-    }, 2000);
-    timeoutIds.push(transitionId);
-  }, 8000);
+    useProgressStore.getState().setStatus('DISPLAY_COMPLETE');
+    // Auto-transition to RESULT_VIEW is handled by Progress component
+  }, DEMO_QUEUED_DELAY_MS + 8000);
   timeoutIds.push(dataLoadId);
 
   return () => {
@@ -118,13 +126,11 @@ const runRealSimulation = (
   const setSseCleanup = useEZSessionStore.getState().setSseCleanup;
 
   if (!isBackendConfigured()) {
-    useProgressStore.getState().setError('Backend URL not configured');
+    useProgressStore.getState().setError(t('ez-progress:error.backendNotConfigured'));
     return;
   }
 
   const backendUrl = getBackendUrl();
-
-  console.log('[REAL BACKEND] Starting SSE simulation');
 
   const apiRequest = createAPIRequest(
     apiPayload,
@@ -137,12 +143,10 @@ const runRealSimulation = (
     payload: apiRequest as unknown as Record<string, unknown>,
 
     onStarted: async (requestId: string) => {
-      console.log('[SSE] Simulation started with requestId:', requestId);
       setRequestId(requestId);
 
       try {
         await updateScenarioMetadata(requestId);
-        console.log('[EZ API] Metadata sent successfully');
       } catch (error) {
         // Metadata is non-critical (title/description only) - log and continue
         console.error('[EZ API] Failed to send metadata:', error);
@@ -150,26 +154,21 @@ const runRealSimulation = (
     },
 
     onSimulationStart: () => {
-      console.log('[SSE] Simulation now actively running');
       useProgressStore.getState().setStatus('DISPLAY_SIMULATION');
     },
 
-    onCancelled: (reason: string) => {
-      console.log('[SSE] Server confirmed cancellation:', reason);
+    onCancelled: (_reason: string) => {
       setSseCleanup(null);
-      resetAllEZOutputStores();
-      useScenarioSnapshotStore.getState().reset();
-      useProgressStore.getState().reset();
+      resetOutputState();
       setState('PARAMETER_SELECTION');
     },
 
     onComplete: () => {
-      console.log('[SSE] Simulation completed successfully');
       setSseCleanup(null);
       useProgressStore.getState().setStatus('DISPLAY_COMPLETE');
       setTimeout(() => {
         setState('RESULT_VIEW');
-      }, 2000);
+      }, RESULT_TRANSITION_DELAY_MS);
     },
 
     onError: (error) => {
@@ -179,13 +178,12 @@ const runRealSimulation = (
       // If we have a requestId, attempt polling recovery instead of giving up
       const currentRequestId = useEZSessionStore.getState().requestId;
       if (currentRequestId && currentRequestId.trim() !== '') {
-        console.log('[SSE] Connection lost - starting polling recovery for:', currentRequestId);
         startPollingRecovery(currentRequestId, setState, onError);
         return;
       }
 
       // No requestId - connection failed before simulation started
-      useProgressStore.getState().reset();
+      resetOutputState();
       onError(getErrorMessage(error));
     },
   });
@@ -216,7 +214,6 @@ export const loadScenario = async (
 };
 
 const runDemoScenarioLoad = (setState: (state: EZStateType) => void): (() => void) => {
-  console.log('[DEMO MODE] Loading demo scenario');
 
   const timeoutIds: NodeJS.Timeout[] = [];
 
@@ -242,8 +239,6 @@ const runRealScenarioLoad = (
   const backendUrl = getBackendUrl();
   const snapshotStore = useScenarioSnapshotStore.getState;
 
-  console.log('[REAL BACKEND] Loading scenario via SSE preamble:', requestId);
-
   let abortStream: (() => void) | null = null;
 
   const cleanup = startSimulationStream({
@@ -252,8 +247,6 @@ const runRealScenarioLoad = (
     method: 'GET',
 
     onScenarioStatus: (status: string) => {
-      console.log('[SSE] Scenario status:', status);
-
       if (status === 'DELETED') {
         if (abortStream) {
           abortStream();
@@ -262,7 +255,7 @@ const runRealScenarioLoad = (
         if (onNonCompleted) {
           onNonCompleted(status);
         } else {
-          onError('This scenario has been deleted');
+          onError(t('ez-progress:error.scenarioDeleted'));
         }
       }
     },
@@ -279,9 +272,7 @@ const runRealScenarioLoad = (
           abortStream();
           setSseCleanup(null);
         }
-        resetAllEZOutputStores();
-        useScenarioSnapshotStore.getState().reset();
-        useProgressStore.getState().reset();
+        resetOutputState();
         onError(t('ez-progress:error.title'));
         return;
       }
@@ -296,33 +287,30 @@ const runRealScenarioLoad = (
         if (onNonCompleted) {
           onNonCompleted(status);
         } else {
-          onError(`Scenario was ${status.toLowerCase()}`);
+          onError(status === 'CANCELLED'
+            ? t('ez-progress:error.scenarioCancelled')
+            : t('ez-progress:error.scenarioFailed'));
         }
       }
     },
 
-    onCancelled: (reason: string) => {
-      console.log('[SSE] Server cancelled scenario load:', reason);
+    onCancelled: (_reason: string) => {
       setSseCleanup(null);
-      resetAllEZOutputStores();
-      useScenarioSnapshotStore.getState().reset();
-      useProgressStore.getState().reset();
+      resetOutputState();
       setState('PARAMETER_SELECTION');
     },
 
     onComplete: () => {
-      console.log('[SSE] Scenario output stream completed');
       setSseCleanup(null);
       setTimeout(() => {
         setState('RESULT_VIEW');
-      }, 500);
+      }, SCENARIO_LOAD_TRANSITION_DELAY_MS);
     },
 
     onError: (error) => {
       console.error('[SSE] Scenario load error:', error);
       setSseCleanup(null);
 
-      console.log('[SSE] Connection lost during scenario load - starting polling recovery for:', requestId);
       startPollingRecovery(requestId, setState, onError);
     },
   });
@@ -349,10 +337,8 @@ const startPollingRecovery = (
 
     if (attempts > MAX_POLL_ATTEMPTS) {
       console.error('[Polling] Max attempts reached - giving up');
-      useProgressStore.getState().reset();
-      resetAllEZOutputStores();
+      resetOutputState();
       useEZSessionStore.getState().setRequestId('');
-      useScenarioSnapshotStore.getState().reset();
       onError(t('ez-progress:timeout.heartbeat'));
       return;
     }
@@ -363,15 +349,11 @@ const startPollingRecovery = (
 
       if (isTerminalStatus(status)) {
         if (status === 'COMPLETED') {
-          console.log('[Polling] Simulation completed - loading results via SSE');
           useScenarioSnapshotStore.getState().reset();
           loadScenario(requestId, setState, onError);
         } else {
-          console.log('[Polling] Simulation ended with status:', status);
-          useProgressStore.getState().reset();
-          resetAllEZOutputStores();
+          resetOutputState();
           useEZSessionStore.getState().setRequestId('');
-          useScenarioSnapshotStore.getState().reset();
           onError(t('ez-progress:cancellation.failed'));
         }
         return;
@@ -394,6 +376,5 @@ const startPollingRecovery = (
 const loadDemoInputData = (): void => {
   const sessionStore = useEZSessionStore.getState();
 
-  sessionStore.setScenarioTitle('Demo Scenario');
-  sessionStore.setScenarioDescription('This is a demo scenario');
+  sessionStore.setScenarioTitle(t('ez-root:demoMode.scenarioTitle'));
 };

@@ -42,11 +42,14 @@ export const QueuedState = ({ onCancel }: QueuedStateProps) => {
 
   return (
     <div className={styles.simulationNotification}>
-      <div className={styles.loadingContent}>
-        <LoadingOutlined className={styles.spinner} />
-        <span className={styles.loadingText}>{t('queued.waiting')}</span>
+      <div className={styles.queuedContent}>
+        <LoadingOutlined className={styles.queuedSpinner} />
+        <div className={styles.queuedTextContainer}>
+          <span className={styles.queuedTitle}>{t('queued.title')}</span>
+          <span className={styles.queuedSubtitle}>{t('queued.subtitle')}</span>
+        </div>
       </div>
-      <div className={styles.notificationFooter}>
+      <div className={styles.queuedFooter}>
         <button className={styles.cancelButton} onClick={onCancel}>
           {t('buttons.cancel')}
         </button>
@@ -208,11 +211,6 @@ export const RunningState = ({
                 />
               ))}
             </div>
-          </div>
-        ) : allCompleted(completedSteps, SIMULATING_STEPS) ? (
-          <div className={`${styles.phaseHeader} ${styles.pending}`}>
-            <span className={styles.phaseIcon}>○</span>
-            <span className={styles.phaseHeaderLabel}>3. {t('phases.postProcessing')}</span>
           </div>
         ) : (
           <div className={`${styles.phaseHeader} ${styles.pending}`}>

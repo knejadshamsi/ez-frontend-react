@@ -6,6 +6,7 @@ import { useEZOutputFiltersStore } from '~stores/session';
 import { useEZServiceStore } from '~store';
 import { fetchMapData } from '~ez/api';
 import { MapContainer } from '../utils';
+import outputStyles from '../Output.module.less';
 import './locales';
 
 /**
@@ -15,16 +16,16 @@ import './locales';
  */
 export const TripLegs = () => {
   const { t } = useTranslation('ez-output-maps');
-  const state = useEZOutputMapStore((state) => state.tripLegsMapState);
-  const error = useEZOutputMapStore((state) => state.tripLegsMapError);
+  const state = useEZOutputMapStore((s) => s.tripLegsMapState);
+  const error = useEZOutputMapStore((s) => s.tripLegsMapError);
 
-  const setState = useEZOutputMapStore((state) => state.setTripLegsMapState);
-  const setError = useEZOutputMapStore((state) => state.setTripLegsMapError);
+  const setState = useEZOutputMapStore((s) => s.setTripLegsMapState);
+  const setError = useEZOutputMapStore((s) => s.setTripLegsMapError);
 
-  const isMapVisible = useEZOutputFiltersStore((state) => state.isTripLegsMapVisible);
-  const toggleMapVisibility = useEZOutputFiltersStore((state) => state.toggleTripLegsMapVisibility);
+  const isMapVisible = useEZOutputFiltersStore((s) => s.isTripLegsMapVisible);
+  const toggleMapVisibility = useEZOutputFiltersStore((s) => s.toggleTripLegsMapVisibility);
 
-  const isDemoMode = !useEZServiceStore((state) => state.isEzBackendAlive);
+  const isDemoMode = !useEZServiceStore((s) => s.isEzBackendAlive);
 
   useEffect(() => {
     if (isMapVisible && state === 'success_initial') {

@@ -1,7 +1,8 @@
 import { Vehicle, TimeBlock, TimeRange, VehicleTypeId, VEHICLE_TYPES } from './types';
 import { Policy, PolicyTier } from '~stores/types';
+import { TIME_COLUMNS, DEFAULT_INTERVAL } from './constants';
 
-export interface PolicyItem {
+interface PolicyItem {
   vehicleType: VehicleTypeId;
   policyValues: 'free' | 'banned' | number[];
   operatingHours: [string, string];
@@ -27,7 +28,7 @@ const itemToPolicy = (item: PolicyItem): Policy => {
     : 2;
 
   const penalty = Array.isArray(item.policyValues) ? item.policyValues[0] : undefined;
-  const interval = tier === 2 ? 1800 : undefined;
+  const interval = tier === 2 ? DEFAULT_INTERVAL : undefined;
 
   return {
     vehicleType: item.vehicleType,
@@ -38,7 +39,7 @@ const itemToPolicy = (item: PolicyItem): Policy => {
   };
 };
 
-export const timeToColumn = (timeString: string): number => {
+const timeToColumn = (timeString: string): number => {
   if (!timeString) return 0;
 
   const [hours, minutes] = timeString.split(':').map(Number);
@@ -46,7 +47,7 @@ export const timeToColumn = (timeString: string): number => {
 };
 
 export const columnToTime = (column: number): string => {
-  if (column < 0 || column >= 48) return '00:00';
+  if (column < 0 || column >= TIME_COLUMNS) return '00:00';
 
   const hours = Math.floor(column / 2);
   const minutes = (column % 2) * 30;
@@ -137,7 +138,7 @@ export const policyToVehicles = (policies: Policy[] | null | undefined): Vehicle
         end,
         type: 'restricted',
         penalty: policyValues[0],
-        interval: 1800
+        interval: DEFAULT_INTERVAL
       });
     }
   });

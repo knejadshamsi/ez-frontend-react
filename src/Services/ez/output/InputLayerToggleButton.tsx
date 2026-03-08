@@ -31,8 +31,6 @@ export const InputLayerToggleButton = ({
         return '10%';
       case 'normal':
         return t('layerToggle.opacityNormal');
-      default:
-        return t('layerToggle.opacityHidden');
     }
   };
 

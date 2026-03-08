@@ -1,7 +1,7 @@
 import { VehicleRowProps, getVehicleTypeLabel } from '../types';
 import { RestrictionBlock } from './RestrictionBlock';
 import { colorShader } from '~utils/colors';
-import { HEADER_HEIGHT, ROW_HEIGHT, VEHICLE_COLUMN_WIDTH } from '../constants';
+import { HEADER_HEIGHT, ROW_HEIGHT, VEHICLE_COLUMN_WIDTH, TWO_HOUR_DIVISIONS } from '../constants';
 import { useEZSessionStore } from '~stores/session';
 import { useTranslation } from 'react-i18next';
 import '../../locales';
@@ -42,6 +42,9 @@ export const VehicleRow = ({
           : '#f3f4f6'
         }
         opacity={isEnabled ? 1 : 0.5}
+        role="button"
+        tabIndex={0}
+        aria-label={t('vehicleRestrictions.a11y.selectVehicle', { vehicle: getVehicleTypeLabel(vehicle.type, t) })}
         onClick={() => isEnabled && onVehicleClick(vehicle.type)}
       />
 
@@ -54,6 +57,9 @@ export const VehicleRow = ({
         fontSize="13"
         fill={isEnabled ? "#374151" : "#9ca3af"}
         style={{ cursor: 'pointer', textDecoration: isEnabled ? 'none' : 'line-through' }}
+        role="button"
+        tabIndex={0}
+        aria-label={t('vehicleRestrictions.a11y.toggleVehicle', { vehicle: getVehicleTypeLabel(vehicle.type, t) })}
         onClick={handleVehicleNameClick}
       >
         {getVehicleTypeLabel(vehicle.type, t)}
@@ -82,7 +88,7 @@ export const VehicleRow = ({
       />
 
       {/* Grid lines (2-hour divisions only) */}
-      {Array.from({ length: 13 }).map((_, i) => (
+      {Array.from({ length: TWO_HOUR_DIVISIONS }).map((_, i) => (
         <line
           key={`grid-line-${i}`}
           x1={VEHICLE_COLUMN_WIDTH + i * timeColumnWidth * 4}

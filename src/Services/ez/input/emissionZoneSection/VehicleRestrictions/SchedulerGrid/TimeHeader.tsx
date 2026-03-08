@@ -1,9 +1,12 @@
+import { useTranslation } from 'react-i18next';
 import { generateMergedHeaders } from '../policyConversions';
 import { colorShader } from '~utils/colors';
-import { HEADER_HEIGHT, VEHICLE_COLUMN_WIDTH, TIME_COLUMNS } from '../constants';
+import { HEADER_HEIGHT, VEHICLE_COLUMN_WIDTH, TIME_COLUMNS, TWO_HOUR_DIVISIONS } from '../constants';
 import { TimeHeaderProps } from '../types';
+import '../../locales';
 
 export const TimeHeader = ({ containerWidth, timeColumnWidth, zoneColor }: TimeHeaderProps) => {
+  const { t } = useTranslation('ez-emission-zone-section');
   const mergedHeaders = generateMergedHeaders();
 
   return (
@@ -13,7 +16,7 @@ export const TimeHeader = ({ containerWidth, timeColumnWidth, zoneColor }: TimeH
 
       {/* Header Vehicle Type Text */}
       <text x="10" y={HEADER_HEIGHT / 2} dominantBaseline="middle" fontSize="12" fontWeight="600" fill="#374151">
-        Vehicle Type
+        {t('vehicleRestrictions.columnHeader')}
       </text>
 
       {/* Header Labels */}
@@ -34,7 +37,7 @@ export const TimeHeader = ({ containerWidth, timeColumnWidth, zoneColor }: TimeH
       {/* Ruler Section */}
       <g>
         {/* 2-hour marks (major) */}
-        {Array.from({ length: 13 }).map((_, i) => (
+        {Array.from({ length: TWO_HOUR_DIVISIONS }).map((_, i) => (
           <line
             key={`major-${i}`}
             x1={VEHICLE_COLUMN_WIDTH + (i * timeColumnWidth * 4)}

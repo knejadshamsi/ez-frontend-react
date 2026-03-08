@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import ModeUtilityCard from './ModeUtilityCard';
+import ModeUtilityCard, { MIN_UTILITY_LEVEL, MAX_UTILITY_LEVEL } from './ModeUtilityCard';
 import { useAPIPayloadStore } from '~store';
 import styles from '../simulationOptions.module.less';
 import '../locales';
@@ -19,7 +19,7 @@ const ModeUtilityAdjustments = () => {
   const setModeUtilities = useAPIPayloadStore((state) => state.setModeUtilities);
 
   const updateUtilityLevel = (id, newLevel) => {
-    if (!Number.isInteger(newLevel) || newLevel < -10 || newLevel > 10) {
+    if (!Number.isInteger(newLevel) || newLevel < MIN_UTILITY_LEVEL || newLevel > MAX_UTILITY_LEVEL) {
       console.error('Invalid utility level:', newLevel);
       return;
     }

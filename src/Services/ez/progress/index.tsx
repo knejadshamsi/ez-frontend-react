@@ -11,8 +11,7 @@ import {
   useEZOutputPeopleResponseStore,
   useEZOutputTripLegsStore,
 } from '~stores/output';
-import { resetAllEZOutputStores } from '~stores/output';
-import { useScenarioSnapshotStore } from '~stores/scenario';
+import { resetOutputState } from '~stores/reset';
 import { cancelSimulation } from '~ez/api';
 import { QueuedState, SuccessState, ErrorState, RunningState, CancellingState, PollingState } from './states';
 import styles from './Progress.module.less';
@@ -21,22 +20,25 @@ import './locales';
 export { useProgressStore } from './store';
 export { decodeProgressAlert } from './decoder';
 
+const COMPLETION_TRANSITION_DELAY_MS = 3000;
+const SCENARIO_LOAD_TRANSITION_DELAY_MS = 3000;
+
 export const Progress = () => {
   const { t } = useTranslation('ez-progress');
   const [messageApi, contextHolder] = message.useMessage();
   const state = useProgressStore();
-  const setState = useEZServiceStore((state) => state.setState);
-  const requestId = useEZSessionStore((state) => state.requestId);
-  const isEzBackendAlive = useEZServiceStore((state) => state.isEzBackendAlive);
+  const setState = useEZServiceStore((s) => s.setState);
+  const requestId = useEZSessionStore((s) => s.requestId);
+  const isEzBackendAlive = useEZServiceStore((s) => s.isEzBackendAlive);
 
   const [canTransition, setCanTransition] = useState(false);
 
-  const overviewData = useEZOutputOverviewStore((state) => state.overviewData);
-  const emissionsPara1 = useEZOutputEmissionsStore((state) => state.emissionsParagraph1Data);
-  const emissionsPara2 = useEZOutputEmissionsStore((state) => state.emissionsParagraph2Data);
-  const peoplePara1 = useEZOutputPeopleResponseStore((state) => state.peopleResponseParagraph1Data);
-  const peoplePara2 = useEZOutputPeopleResponseStore((state) => state.peopleResponseParagraph2Data);
-  const tripLegRecords = useEZOutputTripLegsStore((state) => state.tripLegRecords);
+  const overviewData = useEZOutputOverviewStore((s) => s.overviewData);
+  const emissionsPara1 = useEZOutputEmissionsStore((s) => s.emissionsParagraph1Data);
+  const emissionsPara2 = useEZOutputEmissionsStore((s) => s.emissionsParagraph2Data);
+  const peoplePara1 = useEZOutputPeopleResponseStore((s) => s.peopleResponseParagraph1Data);
+  const peoplePara2 = useEZOutputPeopleResponseStore((s) => s.peopleResponseParagraph2Data);
+  const tripLegRecords = useEZOutputTripLegsStore((s) => s.tripLegRecords);
 
   const { status } = state;
   const canViewEarly = canViewResultsEarly(state.completedSteps);
@@ -46,7 +48,7 @@ export const Progress = () => {
     if (status === 'DISPLAY_COMPLETE') {
       const timer = setTimeout(() => {
         setState('RESULT_VIEW');
-      }, 3000);
+      }, COMPLETION_TRANSITION_DELAY_MS);
       return () => clearTimeout(timer);
     }
   }, [status, setState]);
@@ -56,7 +58,7 @@ export const Progress = () => {
     if (status === 'DISPLAY_SCENARIO_LOAD' && !isEzBackendAlive) {
       const timer = setTimeout(() => {
         setCanTransition(true);
-      }, 3000);
+      }, SCENARIO_LOAD_TRANSITION_DELAY_MS);
       return () => clearTimeout(timer);
     } else if (status === 'DISPLAY_SCENARIO_LOAD') {
       setCanTransition(true);
@@ -117,37 +119,24 @@ export const Progress = () => {
     useProgressStore.getState().setStatus('DISPLAY_CANCELLATION');
     const result = await cancelSimulation(requestId);
 
+    if (result !== 'conflict') {
+      useEZSessionStore.getState().abortSseStream();
+    }
+    resetOutputState();
+    setState('PARAMETER_SELECTION');
+
     switch (result) {
       case 'success':
-        useEZSessionStore.getState().abortSseStream();
-        resetAllEZOutputStores();
-        useScenarioSnapshotStore.getState().reset();
-        useProgressStore.getState().reset();
-        setState('PARAMETER_SELECTION');
         messageApi.success(t('cancellation.success'));
         break;
       case 'timeout':
-        useEZSessionStore.getState().abortSseStream();
-        resetAllEZOutputStores();
-        useScenarioSnapshotStore.getState().reset();
-        useProgressStore.getState().reset();
-        setState('PARAMETER_SELECTION');
         messageApi.error(t('cancellation.timeout'));
         break;
       case 'conflict':
-        resetAllEZOutputStores();
-        useScenarioSnapshotStore.getState().reset();
-        useProgressStore.getState().reset();
-        setState('PARAMETER_SELECTION');
         messageApi.warning(t('cancellation.conflict'));
         break;
       case 'not_found':
       case 'error':
-        useEZSessionStore.getState().abortSseStream();
-        resetAllEZOutputStores();
-        useScenarioSnapshotStore.getState().reset();
-        useProgressStore.getState().reset();
-        setState('PARAMETER_SELECTION');
         messageApi.error(t('cancellation.failed'));
         break;
     }

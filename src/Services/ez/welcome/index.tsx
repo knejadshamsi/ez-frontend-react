@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { useEZSessionStore, useDraftStore } from '~stores/session'
 import { useEZServiceStore, useAPIPayloadStore } from '~store'
 import { loadScenario } from '~ez/api'
+import { resetOutputState } from '~stores/reset'
 import { useScenarioSnapshotStore } from '~stores/scenario'
-import { resetAllEZOutputStores } from '~stores/output'
 import { restoreStoresFromInput } from '~ez/api/fetchScenarioInput'
 import { fetchDraft } from '~ez/api/draft'
 import previousScenarios from './previousScenarios.json'
@@ -32,7 +32,7 @@ export const WelcomeView = () => {
     if (status === 'DELETED') {
       messageApi.error(t('errors.scenarioDeleted'));
       setState('WELCOME');
-      useScenarioSnapshotStore.getState().reset();
+      resetOutputState();
       return;
     }
 
@@ -46,7 +46,7 @@ export const WelcomeView = () => {
         {
           label: t('nonCompleted.cancelText'),
           onClick: () => {
-            useScenarioSnapshotStore.getState().reset();
+            resetOutputState();
             setState('WELCOME');
             instance.destroy();
           },
@@ -60,7 +60,7 @@ export const WelcomeView = () => {
               restoreStoresFromInput(snapshot.input, snapshot.session);
             }
             setRequestId('');
-            useScenarioSnapshotStore.getState().reset();
+            resetOutputState();
             setState('PARAMETER_SELECTION');
             instance.destroy();
           },
@@ -84,9 +84,8 @@ export const WelcomeView = () => {
   const handleCreateScenario = () => {
     // Clean slate — clear any lingering data from previous scenarios
     setRequestId('');
-    useScenarioSnapshotStore.getState().reset();
+    resetOutputState();
     useDraftStore.getState().reset();
-    resetAllEZOutputStores();
     useAPIPayloadStore.getState().reset();
     useEZSessionStore.getState().reset();
     setState('PARAMETER_SELECTION');

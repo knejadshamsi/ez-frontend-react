@@ -61,8 +61,10 @@ export const VehicleFleet = () => {
     );
   }
 
+  const vehicleTypeLabels = chartConfig.vehicleTypeIds.map(id => t(`vehicleFleet.vehicleTypes.${id}`));
+
   const vehicleEmissionsBaseline = {
-    labels: chartConfig.vehicleTypeLabels,
+    labels: vehicleTypeLabels,
     datasets: [{
       data: pieChartsData.vehicleShareBaseline,
       backgroundColor: chartConfig.vehicleTypeColors,
@@ -72,7 +74,7 @@ export const VehicleFleet = () => {
   };
 
   const vehicleEmissionsPostPolicy = {
-    labels: chartConfig.vehicleTypeLabels,
+    labels: vehicleTypeLabels,
     datasets: [{
       data: pieChartsData.vehicleSharePostPolicy,
       backgroundColor: chartConfig.vehicleTypeColors,
@@ -88,13 +90,13 @@ export const VehicleFleet = () => {
       </span>
       <div className={outputStyles.vehicleEmissionsContainer}>
         <div className={outputStyles.legendContainer}>
-          {chartConfig.vehicleTypeLabels.map((label, index) => (
-            <div key={chartConfig.vehicleTypeIds[index]} className={outputStyles.legendItem}>
+          {chartConfig.vehicleTypeIds.map((id, index) => (
+            <div key={id} className={outputStyles.legendItem}>
               <div
                 className={outputStyles.legendColorBox}
                 style={{ backgroundColor: chartConfig.vehicleTypeColors[index] }}
               ></div>
-              <span className={outputStyles.legendText}>{label}</span>
+              <span className={outputStyles.legendText}>{vehicleTypeLabels[index]}</span>
             </div>
           ))}
         </div>
