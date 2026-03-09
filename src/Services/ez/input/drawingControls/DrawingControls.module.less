@@ -1,11 +1,16 @@
+@panel-top-offset: 80px;
+@panel-right-offset: 20px;
+@panel-width: 380px;
+@panel-z-index: 1000;
+
 .drawingControlsPanel {
   position: fixed;
-  top: 80px;
-  right: 20px;
-  width: 380px;
+  top: @panel-top-offset;
+  right: @panel-right-offset;
+  width: @panel-width;
   background: #fff;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
+  z-index: @panel-z-index;
   animation: slideIn 0.3s ease-out;
   user-select: none;
 }

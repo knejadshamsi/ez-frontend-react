@@ -47,7 +47,7 @@ export const TimeImpact = () => {
 
   if (timeImpactState === 'inactive' || timeImpactState === 'loading' || !timeImpactData) {
     return (
-      <div className={outputStyles.timeImpactChartContainer} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div className={`${outputStyles.timeImpactChartContainer} ${outputStyles.chartSpinnerOverlay}`}>
         <Spin size="default" />
       </div>
     );

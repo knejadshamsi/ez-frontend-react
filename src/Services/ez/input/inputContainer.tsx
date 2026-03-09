@@ -10,7 +10,7 @@ const InputContainer = () => {
   useAutoTranslateDefaultNames()
 
   return (
-    <div style={{overflow: 'hidden'}}>
+    <div className={styles.container}>
       <div className={`${styles.formSpace} ${styles.customScroll}`}>
         <EmissionZoneSection />
         <SimulationAreaSection />

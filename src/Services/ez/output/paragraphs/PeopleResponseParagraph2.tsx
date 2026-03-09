@@ -18,7 +18,7 @@ import outputStyles from '../Output.module.less';
 // ENGLISH TEXT GENERATION
 
 function interpretReroutingImpact(reroutedPct: number, reroutedTime: number): string {
-  if (reroutedPct < 5) {
+  if (reroutedPct < REROUTING_THRESHOLDS.MIN_PCT) {
     return '';
   }
 
@@ -97,7 +97,7 @@ function generateEnglishParagraph2(
 // FRENCH TEXT GENERATION
 
 function interpreterImpactDetournement(pctDetourne: number, tempsDetourne: number): string {
-  if (pctDetourne < 5) {
+  if (pctDetourne < REROUTING_THRESHOLDS.MIN_PCT) {
     return '';
   }
 
@@ -210,7 +210,7 @@ export const PeopleResponseParagraph2 = () => {
 
   if (paragraph2State === 'inactive' || paragraph2State === 'loading' || !paragraph2Data || !paragraph1Data) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
+      <div className={outputStyles.paragraphSpinnerContainer}>
         <Spin size="small" />
       </div>
     );

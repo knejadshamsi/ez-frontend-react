@@ -219,7 +219,7 @@ export const PeopleResponseParagraph1 = () => {
 
   if (paragraph1State === 'inactive' || paragraph1State === 'loading' || !paragraph1Data) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
+      <div className={outputStyles.paragraphSpinnerContainer}>
         <Spin size="small" />
       </div>
     );

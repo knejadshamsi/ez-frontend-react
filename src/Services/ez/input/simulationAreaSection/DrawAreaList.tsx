@@ -12,6 +12,15 @@ import type { CustomSimulationArea } from '~ez/stores/types'
 import type { AreaColorPreset } from './types'
 import './locales'
 
+// Color shader multipliers for draw area cards
+const SHADE_GRADIENT = 1.85
+const SHADE_CARD_BORDER = 1.75
+
+// Inline style colors
+const COLOR_ENABLED = '#1890ff'
+const COLOR_DISABLED = '#d9d9d9'
+const GRADIENT_ANGLE = 120
+
 const DrawAreaList = (): ReactElement => {
   const { t } = useTranslation('ez-simulation-area-section')
 
@@ -50,8 +59,8 @@ const DrawAreaList = (): ReactElement => {
               key={area.id}
               className={selectorStyles.drawAreaCard}
               style={{
-                background: `linear-gradient(120deg, ${colorShader(DEFAULT_CUSTOM_AREA_COLOR, 1.85)}, ${colorShader(sessionData.color, 1.85)})`,
-                border: `2px solid ${colorShader(sessionData.color, 1.75)}`,
+                background: `linear-gradient(${GRADIENT_ANGLE}deg, ${colorShader(DEFAULT_CUSTOM_AREA_COLOR, SHADE_GRADIENT)}, ${colorShader(sessionData.color, SHADE_GRADIENT)})`,
+                border: `2px solid ${colorShader(sessionData.color, SHADE_CARD_BORDER)}`,
               }}
             >
               <InlineNameEditor
@@ -63,6 +72,10 @@ const DrawAreaList = (): ReactElement => {
             <div className={selectorStyles.customAreaButtonGroup}>
               <Tooltip title={area.coords ? t('customAreas.editTooltip') : t('customAreas.drawFirstTooltip')}>
                 <div
+                  role="button"
+                  tabIndex={0}
+                  aria-label={area.coords ? t('customAreas.editTooltip') : t('customAreas.drawFirstTooltip')}
+                  aria-disabled={!area.coords}
                   className={`${selectorStyles.customAreaButton} ${!area.coords ? selectorStyles.disabled : ''}`}
                   onClick={(e) => {
                     e.stopPropagation()
@@ -71,8 +84,15 @@ const DrawAreaList = (): ReactElement => {
                       setState('EDIT_SIM_AREA')
                     }
                   }}
+                  onKeyDown={(e) => {
+                    if ((e.key === 'Enter' || e.key === ' ') && area.coords) {
+                      e.preventDefault()
+                      setActiveCustomArea(area.id)
+                      setState('EDIT_SIM_AREA')
+                    }
+                  }}
                   style={{
-                    color: area.coords ? '#1890ff' : '#d9d9d9',
+                    color: area.coords ? COLOR_ENABLED : COLOR_DISABLED,
                     fontSize: '14px',
                   }}
                 >
@@ -80,7 +100,19 @@ const DrawAreaList = (): ReactElement => {
                 </div>
               </Tooltip>
               <Tooltip title={t('customAreas.changeColorTooltip')}>
-                <div className={selectorStyles.customAreaButton} onClick={(e) => e.stopPropagation()}>
+                <div
+                  role="button"
+                  tabIndex={0}
+                  aria-label={t('customAreas.changeColorTooltip')}
+                  className={selectorStyles.customAreaButton}
+                  onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      e.stopPropagation()
+                    }
+                  }}
+                >
                   <ColorPicker
                     value={sessionData.color}
                     onChange={(color) => setCustomAreaProperty(area.id, 'color', color.toHexString())}
@@ -92,12 +124,21 @@ const DrawAreaList = (): ReactElement => {
               </Tooltip>
               <Tooltip title={t('customAreas.deleteTooltip')}>
                 <div
-                  className={selectorStyles.customAreaButton}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={t('customAreas.deleteTooltip')}
+                  className={`${selectorStyles.customAreaButton} ${selectorStyles.deleteButton}`}
                   onClick={(e) => {
                     e.stopPropagation()
                     removeCustomSimulationArea(area.id)
                   }}
-                  style={{ color: 'red', fontSize: '14px' }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      removeCustomSimulationArea(area.id)
+                    }
+                  }}
                 >
                   <DeleteOutlined />
                 </div>

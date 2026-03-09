@@ -163,7 +163,7 @@ export const WelcomeView = () => {
           <Space.Compact className={styles.fullWidth}>
             <Input
               placeholder={t('input.placeholder')}
-              style={{ flex: 1 }}
+              className={styles.flexInput}
               value={requestId || ''}
               onChange={(e) => setRequestId(e.target.value)}
               onPressEnter={() => {

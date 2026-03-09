@@ -55,7 +55,7 @@ export const VehicleFleet = () => {
 
   if (pieChartsState === 'inactive' || pieChartsState === 'loading' || !pieChartsData) {
     return (
-      <div className={outputStyles.vehicleEmissionsContainer} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+      <div className={`${outputStyles.vehicleEmissionsContainer} ${outputStyles.chartSpinnerOverlay}`}>
         <Spin size="default" />
       </div>
     );

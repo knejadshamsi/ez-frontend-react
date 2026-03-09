@@ -64,7 +64,7 @@ export const EmissionsBar = () => {
 
   if (barChartState === 'inactive' || barChartState === 'loading' || !barChartData) {
     return (
-      <div className={outputStyles.emissionsChartContainer} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div className={`${outputStyles.emissionsChartContainer} ${outputStyles.chartSpinnerOverlay}`}>
         <Spin size="default" />
       </div>
     );

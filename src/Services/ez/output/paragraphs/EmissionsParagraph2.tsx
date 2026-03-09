@@ -175,7 +175,7 @@ export const EmissionsParagraph2 = () => {
 
   if (paragraph2State === 'inactive' || paragraph2State === 'loading' || !paragraph2Data) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
+      <div className={outputStyles.paragraphSpinnerContainer}>
         <Spin size="small" />
       </div>
     );

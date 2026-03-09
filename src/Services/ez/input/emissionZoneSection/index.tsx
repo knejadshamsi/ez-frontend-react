@@ -47,7 +47,7 @@ const EmissionZoneSection = () => {
         <div className={styles.addMoreButtonContainer}>
           <Button
             type="default"
-            style={{ width: '100%', backgroundColor: 'white' }}
+            className={styles.addMoreButton}
             onClick={() => {
               const color = nextAvailableColor();
               addZone(color);

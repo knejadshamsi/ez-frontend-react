@@ -84,7 +84,7 @@ export const OutputView = () => {
       {hasInputData && (
         <div className={parameterStyles.backButtonContainer}>
           <Button type="link" onClick={handleEditParameters} className={parameterStyles.backButton}>
-            <ArrowLeftOutlined style={{fontSize: '12px'}} />
+            <ArrowLeftOutlined className={outputStyles.backArrowIcon} />
             {t('backToParameters')}
           </Button>
         </div>

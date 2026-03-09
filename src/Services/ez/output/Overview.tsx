@@ -62,7 +62,7 @@ export const Overview = () => {
 
   if (overviewState === 'inactive' || overviewState === 'loading' || !overviewData) {
     return (
-      <div className={outputStyles.contentWrapper} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+      <div className={`${outputStyles.contentWrapper} ${outputStyles.overviewLoadingContainer}`}>
         <Spin size="large" tip={t('overview.loadingTip')} />
       </div>
     );

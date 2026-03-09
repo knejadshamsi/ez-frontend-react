@@ -45,7 +45,7 @@ export const PeopleResponse = () => {
 
   if (state === 'inactive') {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
+      <div className={outputStyles.spinnerContainer}>
         <Spin size="default" tip={t('peopleResponse.loadingTip')} />
       </div>
     );

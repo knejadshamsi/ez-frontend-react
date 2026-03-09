@@ -74,7 +74,7 @@ const SimulationAreaDisplayControls = ({ compact = false }: SimulationAreaDispla
     if (simulationAreaDisplay.fillOpacity === FILL_OPACITY_TRANSPARENT) {
       return <BorderOutlined />
     } else if (simulationAreaDisplay.fillOpacity === FILL_OPACITY_LIGHT) {
-      return <BgColorsOutlined style={{ opacity: 0.5 }} />
+      return <BgColorsOutlined className={styles.iconHalfOpacity} />
     } else {
       return <BgColorsOutlined />
     }
@@ -112,10 +112,6 @@ const SimulationAreaDisplayControls = ({ compact = false }: SimulationAreaDispla
           size={buttonSize}
           icon={getBorderStyleIcon()}
           onClick={handleBorderStyleClick}
-          style={{
-            borderColor: '#80cbc4',
-            color: '#00695c'
-          }}
         />
       </Tooltip>
 
@@ -125,10 +121,6 @@ const SimulationAreaDisplayControls = ({ compact = false }: SimulationAreaDispla
           size={buttonSize}
           icon={getFillIcon()}
           onClick={handleFillClick}
-          style={{
-            borderColor: '#80cbc4',
-            color: '#00695c'
-          }}
         />
       </Tooltip>
     </div>

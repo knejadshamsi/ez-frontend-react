@@ -14,6 +14,7 @@ import { createDraft, updateDraft } from '../api/draft';
 import { createMetadataPayload } from '../api/updateScenarioMetadata';
 import { hasInputChangedFromDefault } from '../exitHandler';
 import type { MainInputPayload } from '~stores/types';
+import styles from './ExitModal.module.less';
 
 function buildCurrentInput(): MainInputPayload {
   const payload = useAPIPayloadStore.getState().payload;
@@ -62,7 +63,7 @@ export default function ExitModal() {
 
     if (isWelcome) {
       return (
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+        <div className={styles.footerEnd}>
           <Space size={8}>
             <Button
               size="small"
@@ -76,7 +77,7 @@ export default function ExitModal() {
             </Button>
             <Button
               size="small"
-              type="primary"
+              danger
               onClick={() => {
                 confirmExit();
                 instance.destroy();
@@ -91,13 +92,7 @@ export default function ExitModal() {
     }
 
     return (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
+      <div className={styles.footer}>
         {showCopy && (
           <CopyRequestIdButton
             requestId={currentRequestId}
@@ -125,7 +120,7 @@ export default function ExitModal() {
               onClick={async () => {
                 instance.update({
                   footer: () => (
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                    <div className={styles.footerEnd}>
                       <Button size="small" disabled>
                         <LoadingOutlined /> {t('exitModal.savingDraft')}
                       </Button>
@@ -169,7 +164,7 @@ export default function ExitModal() {
               onClick={async () => {
                 instance.update({
                   footer: () => (
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                    <div className={styles.footerEnd}>
                       <Button size="small" danger ghost disabled>
                         <LoadingOutlined /> {t('exitModal.deletingAndCancelling')}
                       </Button>
@@ -197,7 +192,7 @@ export default function ExitModal() {
           )}
           <Button
             size="small"
-            type="primary"
+            danger
             onClick={() => {
               confirmExit();
               instance.destroy();
@@ -216,23 +211,16 @@ export default function ExitModal() {
     if (exitState === 'await_confirmation' && exitWarning && !modalInstanceRef.current) {
       const instance = modal.confirm({
         title: exitWarning.title,
-        icon: <ExclamationCircleOutlined />,
-        content: exitWarning.message,
+        icon: <ExclamationCircleOutlined className={styles.icon} />,
+        content: <div className={styles.content}>{exitWarning.message}</div>,
         okText: t('exitModal.exit'),
         okType: 'primary',
         cancelText: t('exitModal.stayInEZ'),
         closable: false,
         maskClosable: false,
         keyboard: false,
+        className: styles.modal,
         footer: () => buildFooter(instance),
-        onCancel: () => {
-          cancelExit();
-          modalInstanceRef.current = null;
-        },
-        onOk: () => {
-          confirmExit();
-          modalInstanceRef.current = null;
-        },
       });
       modalInstanceRef.current = instance;
     } else if (exitState === 'resetting' && !isResettingRef.current) {

@@ -47,7 +47,7 @@ export const ResponseBreakdown = () => {
 
   if (breakdownState === 'inactive' || breakdownState === 'loading' || !breakdownData) {
     return (
-      <div className={outputStyles.peopleResponseChartContainer} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div className={`${outputStyles.peopleResponseChartContainer} ${outputStyles.chartSpinnerOverlay}`}>
         <Spin size="default" />
       </div>
     );
