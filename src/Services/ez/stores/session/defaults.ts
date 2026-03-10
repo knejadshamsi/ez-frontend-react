@@ -1,4 +1,4 @@
-import type { ZoneSessionData, VisualizationType, PollutantType, ResponseLayerView, BehavioralResponseType, SimulationAreaDisplayConfig, CarDistributionCategories } from './types';
+import type { ZoneSessionData, VisualizationType, PollutantType, EmissionsScenarioType, ResponseLayerView, PeopleResponseCategory, SimulationAreaDisplayConfig, CarDistributionCategories } from './types';
 
 // === SESSION DEFAULTS ===
 
@@ -41,5 +41,7 @@ export const DEFAULT_CAR_DISTRIBUTION_CATEGORIES: CarDistributionCategories = {
 
 export const DEFAULT_VISUALIZATION_TYPE: VisualizationType = 'heatmap';
 export const DEFAULT_POLLUTANT_TYPE: PollutantType = 'CO2';
+export const DEFAULT_EMISSIONS_SCENARIO: EmissionsScenarioType = 'baseline';
 export const DEFAULT_RESPONSE_VIEW: ResponseLayerView = 'origin';
-export const DEFAULT_BEHAVIORAL_RESPONSE: BehavioralResponseType = 'paidPenalty';
+const ALL_RESPONSE_CATEGORIES: PeopleResponseCategory[] = ['modeShift', 'rerouted', 'paidPenalty', 'cancelled'];
+export const DEFAULT_VISIBLE_RESPONSE_CATEGORIES = new Set<PeopleResponseCategory>(ALL_RESPONSE_CATEGORIES);

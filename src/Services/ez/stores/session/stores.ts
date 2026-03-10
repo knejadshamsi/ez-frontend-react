@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { DEFAULT_ZONE_ID } from '../types';
+import { DEFAULT_ZONE_ID } from '../defaults';
 import type {
   ZoneSessionData,
   CustomAreaSessionData,
@@ -8,8 +8,10 @@ import type {
   EZOutputFiltersStore,
   VisualizationType,
   PollutantType,
+  EmissionsScenarioType,
+  EmissionsViewMode,
   ResponseLayerView,
-  BehavioralResponseType,
+  PeopleResponseCategory,
   ExitWarning,
   ExitState,
 } from './types';
@@ -23,8 +25,9 @@ import {
   DEFAULT_SIMULATION_AREA_DISPLAY,
   DEFAULT_VISUALIZATION_TYPE,
   DEFAULT_POLLUTANT_TYPE,
+  DEFAULT_EMISSIONS_SCENARIO,
   DEFAULT_RESPONSE_VIEW,
-  DEFAULT_BEHAVIORAL_RESPONSE,
+  DEFAULT_VISIBLE_RESPONSE_CATEGORIES,
   DEFAULT_CAR_DISTRIBUTION_CATEGORIES,
 } from './defaults';
 import { useAPIPayloadStore } from '../index';
@@ -85,7 +88,7 @@ export const createInitialSessionState = () => ({
   zones: {
     [DEFAULT_ZONE_ID]: DEFAULT_ZONE_SESSION_DATA
   },
-  customAreas: {} as Record<string, { name: string; color: string }>,
+  customAreas: {} as Record<string, CustomAreaSessionData>,
   scaledAreas: {} as Record<string, ScaledAreaSessionData>,
   activeZone: DEFAULT_ZONE_ID,
   activeCustomArea: null,
@@ -94,7 +97,7 @@ export const createInitialSessionState = () => ({
   isNewSimulation: true,
   simulationAreaDisplay: { ...DEFAULT_SIMULATION_AREA_DISPLAY },
   carDistributionCategories: { ...DEFAULT_CAR_DISTRIBUTION_CATEGORIES },
-  exitState: 'idle' as ExitState,
+  exitState: 'idle',
   exitWarning: null,
 });
 
@@ -110,7 +113,7 @@ export const useEZSessionStore = create<EZSessionStore>((set, get) => ({
   setRequestId: (requestId: string) =>
     set({ requestId }),
 
-  setZoneProperty: (zoneId: string, property: keyof ZoneSessionData, value: any) =>
+  setZoneProperty: <K extends keyof ZoneSessionData>(zoneId: string, property: K, value: ZoneSessionData[K]) =>
     set((state) => ({
       zones: {
         ...state.zones,
@@ -150,7 +153,7 @@ export const useEZSessionStore = create<EZSessionStore>((set, get) => ({
       }
     })),
 
-  setCustomAreaProperty: (areaId: string, property: keyof CustomAreaSessionData, value: any) =>
+  setCustomAreaProperty: <K extends keyof CustomAreaSessionData>(areaId: string, property: K, value: CustomAreaSessionData[K]) =>
     set((state) => ({
       customAreas: {
         ...state.customAreas,
@@ -179,7 +182,7 @@ export const useEZSessionStore = create<EZSessionStore>((set, get) => ({
       }
     })),
 
-  setScaledAreaProperty: (areaId: string, property: keyof ScaledAreaSessionData, value: any) =>
+  setScaledAreaProperty: <K extends keyof ScaledAreaSessionData>(areaId: string, property: K, value: ScaledAreaSessionData[K]) =>
     set((state) => ({
       scaledAreas: {
         ...state.scaledAreas,
@@ -334,9 +337,11 @@ const createInitialFiltersState = () => ({
   isTripLegsMapVisible: false,
   selectedVisualizationType: DEFAULT_VISUALIZATION_TYPE,
   selectedPollutantType: DEFAULT_POLLUTANT_TYPE,
+  selectedEmissionsScenario: DEFAULT_EMISSIONS_SCENARIO,
+  emissionsViewMode: 'private',
   selectedResponseLayerView: DEFAULT_RESPONSE_VIEW,
-  selectedBehavioralResponseType: DEFAULT_BEHAVIORAL_RESPONSE,
-  visibleTripLegIds: new Set<string>(),
+  visibleResponseCategories: new Set(DEFAULT_VISIBLE_RESPONSE_CATEGORIES),
+  tripLegsViewMode: 'baseline',
   inputZoneLayerOpacity: OPACITY_STATES.HIDDEN,
   inputSimulationAreaLayerOpacity: OPACITY_STATES.HIDDEN,
 });
@@ -358,34 +363,34 @@ export const useEZOutputFiltersStore = create<EZOutputFiltersStore>((set) => ({
   setSelectedPollutantType: (selectedPollutantType: PollutantType) =>
     set({ selectedPollutantType }),
 
+  setSelectedEmissionsScenario: (selectedEmissionsScenario: EmissionsScenarioType) =>
+    set({ selectedEmissionsScenario }),
+
+  setEmissionsViewMode: (emissionsViewMode: EmissionsViewMode) =>
+    set({ emissionsViewMode }),
+
   togglePeopleResponseMapVisibility: () =>
     set((state) => ({ isPeopleResponseMapVisible: !state.isPeopleResponseMapVisible })),
 
   setSelectedResponseLayerView: (selectedResponseLayerView: ResponseLayerView) =>
     set({ selectedResponseLayerView }),
 
-  setSelectedBehavioralResponseType: (selectedBehavioralResponseType: BehavioralResponseType) =>
-    set({ selectedBehavioralResponseType }),
+  toggleResponseCategory: (category: PeopleResponseCategory) =>
+    set((state) => {
+      const newCategories = new Set(state.visibleResponseCategories);
+      if (newCategories.has(category)) {
+        newCategories.delete(category);
+      } else {
+        newCategories.add(category);
+      }
+      return { visibleResponseCategories: newCategories };
+    }),
 
   toggleTripLegsMapVisibility: () =>
     set((state) => ({ isTripLegsMapVisible: !state.isTripLegsMapVisible })),
 
-  toggleTripLegVisibility: (legId: string) =>
-    set((state) => {
-      const newVisibleIds = new Set(state.visibleTripLegIds);
-      if (newVisibleIds.has(legId)) {
-        newVisibleIds.delete(legId);
-      } else {
-        newVisibleIds.add(legId);
-      }
-      return { visibleTripLegIds: newVisibleIds };
-    }),
-
-  showAllTripLegs: (legIds: string[]) =>
-    set({ visibleTripLegIds: new Set(legIds) }),
-
-  hideAllTripLegs: () =>
-    set({ visibleTripLegIds: new Set<string>() }),
+  setTripLegsViewMode: (tripLegsViewMode: 'baseline' | 'policy' | 'hidden') =>
+    set({ tripLegsViewMode }),
 
   cycleInputZoneLayerOpacity: () =>
     set((state) => ({ inputZoneLayerOpacity: cycleOpacity(state.inputZoneLayerOpacity) })),

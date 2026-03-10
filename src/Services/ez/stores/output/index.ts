@@ -25,11 +25,13 @@ export const getOutputErrorCount = (): number => {
     useEZOutputEmissionsStore.getState().emissionsParagraph1State,
     useEZOutputEmissionsStore.getState().emissionsParagraph2State,
     useEZOutputEmissionsStore.getState().emissionsBarChartState,
-    useEZOutputEmissionsStore.getState().emissionsPieChartsState,
-    useEZOutputPeopleResponseStore.getState().peopleResponseParagraph1State,
-    useEZOutputPeopleResponseStore.getState().peopleResponseParagraph2State,
-    useEZOutputPeopleResponseStore.getState().peopleResponseBreakdownChartState,
-    useEZOutputPeopleResponseStore.getState().peopleResponseTimeImpactChartState,
+    useEZOutputEmissionsStore.getState().emissionsLineChartState,
+    useEZOutputEmissionsStore.getState().emissionsStackedBarState,
+    useEZOutputEmissionsStore.getState().emissionsWarmColdIntensityState,
+    useEZOutputPeopleResponseStore.getState().peopleResponseParagraphState,
+    useEZOutputPeopleResponseStore.getState().peopleResponseSankeyState,
+    useEZOutputPeopleResponseStore.getState().peopleResponseBarState,
+    useEZOutputTripLegsStore.getState().tripLegsParagraphState,
     useEZOutputTripLegsStore.getState().tripLegsTableState,
     useEZOutputMapStore.getState().emissionsMapState,
     useEZOutputMapStore.getState().peopleResponseMapState,
@@ -41,7 +43,7 @@ export const getOutputErrorCount = (): number => {
 export const hasOutputData = (): boolean => {
   const overviewData = useEZOutputOverviewStore.getState().overviewData;
   const emissionsParagraph1 = useEZOutputEmissionsStore.getState().emissionsParagraph1Data;
-  const peopleResponseParagraph1 = useEZOutputPeopleResponseStore.getState().peopleResponseParagraph1Data;
+  const peopleResponseParagraph = useEZOutputPeopleResponseStore.getState().peopleResponseParagraphData;
 
-  return !!(overviewData || emissionsParagraph1 || peopleResponseParagraph1);
+  return !!(overviewData || emissionsParagraph1 || peopleResponseParagraph);
 };

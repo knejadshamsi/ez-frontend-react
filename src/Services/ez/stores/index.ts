@@ -1,10 +1,9 @@
 import { create } from 'zustand';
 import { v4 as uuidv4 } from 'uuid';
 import type { FeatureCollection } from '@deck.gl-community/editable-layers';
-import {
+import type {
   EZServiceStore,
   APIPayloadStore,
-  APIPayload,
   Zone,
   Coordinate,
   Sources,
@@ -13,61 +12,11 @@ import {
   ModeUtilities,
   CustomSimulationArea,
   ScaledSimulationArea,
-  DEFAULT_ZONE_ID
 } from './types';
 import { useEZSessionStore } from './session';
 import { generateDefaultName, generateDuplicateName } from '~utils/zoneNames';
 import { DEFAULT_CUSTOM_AREA_COLOR } from '~utils/colors';
-
-// ============= CONSTANTS =============
-const DEFAULT_SIMULATION_ITERATIONS = 5;
-const DEFAULT_SIMULATION_PERCENTAGE = 5;
-const DEFAULT_CAR_DISTRIBUTION = {
-  zeroEmission: 30,
-  nearZeroEmission: 35,
-  lowEmission: 35,
-  midEmission: 0,
-  highEmission: 0
-};
-
-// ============= DEFAULT VALUE =============
-export const createInitialPayload = (): APIPayload => ({
-  zones: [{
-    id: DEFAULT_ZONE_ID,
-    coords: null,
-    trip: ['start'],
-    policies: []
-  }],
-  customSimulationAreas: [],
-  scaledSimulationAreas: [],
-  sources: {
-    population: {
-      year: 2024,
-      name: 'montreal-polytechnique-pipeline-2024'
-    },
-    network: {
-      year: 2025,
-      name: 'osm-2025'
-    },
-    publicTransport: {
-      year: 2024,
-      name: 'stm-gtfs-2024'
-    }
-  },
-  simulationOptions: {
-    iterations: DEFAULT_SIMULATION_ITERATIONS,
-    percentage: DEFAULT_SIMULATION_PERCENTAGE
-  },
-  carDistribution: { ...DEFAULT_CAR_DISTRIBUTION },
-  modeUtilities: {
-    walk: 0,
-    bike: 0,
-    car: 0,
-    ev: 0,
-    subway: 0,
-    bus: 0
-  }
-});
+import { INITIAL_PAYLOAD } from './defaults';
 
 // ============= EZ SERVICE STATE STORE =============
 // Manages the current view state
@@ -104,7 +53,7 @@ export const useDrawToolStore = create<DrawToolStore>((set) => ({
 // ============= API PAYLOAD STORE =============
 // Manages the payload structure for API
 export const useAPIPayloadStore = create<APIPayloadStore>((set, get) => ({
-  payload: createInitialPayload(),
+  payload: structuredClone(INITIAL_PAYLOAD),
 
   addZone: (color: string): string => {
     const zoneId = uuidv4();
@@ -149,10 +98,10 @@ export const useAPIPayloadStore = create<APIPayloadStore>((set, get) => ({
     useEZSessionStore.getState().setActiveZone(newActiveZoneId);
 
     // Remove zone from payload
-    set((state) => ({
+    set((s) => ({
       payload: {
-        ...state.payload,
-        zones: state.payload.zones.filter(z => z.id !== zoneId)
+        ...s.payload,
+        zones: s.payload.zones.filter(z => z.id !== zoneId)
       }
     }));
 
@@ -425,7 +374,7 @@ export const useAPIPayloadStore = create<APIPayloadStore>((set, get) => ({
     })),
 
   reset: () =>
-    set({ payload: createInitialPayload() })
+    set({ payload: structuredClone(INITIAL_PAYLOAD) })
 }));
 
 // ============= DRAWING STATE STORE =============

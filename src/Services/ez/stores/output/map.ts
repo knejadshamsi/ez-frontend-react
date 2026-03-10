@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { EmissionsMapData, PeopleResponseMapData, MapPathData, OutputComponentState } from './types';
+import type { EmissionsMapData, PeopleResponseMapData, TripLegsMapData, OutputComponentState } from './types';
 
 // === MAP STORE ===
 
@@ -16,7 +16,7 @@ interface EZOutputMapStoreState {
 
   /* Trip legs map state */
   tripLegsMapState: OutputComponentState;
-  tripLegsMapData: MapPathData[];
+  tripLegsMapData: TripLegsMapData | null;
   tripLegsMapError: string | null;
 
   /* Emissions actions */
@@ -31,7 +31,7 @@ interface EZOutputMapStoreState {
 
   /* Trip legs actions */
   setTripLegsMapState: (state: OutputComponentState) => void;
-  setTripLegsMapData: (data: MapPathData[]) => void;
+  setTripLegsMapData: (data: TripLegsMapData) => void;
   setTripLegsMapError: (error: string | null) => void;
 
   /* Reset */
@@ -39,15 +39,15 @@ interface EZOutputMapStoreState {
 }
 
 const createInitialMapState = () => ({
-  emissionsMapState: 'inactive' as OutputComponentState,
-  emissionsMapData: null as EmissionsMapData | null,
-  emissionsMapError: null as string | null,
-  peopleResponseMapState: 'inactive' as OutputComponentState,
-  peopleResponseMapData: null as PeopleResponseMapData | null,
-  peopleResponseMapError: null as string | null,
-  tripLegsMapState: 'inactive' as OutputComponentState,
-  tripLegsMapData: [] as MapPathData[],
-  tripLegsMapError: null as string | null,
+  emissionsMapState: 'inactive',
+  emissionsMapData: null,
+  emissionsMapError: null,
+  peopleResponseMapState: 'inactive',
+  peopleResponseMapData: null,
+  peopleResponseMapError: null,
+  tripLegsMapState: 'inactive',
+  tripLegsMapData: null,
+  tripLegsMapError: null,
 });
 
 export const useEZOutputMapStore = create<EZOutputMapStoreState>((set) => ({

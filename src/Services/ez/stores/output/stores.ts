@@ -1,30 +1,23 @@
 import { create } from 'zustand';
+
+const DEFAULT_PAGE_SIZE = 10;
+
 import type {
   EZOutputOverviewData,
   EZEmissionsParagraph1Data,
   EZEmissionsParagraph2Data,
   EZEmissionsBarChartData,
-  EZEmissionsPieChartsData,
-  EZPeopleResponseParagraph1Data,
-  EZPeopleResponseParagraph2Data,
-  EZPeopleResponseBreakdownChartData,
-  EZPeopleResponseTimeImpactChartData,
+  EZEmissionsLineChartData,
+  EZEmissionsStackedBarData,
+  EZEmissionsWarmColdIntensityData,
+  EZPeopleResponseParagraphData,
+  EZPeopleResponseSankeyData,
+  EZPeopleResponseBarData,
   EZTripLegRecord,
   EZTripLegsPaginationInfo,
-  EZPeopleResponseChartConfig,
-  EZTimeImpactChartConfig,
-  EZEmissionsBarChartConfig,
-  EZVehicleEmissionsChartConfig,
-  EZTripLegsTableConfig,
+  EZTripLegsParagraphData,
   OutputComponentState,
 } from './types';
-import {
-  DEFAULT_PEOPLE_RESPONSE_CHART_CONFIG,
-  DEFAULT_TIME_IMPACT_CHART_CONFIG,
-  DEFAULT_EMISSIONS_BAR_CHART_CONFIG,
-  DEFAULT_VEHICLE_EMISSIONS_CHART_CONFIG,
-  DEFAULT_TRIP_LEGS_TABLE_CONFIG,
-} from './defaults';
 
 // === OVERVIEW STORE ===
 
@@ -41,7 +34,7 @@ interface EZOutputOverviewStoreState {
 
 export const useEZOutputOverviewStore = create<EZOutputOverviewStoreState>((set) => ({
   overviewData: null,
-  overviewState: 'inactive' as OutputComponentState,
+  overviewState: 'inactive',
   overviewError: null,
 
   setOverviewData: (overviewData) => set({ overviewData }),
@@ -49,7 +42,7 @@ export const useEZOutputOverviewStore = create<EZOutputOverviewStoreState>((set)
   setOverviewError: (overviewError) => set({ overviewError }),
   resetOverviewStore: () => set({
     overviewData: null,
-    overviewState: 'inactive' as OutputComponentState,
+    overviewState: 'inactive',
     overviewError: null,
   }),
 }));
@@ -60,32 +53,44 @@ interface EZOutputEmissionsStoreState {
   emissionsParagraph1Data: EZEmissionsParagraph1Data | null;
   emissionsParagraph2Data: EZEmissionsParagraph2Data | null;
   emissionsBarChartData: EZEmissionsBarChartData | null;
-  emissionsPieChartsData: EZEmissionsPieChartsData | null;
+  emissionsLineChartData: EZEmissionsLineChartData | null;
+  emissionsStackedBarData: EZEmissionsStackedBarData | null;
+  emissionsWarmColdIntensityData: EZEmissionsWarmColdIntensityData | null;
 
   emissionsParagraph1State: OutputComponentState;
   emissionsParagraph2State: OutputComponentState;
   emissionsBarChartState: OutputComponentState;
-  emissionsPieChartsState: OutputComponentState;
+  emissionsLineChartState: OutputComponentState;
+  emissionsStackedBarState: OutputComponentState;
+  emissionsWarmColdIntensityState: OutputComponentState;
 
   emissionsParagraph1Error: string | null;
   emissionsParagraph2Error: string | null;
   emissionsBarChartError: string | null;
-  emissionsPieChartsError: string | null;
+  emissionsLineChartError: string | null;
+  emissionsStackedBarError: string | null;
+  emissionsWarmColdIntensityError: string | null;
 
   setEmissionsParagraph1Data: (data: EZEmissionsParagraph1Data) => void;
   setEmissionsParagraph2Data: (data: EZEmissionsParagraph2Data) => void;
   setEmissionsBarChartData: (data: EZEmissionsBarChartData) => void;
-  setEmissionsPieChartsData: (data: EZEmissionsPieChartsData) => void;
+  setEmissionsLineChartData: (data: EZEmissionsLineChartData) => void;
+  setEmissionsStackedBarData: (data: EZEmissionsStackedBarData) => void;
+  setEmissionsWarmColdIntensityData: (data: EZEmissionsWarmColdIntensityData) => void;
 
   setEmissionsParagraph1State: (state: OutputComponentState) => void;
   setEmissionsParagraph2State: (state: OutputComponentState) => void;
   setEmissionsBarChartState: (state: OutputComponentState) => void;
-  setEmissionsPieChartsState: (state: OutputComponentState) => void;
+  setEmissionsLineChartState: (state: OutputComponentState) => void;
+  setEmissionsStackedBarState: (state: OutputComponentState) => void;
+  setEmissionsWarmColdIntensityState: (state: OutputComponentState) => void;
 
   setEmissionsParagraph1Error: (error: string | null) => void;
   setEmissionsParagraph2Error: (error: string | null) => void;
   setEmissionsBarChartError: (error: string | null) => void;
-  setEmissionsPieChartsError: (error: string | null) => void;
+  setEmissionsLineChartError: (error: string | null) => void;
+  setEmissionsStackedBarError: (error: string | null) => void;
+  setEmissionsWarmColdIntensityError: (error: string | null) => void;
 
   resetEmissionsStore: () => void;
 }
@@ -94,129 +99,132 @@ export const useEZOutputEmissionsStore = create<EZOutputEmissionsStoreState>((se
   emissionsParagraph1Data: null,
   emissionsParagraph2Data: null,
   emissionsBarChartData: null,
-  emissionsPieChartsData: null,
+  emissionsLineChartData: null,
+  emissionsStackedBarData: null,
+  emissionsWarmColdIntensityData: null,
 
-  emissionsParagraph1State: 'inactive' as OutputComponentState,
-  emissionsParagraph2State: 'inactive' as OutputComponentState,
-  emissionsBarChartState: 'inactive' as OutputComponentState,
-  emissionsPieChartsState: 'inactive' as OutputComponentState,
+  emissionsParagraph1State: 'inactive',
+  emissionsParagraph2State: 'inactive',
+  emissionsBarChartState: 'inactive',
+  emissionsLineChartState: 'inactive',
+  emissionsStackedBarState: 'inactive',
+  emissionsWarmColdIntensityState: 'inactive',
 
   emissionsParagraph1Error: null,
   emissionsParagraph2Error: null,
   emissionsBarChartError: null,
-  emissionsPieChartsError: null,
+  emissionsLineChartError: null,
+  emissionsStackedBarError: null,
+  emissionsWarmColdIntensityError: null,
 
   setEmissionsParagraph1Data: (emissionsParagraph1Data) => set({ emissionsParagraph1Data }),
   setEmissionsParagraph2Data: (emissionsParagraph2Data) => set({ emissionsParagraph2Data }),
   setEmissionsBarChartData: (emissionsBarChartData) => set({ emissionsBarChartData }),
-  setEmissionsPieChartsData: (emissionsPieChartsData) => set({ emissionsPieChartsData }),
+  setEmissionsLineChartData: (emissionsLineChartData) => set({ emissionsLineChartData }),
+  setEmissionsStackedBarData: (emissionsStackedBarData) => set({ emissionsStackedBarData }),
+  setEmissionsWarmColdIntensityData: (emissionsWarmColdIntensityData) => set({ emissionsWarmColdIntensityData }),
 
   setEmissionsParagraph1State: (emissionsParagraph1State) => set({ emissionsParagraph1State }),
   setEmissionsParagraph2State: (emissionsParagraph2State) => set({ emissionsParagraph2State }),
   setEmissionsBarChartState: (emissionsBarChartState) => set({ emissionsBarChartState }),
-  setEmissionsPieChartsState: (emissionsPieChartsState) => set({ emissionsPieChartsState }),
+  setEmissionsLineChartState: (emissionsLineChartState) => set({ emissionsLineChartState }),
+  setEmissionsStackedBarState: (emissionsStackedBarState) => set({ emissionsStackedBarState }),
+  setEmissionsWarmColdIntensityState: (emissionsWarmColdIntensityState) => set({ emissionsWarmColdIntensityState }),
 
   setEmissionsParagraph1Error: (emissionsParagraph1Error) => set({ emissionsParagraph1Error }),
   setEmissionsParagraph2Error: (emissionsParagraph2Error) => set({ emissionsParagraph2Error }),
   setEmissionsBarChartError: (emissionsBarChartError) => set({ emissionsBarChartError }),
-  setEmissionsPieChartsError: (emissionsPieChartsError) => set({ emissionsPieChartsError }),
+  setEmissionsLineChartError: (emissionsLineChartError) => set({ emissionsLineChartError }),
+  setEmissionsStackedBarError: (emissionsStackedBarError) => set({ emissionsStackedBarError }),
+  setEmissionsWarmColdIntensityError: (emissionsWarmColdIntensityError) => set({ emissionsWarmColdIntensityError }),
 
   resetEmissionsStore: () => set({
     emissionsParagraph1Data: null,
     emissionsParagraph2Data: null,
     emissionsBarChartData: null,
-    emissionsPieChartsData: null,
-    emissionsParagraph1State: 'inactive' as OutputComponentState,
-    emissionsParagraph2State: 'inactive' as OutputComponentState,
-    emissionsBarChartState: 'inactive' as OutputComponentState,
-    emissionsPieChartsState: 'inactive' as OutputComponentState,
+    emissionsLineChartData: null,
+    emissionsStackedBarData: null,
+    emissionsWarmColdIntensityData: null,
+    emissionsParagraph1State: 'inactive',
+    emissionsParagraph2State: 'inactive',
+    emissionsBarChartState: 'inactive',
+    emissionsLineChartState: 'inactive',
+    emissionsStackedBarState: 'inactive',
+    emissionsWarmColdIntensityState: 'inactive',
     emissionsParagraph1Error: null,
     emissionsParagraph2Error: null,
     emissionsBarChartError: null,
-    emissionsPieChartsError: null,
+    emissionsLineChartError: null,
+    emissionsStackedBarError: null,
+    emissionsWarmColdIntensityError: null,
   }),
 }));
 
 // === PEOPLE RESPONSE STORE ===
 
 interface EZOutputPeopleResponseStoreState {
-  peopleResponseParagraph1Data: EZPeopleResponseParagraph1Data | null;
-  peopleResponseParagraph2Data: EZPeopleResponseParagraph2Data | null;
-  peopleResponseBreakdownChartData: EZPeopleResponseBreakdownChartData | null;
-  peopleResponseTimeImpactChartData: EZPeopleResponseTimeImpactChartData | null;
+  peopleResponseParagraphData: EZPeopleResponseParagraphData | null;
+  peopleResponseSankeyData: EZPeopleResponseSankeyData | null;
+  peopleResponseBarData: EZPeopleResponseBarData | null;
 
-  peopleResponseParagraph1State: OutputComponentState;
-  peopleResponseParagraph2State: OutputComponentState;
-  peopleResponseBreakdownChartState: OutputComponentState;
-  peopleResponseTimeImpactChartState: OutputComponentState;
+  peopleResponseParagraphState: OutputComponentState;
+  peopleResponseSankeyState: OutputComponentState;
+  peopleResponseBarState: OutputComponentState;
 
-  peopleResponseParagraph1Error: string | null;
-  peopleResponseParagraph2Error: string | null;
-  peopleResponseBreakdownChartError: string | null;
-  peopleResponseTimeImpactChartError: string | null;
+  peopleResponseParagraphError: string | null;
+  peopleResponseSankeyError: string | null;
+  peopleResponseBarError: string | null;
 
-  setPeopleResponseParagraph1Data: (data: EZPeopleResponseParagraph1Data) => void;
-  setPeopleResponseParagraph2Data: (data: EZPeopleResponseParagraph2Data) => void;
-  setPeopleResponseBreakdownChartData: (data: EZPeopleResponseBreakdownChartData) => void;
-  setPeopleResponseTimeImpactChartData: (data: EZPeopleResponseTimeImpactChartData) => void;
+  setPeopleResponseParagraphData: (data: EZPeopleResponseParagraphData) => void;
+  setPeopleResponseSankeyData: (data: EZPeopleResponseSankeyData) => void;
+  setPeopleResponseBarData: (data: EZPeopleResponseBarData) => void;
 
-  setPeopleResponseParagraph1State: (state: OutputComponentState) => void;
-  setPeopleResponseParagraph2State: (state: OutputComponentState) => void;
-  setPeopleResponseBreakdownChartState: (state: OutputComponentState) => void;
-  setPeopleResponseTimeImpactChartState: (state: OutputComponentState) => void;
+  setPeopleResponseParagraphState: (state: OutputComponentState) => void;
+  setPeopleResponseSankeyState: (state: OutputComponentState) => void;
+  setPeopleResponseBarState: (state: OutputComponentState) => void;
 
-  setPeopleResponseParagraph1Error: (error: string | null) => void;
-  setPeopleResponseParagraph2Error: (error: string | null) => void;
-  setPeopleResponseBreakdownChartError: (error: string | null) => void;
-  setPeopleResponseTimeImpactChartError: (error: string | null) => void;
+  setPeopleResponseParagraphError: (error: string | null) => void;
+  setPeopleResponseSankeyError: (error: string | null) => void;
+  setPeopleResponseBarError: (error: string | null) => void;
 
   resetPeopleResponseStore: () => void;
 }
 
 export const useEZOutputPeopleResponseStore = create<EZOutputPeopleResponseStoreState>((set) => ({
-  peopleResponseParagraph1Data: null,
-  peopleResponseParagraph2Data: null,
-  peopleResponseBreakdownChartData: null,
-  peopleResponseTimeImpactChartData: null,
+  peopleResponseParagraphData: null,
+  peopleResponseSankeyData: null,
+  peopleResponseBarData: null,
 
-  peopleResponseParagraph1State: 'inactive' as OutputComponentState,
-  peopleResponseParagraph2State: 'inactive' as OutputComponentState,
-  peopleResponseBreakdownChartState: 'inactive' as OutputComponentState,
-  peopleResponseTimeImpactChartState: 'inactive' as OutputComponentState,
+  peopleResponseParagraphState: 'inactive',
+  peopleResponseSankeyState: 'inactive',
+  peopleResponseBarState: 'inactive',
 
-  peopleResponseParagraph1Error: null,
-  peopleResponseParagraph2Error: null,
-  peopleResponseBreakdownChartError: null,
-  peopleResponseTimeImpactChartError: null,
+  peopleResponseParagraphError: null,
+  peopleResponseSankeyError: null,
+  peopleResponseBarError: null,
 
-  setPeopleResponseParagraph1Data: (peopleResponseParagraph1Data) => set({ peopleResponseParagraph1Data }),
-  setPeopleResponseParagraph2Data: (peopleResponseParagraph2Data) => set({ peopleResponseParagraph2Data }),
-  setPeopleResponseBreakdownChartData: (peopleResponseBreakdownChartData) => set({ peopleResponseBreakdownChartData }),
-  setPeopleResponseTimeImpactChartData: (peopleResponseTimeImpactChartData) => set({ peopleResponseTimeImpactChartData }),
+  setPeopleResponseParagraphData: (peopleResponseParagraphData) => set({ peopleResponseParagraphData }),
+  setPeopleResponseSankeyData: (peopleResponseSankeyData) => set({ peopleResponseSankeyData }),
+  setPeopleResponseBarData: (peopleResponseBarData) => set({ peopleResponseBarData }),
 
-  setPeopleResponseParagraph1State: (peopleResponseParagraph1State) => set({ peopleResponseParagraph1State }),
-  setPeopleResponseParagraph2State: (peopleResponseParagraph2State) => set({ peopleResponseParagraph2State }),
-  setPeopleResponseBreakdownChartState: (peopleResponseBreakdownChartState) => set({ peopleResponseBreakdownChartState }),
-  setPeopleResponseTimeImpactChartState: (peopleResponseTimeImpactChartState) => set({ peopleResponseTimeImpactChartState }),
+  setPeopleResponseParagraphState: (peopleResponseParagraphState) => set({ peopleResponseParagraphState }),
+  setPeopleResponseSankeyState: (peopleResponseSankeyState) => set({ peopleResponseSankeyState }),
+  setPeopleResponseBarState: (peopleResponseBarState) => set({ peopleResponseBarState }),
 
-  setPeopleResponseParagraph1Error: (peopleResponseParagraph1Error) => set({ peopleResponseParagraph1Error }),
-  setPeopleResponseParagraph2Error: (peopleResponseParagraph2Error) => set({ peopleResponseParagraph2Error }),
-  setPeopleResponseBreakdownChartError: (peopleResponseBreakdownChartError) => set({ peopleResponseBreakdownChartError }),
-  setPeopleResponseTimeImpactChartError: (peopleResponseTimeImpactChartError) => set({ peopleResponseTimeImpactChartError }),
+  setPeopleResponseParagraphError: (peopleResponseParagraphError) => set({ peopleResponseParagraphError }),
+  setPeopleResponseSankeyError: (peopleResponseSankeyError) => set({ peopleResponseSankeyError }),
+  setPeopleResponseBarError: (peopleResponseBarError) => set({ peopleResponseBarError }),
 
   resetPeopleResponseStore: () => set({
-    peopleResponseParagraph1Data: null,
-    peopleResponseParagraph2Data: null,
-    peopleResponseBreakdownChartData: null,
-    peopleResponseTimeImpactChartData: null,
-    peopleResponseParagraph1State: 'inactive' as OutputComponentState,
-    peopleResponseParagraph2State: 'inactive' as OutputComponentState,
-    peopleResponseBreakdownChartState: 'inactive' as OutputComponentState,
-    peopleResponseTimeImpactChartState: 'inactive' as OutputComponentState,
-    peopleResponseParagraph1Error: null,
-    peopleResponseParagraph2Error: null,
-    peopleResponseBreakdownChartError: null,
-    peopleResponseTimeImpactChartError: null,
+    peopleResponseParagraphData: null,
+    peopleResponseSankeyData: null,
+    peopleResponseBarData: null,
+    peopleResponseParagraphState: 'inactive',
+    peopleResponseSankeyState: 'inactive',
+    peopleResponseBarState: 'inactive',
+    peopleResponseParagraphError: null,
+    peopleResponseSankeyError: null,
+    peopleResponseBarError: null,
   }),
 }));
 
@@ -225,14 +233,25 @@ export const useEZOutputPeopleResponseStore = create<EZOutputPeopleResponseStore
 interface TripLegsFirstPageData {
   records: EZTripLegRecord[];
   totalRecords: number;
+  totalAllRecords: number;
   pageSize: number;
 }
 
 interface EZOutputTripLegsStoreState {
+  tripLegsParagraphData: EZTripLegsParagraphData | null;
+  tripLegsParagraphState: OutputComponentState;
+  tripLegsParagraphError: string | null;
+
   tripLegRecords: EZTripLegRecord[];
   tripLegsPagination: EZTripLegsPaginationInfo | null;
   tripLegsTableState: OutputComponentState;
   tripLegsTableError: string | null;
+  excludeNC: boolean;
+  selectedTripIds: Set<string>;
+
+  setTripLegsParagraphData: (data: EZTripLegsParagraphData) => void;
+  setTripLegsParagraphState: (state: OutputComponentState) => void;
+  setTripLegsParagraphError: (error: string | null) => void;
 
   setTripLegRecords: (records: EZTripLegRecord[]) => void;
   setTripLegsPagination: (pagination: EZTripLegsPaginationInfo) => void;
@@ -240,30 +259,45 @@ interface EZOutputTripLegsStoreState {
   setTripLegsTableError: (error: string | null) => void;
   setTripLegsFirstPage: (data: TripLegsFirstPageData) => void;
   setTripLegsPage: (page: number, records: EZTripLegRecord[]) => void;
+  setExcludeNC: (excludeNC: boolean) => void;
+  toggleTripSelection: (legId: string) => void;
+  selectAllOnPage: () => void;
+  deselectAll: () => void;
 
   resetTripLegsStore: () => void;
 }
 
-export const useEZOutputTripLegsStore = create<EZOutputTripLegsStoreState>((set) => ({
+export const useEZOutputTripLegsStore = create<EZOutputTripLegsStoreState>((set, get) => ({
+  tripLegsParagraphData: null,
+  tripLegsParagraphState: 'inactive',
+  tripLegsParagraphError: null,
+
   tripLegRecords: [],
   tripLegsPagination: null,
-  tripLegsTableState: 'inactive' as OutputComponentState,
+  tripLegsTableState: 'inactive',
   tripLegsTableError: null,
+  excludeNC: true,
+  selectedTripIds: new Set<string>(),
+
+  setTripLegsParagraphData: (tripLegsParagraphData) => set({ tripLegsParagraphData }),
+  setTripLegsParagraphState: (tripLegsParagraphState) => set({ tripLegsParagraphState }),
+  setTripLegsParagraphError: (tripLegsParagraphError) => set({ tripLegsParagraphError }),
 
   setTripLegRecords: (tripLegRecords) => set({ tripLegRecords }),
   setTripLegsPagination: (tripLegsPagination) => set({ tripLegsPagination }),
   setTripLegsTableState: (tripLegsTableState) => set({ tripLegsTableState }),
   setTripLegsTableError: (tripLegsTableError) => set({ tripLegsTableError }),
 
-  setTripLegsFirstPage: ({ records, totalRecords, pageSize }) => set({
+  setTripLegsFirstPage: ({ records, totalRecords, totalAllRecords, pageSize }) => set({
     tripLegRecords: records,
     tripLegsPagination: {
       currentPage: 1,
       pageSize,
       totalRecords,
+      totalAllRecords,
       totalPages: Math.ceil(totalRecords / pageSize),
     },
-    tripLegsTableState: 'success' as OutputComponentState,
+    tripLegsTableState: 'success',
   }),
 
   setTripLegsPage: (page, records) => set((state) => ({
@@ -273,28 +307,43 @@ export const useEZOutputTripLegsStore = create<EZOutputTripLegsStoreState>((set)
       : null,
   })),
 
+  setExcludeNC: (excludeNC) => set({
+    excludeNC,
+    selectedTripIds: new Set<string>(),
+  }),
+
+  toggleTripSelection: (legId) => set((state) => {
+    const newIds = new Set(state.selectedTripIds);
+    if (newIds.has(legId)) {
+      newIds.delete(legId);
+    } else {
+      const pageSize = state.tripLegsPagination?.pageSize ?? DEFAULT_PAGE_SIZE;
+      if (newIds.size >= pageSize) return state;
+      newIds.add(legId);
+    }
+    return { selectedTripIds: newIds };
+  }),
+
+  selectAllOnPage: () => set((state) => {
+    const newIds = new Set(state.selectedTripIds);
+    for (const record of state.tripLegRecords) {
+      newIds.add(record.legId);
+    }
+    return { selectedTripIds: newIds };
+  }),
+
+  deselectAll: () => set({ selectedTripIds: new Set<string>() }),
+
   resetTripLegsStore: () => set({
+    tripLegsParagraphData: null,
+    tripLegsParagraphState: 'inactive',
+    tripLegsParagraphError: null,
     tripLegRecords: [],
     tripLegsPagination: null,
-    tripLegsTableState: 'inactive' as OutputComponentState,
+    tripLegsTableState: 'inactive',
     tripLegsTableError: null,
+    excludeNC: true,
+    selectedTripIds: new Set<string>(),
   }),
 }));
 
-// === CHART CONFIGURATION STORE ===
-
-interface EZOutputChartConfigStoreState {
-  peopleResponseChartConfig: EZPeopleResponseChartConfig;
-  timeImpactChartConfig: EZTimeImpactChartConfig;
-  emissionsBarChartConfig: EZEmissionsBarChartConfig;
-  vehicleEmissionsChartConfig: EZVehicleEmissionsChartConfig;
-  tripLegsTableConfig: EZTripLegsTableConfig;
-}
-
-export const useEZOutputChartConfigStore = create<EZOutputChartConfigStoreState>(() => ({
-  peopleResponseChartConfig: DEFAULT_PEOPLE_RESPONSE_CHART_CONFIG,
-  timeImpactChartConfig: DEFAULT_TIME_IMPACT_CHART_CONFIG,
-  emissionsBarChartConfig: DEFAULT_EMISSIONS_BAR_CHART_CONFIG,
-  vehicleEmissionsChartConfig: DEFAULT_VEHICLE_EMISSIONS_CHART_CONFIG,
-  tripLegsTableConfig: DEFAULT_TRIP_LEGS_TABLE_CONFIG,
-}));
