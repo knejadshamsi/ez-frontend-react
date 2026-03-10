@@ -12,6 +12,7 @@ interface TripLegsPageResponse {
   page: number;
   pageSize: number;
   totalRecords: number;
+  totalAllRecords: number;
 }
 
 // demo trip leg records for a specific page
@@ -21,10 +22,10 @@ const generateDemoTripLegsPage = (page: number, pageSize: number, totalRecords: 
   const records: EZTripLegRecord[] = [];
 
   const impacts = [
-    'Car → Bus',
-    'Car → Subway',
-    'Car → Walking',
-    'Car → Biking',
+    'Car -> Bus',
+    'Car -> Subway',
+    'Car -> Walking',
+    'Car -> Biking',
     'Rerouted',
     'Paid Penalty',
   ];
@@ -36,10 +37,10 @@ const generateDemoTripLegsPage = (page: number, pageSize: number, totalRecords: 
     records.push({
       legId: `leg_${i.toString().padStart(5, '0')}`,
       personId,
-      originActivityType: `A_${activities[Math.floor(Math.random() * activities.length)]}_${personId.slice(1)}`,
-      destinationActivityType: `A_${activities[Math.floor(Math.random() * activities.length)]}_${personId.slice(1)}`,
-      co2DeltaGrams: Math.round((Math.random() - 0.4) * 500), // -200 to +300
-      timeDeltaMinutes: Math.round((Math.random() - 0.2) * 20), // -4 to +16
+      originActivity: `A_${activities[Math.floor(Math.random() * activities.length)]}_${personId.slice(1)}`,
+      destinationActivity: `A_${activities[Math.floor(Math.random() * activities.length)]}_${personId.slice(1)}`,
+      co2DeltaGrams: Math.round((Math.random() - 0.4) * 500),
+      timeDeltaMinutes: Math.round((Math.random() - 0.2) * 20),
       impact: impacts[Math.floor(Math.random() * impacts.length)],
     });
   }
@@ -47,7 +48,7 @@ const generateDemoTripLegsPage = (page: number, pageSize: number, totalRecords: 
   return records;
 };
 
-export const fetchTripLegsPage = async (page: number): Promise<void> => {
+export const fetchTripLegsPage = async (page: number, excludeNC?: boolean): Promise<void> => {
   const store = useEZOutputTripLegsStore.getState();
   const isDemoMode = !useEZServiceStore.getState().isEzBackendAlive;
   const pagination = store.tripLegsPagination;
@@ -57,22 +58,19 @@ export const fetchTripLegsPage = async (page: number): Promise<void> => {
     return;
   }
 
-  if (pagination.currentPage === page && store.tripLegRecords.length > 0) {
-    return;
-  }
+  // Use store value if not explicitly provided
+  const shouldExcludeNC = excludeNC ?? store.excludeNC;
 
   store.setTripLegsTableState('loading');
   store.setTripLegsTableError(null);
 
   try {
     if (isDemoMode) {
-      // Demo mode
       await new Promise(resolve => setTimeout(resolve, 300));
       const records = generateDemoTripLegsPage(page, pagination.pageSize, pagination.totalRecords);
       store.setTripLegsPage(page, records);
       store.setTripLegsTableState('success');
     } else {
-      // Real mode
       const backendUrl = getBackendUrl();
       const requestId = useEZSessionStore.getState().requestId!;
 
@@ -82,13 +80,23 @@ export const fetchTripLegsPage = async (page: number): Promise<void> => {
           params: {
             page,
             pageSize: pagination.pageSize,
+            excludeNC: shouldExcludeNC,
           },
           timeout: TRIP_LEGS_FETCH_TIMEOUT_MS,
         }
       );
 
       const data = unwrapResponse(response);
-      store.setTripLegsPage(page, data.records);
+
+      // Update pagination with new totalRecords from response
+      store.setTripLegsPagination({
+        currentPage: page,
+        pageSize: data.pageSize,
+        totalRecords: data.totalRecords,
+        totalAllRecords: data.totalAllRecords,
+        totalPages: Math.ceil(data.totalRecords / data.pageSize),
+      });
+      store.setTripLegRecords(data.records);
       store.setTripLegsTableState('success');
     }
   } catch (error) {

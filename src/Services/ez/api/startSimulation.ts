@@ -3,6 +3,7 @@ import { useEZSessionStore } from '~stores/session';
 import type { EZStateType } from '~stores/types';
 import { createAPIRequest } from './apiRequestFactory';
 import { startSimulationStream } from './sse';
+import type { ValidationError } from './sse';
 import { getBackendUrl, isBackendConfigured } from './config';
 import { decodeProgressAlert } from '../progress';
 import { useProgressStore } from '../progress/store';
@@ -37,7 +38,8 @@ const getErrorMessage = (error: { code?: string; message?: string }): string => 
 
 export const startSimulation = async (
   setState: (state: EZStateType) => void,
-  onError: (errorMessage: string) => void
+  onError: (errorMessage: string) => void,
+  onValidationError: (errors: ValidationError[]) => void
 ): Promise<void> => {
   const isEzBackendAlive = useEZServiceStore.getState().isEzBackendAlive;
   const setSseCleanup = useEZSessionStore.getState().setSseCleanup;
@@ -54,10 +56,11 @@ export const startSimulation = async (
   }
 
   if (!isEzBackendAlive) {
+    setState('AWAIT_RESULTS');
     const cleanup = runDemoSimulation(setState);
     setSseCleanup(cleanup);
   } else {
-    runRealSimulation(setState, onError);
+    runRealSimulation(setState, onError, onValidationError);
   }
 };
 
@@ -117,7 +120,8 @@ const runDemoSimulation = (setState: (state: EZStateType) => void): (() => void)
 
 const runRealSimulation = (
   setState: (state: EZStateType) => void,
-  onError: (errorMessage: string) => void
+  onError: (errorMessage: string) => void,
+  onValidationError: (errors: ValidationError[]) => void
 ): void => {
   const apiPayload = useAPIPayloadStore.getState().payload;
   const scenarioTitle = useEZSessionStore.getState().scenarioTitle;
@@ -126,7 +130,7 @@ const runRealSimulation = (
   const setSseCleanup = useEZSessionStore.getState().setSseCleanup;
 
   if (!isBackendConfigured()) {
-    useProgressStore.getState().setError(t('ez-progress:error.backendNotConfigured'));
+    onError(t('ez-progress:error.backendNotConfigured'));
     return;
   }
 
@@ -143,7 +147,10 @@ const runRealSimulation = (
     payload: apiRequest as unknown as Record<string, unknown>,
 
     onStarted: async (requestId: string) => {
+      console.log('[EZ API] Request ID:', requestId);
       setRequestId(requestId);
+      useProgressStore.getState().reset();
+      setState('AWAIT_RESULTS');
 
       try {
         await updateScenarioMetadata(requestId);
@@ -155,6 +162,11 @@ const runRealSimulation = (
 
     onSimulationStart: () => {
       useProgressStore.getState().setStatus('DISPLAY_SIMULATION');
+    },
+
+    onValidationError: (errors) => {
+      setSseCleanup(null);
+      onValidationError(errors);
     },
 
     onCancelled: (_reason: string) => {
@@ -175,16 +187,17 @@ const runRealSimulation = (
       console.error('[SSE] Simulation error:', error);
       setSseCleanup(null);
 
-      // If we have a requestId, attempt polling recovery instead of giving up
+      // Only attempt polling recovery for connection-type errors
+      const connectionErrors = ['HEARTBEAT_TIMEOUT', 'CONNECTION_TIMEOUT', 'STREAM_ERROR'];
       const currentRequestId = useEZSessionStore.getState().requestId;
-      if (currentRequestId && currentRequestId.trim() !== '') {
+
+      if (currentRequestId && currentRequestId.trim() !== '' && connectionErrors.includes(error.code || '')) {
         startPollingRecovery(currentRequestId, setState, onError);
         return;
       }
 
-      // No requestId - connection failed before simulation started
-      resetOutputState();
-      onError(getErrorMessage(error));
+      // Application error (error_global, etc.) - show in progress error display
+      useProgressStore.getState().setError(getErrorMessage(error));
     },
   });
 
@@ -354,7 +367,7 @@ const startPollingRecovery = (
         } else {
           resetOutputState();
           useEZSessionStore.getState().setRequestId('');
-          onError(t('ez-progress:cancellation.failed'));
+          onError(t('ez-progress:polling.failed'));
         }
         return;
       }

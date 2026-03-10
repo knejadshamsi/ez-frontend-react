@@ -38,25 +38,33 @@ const ERROR_HANDLER_MAP: Record<string, ErrorHandlerConfig> = {
     setState: (state) => useEZOutputEmissionsStore.getState().setEmissionsBarChartState(state),
     setError: (error) => useEZOutputEmissionsStore.getState().setEmissionsBarChartError(error),
   },
-  error_chart_pie_emissions: {
-    setState: (state) => useEZOutputEmissionsStore.getState().setEmissionsPieChartsState(state),
-    setError: (error) => useEZOutputEmissionsStore.getState().setEmissionsPieChartsError(error),
+  error_chart_line_emissions: {
+    setState: (state) => useEZOutputEmissionsStore.getState().setEmissionsLineChartState(state),
+    setError: (error) => useEZOutputEmissionsStore.getState().setEmissionsLineChartError(error),
+  },
+  error_chart_stacked_bar_emissions: {
+    setState: (state) => useEZOutputEmissionsStore.getState().setEmissionsStackedBarState(state),
+    setError: (error) => useEZOutputEmissionsStore.getState().setEmissionsStackedBarError(error),
+  },
+  error_warm_cold_intensity_emissions: {
+    setState: (state) => useEZOutputEmissionsStore.getState().setEmissionsWarmColdIntensityState(state),
+    setError: (error) => useEZOutputEmissionsStore.getState().setEmissionsWarmColdIntensityError(error),
   },
   error_text_paragraph1_people_response: {
-    setState: (state) => useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph1State(state),
-    setError: (error) => useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph1Error(error),
+    setState: (state) => useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraphState(state),
+    setError: (error) => useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraphError(error),
   },
-  error_text_paragraph2_people_response: {
-    setState: (state) => useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph2State(state),
-    setError: (error) => useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph2Error(error),
+  error_chart_sankey_people_response: {
+    setState: (state) => useEZOutputPeopleResponseStore.getState().setPeopleResponseSankeyState(state),
+    setError: (error) => useEZOutputPeopleResponseStore.getState().setPeopleResponseSankeyError(error),
   },
-  error_chart_breakdown_people_response: {
-    setState: (state) => useEZOutputPeopleResponseStore.getState().setPeopleResponseBreakdownChartState(state),
-    setError: (error) => useEZOutputPeopleResponseStore.getState().setPeopleResponseBreakdownChartError(error),
+  error_chart_bar_people_response: {
+    setState: (state) => useEZOutputPeopleResponseStore.getState().setPeopleResponseBarState(state),
+    setError: (error) => useEZOutputPeopleResponseStore.getState().setPeopleResponseBarError(error),
   },
-  error_chart_time_impact_people_response: {
-    setState: (state) => useEZOutputPeopleResponseStore.getState().setPeopleResponseTimeImpactChartState(state),
-    setError: (error) => useEZOutputPeopleResponseStore.getState().setPeopleResponseTimeImpactChartError(error),
+  error_text_paragraph1_trip_legs: {
+    setState: (state) => useEZOutputTripLegsStore.getState().setTripLegsParagraphState(state),
+    setError: (error) => useEZOutputTripLegsStore.getState().setTripLegsParagraphError(error),
   },
   error_table_trip_legs: {
     setState: (state) => useEZOutputTripLegsStore.getState().setTripLegsTableState(state),
@@ -72,30 +80,8 @@ function handleProgressAlertMessage(
   payload: SSEMessage['payload'],
   config: SimulationStreamConfig
 ): void {
-  // Route to progress decoder for phase/timeline events
-  // Phase events follow pattern: pa_phase_*, success_phase_*, error_phase_*
-  const isPhaseEvent = messageType.startsWith('pa_phase_') ||
-                       messageType.startsWith('success_phase_') ||
-                       messageType.startsWith('error_phase_');
-
-  if (isPhaseEvent) {
-    decodeProgressAlert(messageType);
-    if (config.onTimelineEvent) {
-      config.onTimelineEvent(messageType);
-    }
-    return;
-  }
-
-  // Check if this is a component error that uses the configuration map
-  if (messageType in ERROR_HANDLER_MAP) {
-    const errorData = payload as { message: string };
-    const errorHandler = ERROR_HANDLER_MAP[messageType];
-    errorHandler.setState('error');
-    errorHandler.setError(errorData.message);
-    return;
-  }
-
-  // Handle lifecycle events and map-specific events
+  // Handle lifecycle events first (before phase routing)
+  // pa_simulation_start would otherwise match the pa_simulation_* phase prefix
   switch (messageType) {
     case 'pa_request_accepted': {
       const requestId = (payload as { requestId?: string }).requestId;
@@ -138,6 +124,14 @@ function handleProgressAlertMessage(
         });
       }
       break;
+
+    case 'error_validation': {
+      const validationPayload = payload as { errors: Array<{ origin: string; error: string; message: string }> };
+      if (config.onValidationError) {
+        config.onValidationError(validationPayload.errors);
+      }
+      break;
+    }
 
     case 'success_map_emissions':
       useEZOutputMapStore.getState().setEmissionsMapState('success_initial');
@@ -197,9 +191,32 @@ function handleProgressAlertMessage(
       break;
     }
 
-    default:
+    default: {
+      // Route phase progress events to decoder
+      const isPhaseEvent = messageType.startsWith('pa_preprocessing_') ||
+                           messageType.startsWith('pa_simulation_') ||
+                           messageType.startsWith('pa_postprocessing_');
+
+      if (isPhaseEvent) {
+        decodeProgressAlert(messageType);
+        if (config.onTimelineEvent) {
+          config.onTimelineEvent(messageType);
+        }
+        break;
+      }
+
+      // Component-level errors
+      if (messageType in ERROR_HANDLER_MAP) {
+        const errorData = payload as { message: string };
+        const errorHandler = ERROR_HANDLER_MAP[messageType];
+        errorHandler.setState('error');
+        errorHandler.setError(errorData.message);
+        break;
+      }
+
       console.warn(`[SSE] Unhandled progress alert: ${messageType}`);
       break;
+    }
   }
 }
 
@@ -211,11 +228,13 @@ const SUCCESS_STATE_MAP: Record<string, () => void> = {
   data_text_paragraph1_emissions: () => useEZOutputEmissionsStore.getState().setEmissionsParagraph1State('success'),
   data_text_paragraph2_emissions: () => useEZOutputEmissionsStore.getState().setEmissionsParagraph2State('success'),
   data_chart_bar_emissions: () => useEZOutputEmissionsStore.getState().setEmissionsBarChartState('success'),
-  data_chart_pie_emissions: () => useEZOutputEmissionsStore.getState().setEmissionsPieChartsState('success'),
-  data_text_paragraph1_people_response: () => useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph1State('success'),
-  data_text_paragraph2_people_response: () => useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph2State('success'),
-  data_chart_breakdown_people_response: () => useEZOutputPeopleResponseStore.getState().setPeopleResponseBreakdownChartState('success'),
-  data_chart_time_impact_people_response: () => useEZOutputPeopleResponseStore.getState().setPeopleResponseTimeImpactChartState('success'),
+  data_chart_line_emissions: () => useEZOutputEmissionsStore.getState().setEmissionsLineChartState('success'),
+  data_chart_stacked_bar_emissions: () => useEZOutputEmissionsStore.getState().setEmissionsStackedBarState('success'),
+  data_warm_cold_intensity_emissions: () => useEZOutputEmissionsStore.getState().setEmissionsWarmColdIntensityState('success'),
+  data_text_paragraph1_people_response: () => useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraphState('success'),
+  data_chart_sankey_people_response: () => useEZOutputPeopleResponseStore.getState().setPeopleResponseSankeyState('success'),
+  data_chart_bar_people_response: () => useEZOutputPeopleResponseStore.getState().setPeopleResponseBarState('success'),
+  data_text_paragraph1_trip_legs: () => useEZOutputTripLegsStore.getState().setTripLegsParagraphState('success'),
   data_table_trip_legs: () => useEZOutputTripLegsStore.getState().setTripLegsTableState('success'),
 };
 
@@ -235,161 +254,159 @@ export function handleDataMessage(
         networkNodes: number;
         networkLinks: number;
         totalKmTraveled: number;
+        samplePersonCount: number;
+        sampleLegCount: number;
+        sampleTotalKmTraveled: number;
+        samplePercentage: number;
       };
       useEZOutputOverviewStore.getState().setOverviewData({
-        totalPersonCount: data.personCount,
-        totalLegCount: data.legCount,
+        personCount: data.personCount,
+        legCount: data.legCount,
         totalAreaCoverageKm2: data.simulationAreaKm2,
         totalNetworkNodes: data.networkNodes,
         totalNetworkLinks: data.networkLinks,
-        totalKilometersTraveled: data.totalKmTraveled,
+        totalKmTraveled: data.totalKmTraveled,
+        samplePersonCount: data.samplePersonCount,
+        sampleLegCount: data.sampleLegCount,
+        sampleTotalKmTraveled: data.sampleTotalKmTraveled,
+        samplePercentage: data.samplePercentage,
       });
       break;
     }
 
     case 'data_text_paragraph1_emissions': {
       const data = payload as {
-        co2Baseline: number;
-        co2PostPolicy: number;
-        pm25Baseline: number;
-        pm25PostPolicy: number;
-        noxBaseline: number;
-        noxPostPolicy: number;
-        pm10Baseline: number;
-        pm10PostPolicy: number;
-        modeShiftPercentage: number;
+        co2Baseline: number; co2Policy: number; co2DeltaPercent: number;
+        noxBaseline: number; noxPolicy: number; noxDeltaPercent: number;
+        pm25Baseline: number; pm25Policy: number; pm25DeltaPercent: number;
+        pm10Baseline: number; pm10Policy: number; pm10DeltaPercent: number;
+        privateCo2Baseline: number; privateCo2Policy: number; privateCo2DeltaPercent: number;
+        privateNoxBaseline: number; privateNoxPolicy: number; privateNoxDeltaPercent: number;
+        privatePm25Baseline: number; privatePm25Policy: number; privatePm25DeltaPercent: number;
+        privatePm10Baseline: number; privatePm10Policy: number; privatePm10DeltaPercent: number;
+        transitCo2Baseline: number; transitCo2Policy: number;
+        transitNoxBaseline: number; transitNoxPolicy: number;
+        transitPm25Baseline: number; transitPm25Policy: number;
+        transitPm10Baseline: number; transitPm10Policy: number;
       };
-      useEZOutputEmissionsStore.getState().setEmissionsParagraph1Data({
-        co2Baseline: data.co2Baseline,
-        co2PostPolicy: data.co2PostPolicy,
-        pm25Baseline: data.pm25Baseline,
-        pm25PostPolicy: data.pm25PostPolicy,
-        noxBaseline: data.noxBaseline,
-        noxPostPolicy: data.noxPostPolicy,
-        pm10Baseline: data.pm10Baseline,
-        pm10PostPolicy: data.pm10PostPolicy,
-        modeShiftPercentage: data.modeShiftPercentage,
-      });
+      useEZOutputEmissionsStore.getState().setEmissionsParagraph1Data(data);
       break;
     }
 
     case 'data_text_paragraph2_emissions': {
       const data = payload as {
-        pm25PostPolicy: number;
-        zeroEmissionShareBaseline: number;
-        zeroEmissionSharePostPolicy: number;
-        nearZeroEmissionShareBaseline: number;
-        nearZeroEmissionSharePostPolicy: number;
-        lowEmissionShareBaseline: number;
-        lowEmissionSharePostPolicy: number;
-        midEmissionShareBaseline: number;
-        midEmissionSharePostPolicy: number;
-        highEmissionShareBaseline: number;
-        highEmissionSharePostPolicy: number;
+        pm25PerKm2Baseline: number;
+        pm25PerKm2Policy: number;
+        zoneAreaKm2: number;
+        mixingHeightMeters: number;
       };
-      useEZOutputEmissionsStore.getState().setEmissionsParagraph2Data({
-        pm25PostPolicy: data.pm25PostPolicy,
-        zeroEmissionShareBaseline: data.zeroEmissionShareBaseline,
-        zeroEmissionSharePostPolicy: data.zeroEmissionSharePostPolicy,
-        nearZeroEmissionShareBaseline: data.nearZeroEmissionShareBaseline,
-        nearZeroEmissionSharePostPolicy: data.nearZeroEmissionSharePostPolicy,
-        lowEmissionShareBaseline: data.lowEmissionShareBaseline,
-        lowEmissionSharePostPolicy: data.lowEmissionSharePostPolicy,
-        midEmissionShareBaseline: data.midEmissionShareBaseline,
-        midEmissionSharePostPolicy: data.midEmissionSharePostPolicy,
-        highEmissionShareBaseline: data.highEmissionShareBaseline,
-        highEmissionSharePostPolicy: data.highEmissionSharePostPolicy,
-      });
+      useEZOutputEmissionsStore.getState().setEmissionsParagraph2Data(data);
       break;
     }
 
     case 'data_chart_bar_emissions': {
+      // Same payload shape as paragraph1
       const data = payload as {
-        baselineData: number[];
-        postPolicyData: number[];
+        co2Baseline: number; co2Policy: number; co2DeltaPercent: number;
+        noxBaseline: number; noxPolicy: number; noxDeltaPercent: number;
+        pm25Baseline: number; pm25Policy: number; pm25DeltaPercent: number;
+        pm10Baseline: number; pm10Policy: number; pm10DeltaPercent: number;
+        privateCo2Baseline: number; privateCo2Policy: number; privateCo2DeltaPercent: number;
+        privateNoxBaseline: number; privateNoxPolicy: number; privateNoxDeltaPercent: number;
+        privatePm25Baseline: number; privatePm25Policy: number; privatePm25DeltaPercent: number;
+        privatePm10Baseline: number; privatePm10Policy: number; privatePm10DeltaPercent: number;
+        transitCo2Baseline: number; transitCo2Policy: number;
+        transitNoxBaseline: number; transitNoxPolicy: number;
+        transitPm25Baseline: number; transitPm25Policy: number;
+        transitPm10Baseline: number; transitPm10Policy: number;
       };
-      useEZOutputEmissionsStore.getState().setEmissionsBarChartData({
-        baselineEmissions: data.baselineData,
-        postPolicyEmissions: data.postPolicyData,
-      });
+      useEZOutputEmissionsStore.getState().setEmissionsBarChartData(data);
       break;
     }
 
-    case 'data_chart_pie_emissions': {
+    case 'data_chart_line_emissions': {
       const data = payload as {
-        vehicleBaselineData: number[];
-        vehiclePostPolicyData: number[];
+        timeBins: string[];
+        co2Baseline: number[]; co2Policy: number[];
+        noxBaseline: number[]; noxPolicy: number[];
+        pm25Baseline: number[]; pm25Policy: number[];
+        pm10Baseline: number[]; pm10Policy: number[];
       };
-      useEZOutputEmissionsStore.getState().setEmissionsPieChartsData({
-        vehicleShareBaseline: data.vehicleBaselineData,
-        vehicleSharePostPolicy: data.vehiclePostPolicyData,
-      });
+      useEZOutputEmissionsStore.getState().setEmissionsLineChartData(data);
+      break;
+    }
+
+    case 'data_chart_stacked_bar_emissions': {
+      const data = payload as {
+        baseline: {
+          private: { co2ByType: Record<string, number>; noxByType: Record<string, number>; pm25ByType: Record<string, number>; pm10ByType: Record<string, number> };
+          transit: { co2: number; nox: number; pm25: number; pm10: number };
+        };
+        policy: {
+          private: { co2ByType: Record<string, number>; noxByType: Record<string, number>; pm25ByType: Record<string, number>; pm10ByType: Record<string, number> };
+          transit: { co2: number; nox: number; pm25: number; pm10: number };
+        };
+      };
+      useEZOutputEmissionsStore.getState().setEmissionsStackedBarData(data);
+      break;
+    }
+
+    case 'data_warm_cold_intensity_emissions': {
+      const data = payload as {
+        warmCold: { warmBaseline: number; coldBaseline: number; warmPolicy: number; coldPolicy: number };
+        intensity: { co2Baseline: number; co2Policy: number; distanceBaseline: number; distancePolicy: number; co2PerMeterBaseline: number; co2PerMeterPolicy: number };
+      };
+      useEZOutputEmissionsStore.getState().setEmissionsWarmColdIntensityData(data);
       break;
     }
 
     case 'data_text_paragraph1_people_response': {
       const data = payload as {
-        paidPenaltyPct: number;
-        reroutedPct: number;
-        busPct: number;
-        subwayPct: number;
-        walkPct: number;
-        bikePct: number;
-        carPct: number;
-        cancelledPct: number;
+        totalTrips: number; affectedTrips: number; affectedAgents: number;
+        modeShiftCount: number; modeShiftPct: number;
+        reroutedCount: number; reroutedPct: number;
+        paidPenaltyCount: number; paidPenaltyPct: number;
+        cancelledCount: number; cancelledPct: number;
+        noChangeCount: number; noChangePct: number;
+        dominantResponse: string;
         penaltyCharges: Array<{ zoneName: string; rate: number }>;
-        totalAffectedTrips: number;
       };
-      useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph1Data({
-        paidPenaltyPercentage: data.paidPenaltyPct,
-        reroutedPercentage: data.reroutedPct,
-        switchedToBusPercentage: data.busPct,
-        switchedToSubwayPercentage: data.subwayPct,
-        switchedToWalkingPercentage: data.walkPct,
-        switchedToBikingPercentage: data.bikePct,
-        switchedToCarPercentage: data.carPct,
-        cancelledTripPercentage: data.cancelledPct,
-        penaltyCharges: data.penaltyCharges,
-        totalAffectedTrips: data.totalAffectedTrips,
-      });
+      useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraphData(data);
       break;
     }
 
-    case 'data_text_paragraph2_people_response': {
+    case 'data_chart_sankey_people_response': {
       const data = payload as {
-        avgPenaltyTime: number;
-        avgRerouteTime: number;
-        avgBusTime: number;
-        avgSubwayTime: number;
-        avgWalkTime: number;
-        avgBikeTime: number;
-        avgCarTime: number;
+        nodes: string[];
+        flows: Array<{ from: string; to: string; count: number }>;
       };
-      useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph2Data({
-        averageTimePaidPenalty: data.avgPenaltyTime,
-        averageTimeRerouted: data.avgRerouteTime,
-        averageTimeSwitchedToBus: data.avgBusTime,
-        averageTimeSwitchedToSubway: data.avgSubwayTime,
-        averageTimeSwitchedToWalking: data.avgWalkTime,
-        averageTimeSwitchedToBiking: data.avgBikeTime,
-        averageTimeSwitchedToCar: data.avgCarTime,
-      });
+      useEZOutputPeopleResponseStore.getState().setPeopleResponseSankeyData(data);
       break;
     }
 
-    case 'data_chart_breakdown_people_response': {
-      const data = payload as { data: number[] };
-      useEZOutputPeopleResponseStore.getState().setPeopleResponseBreakdownChartData({
-        responsePercentages: data.data,
-      });
+    case 'data_chart_bar_people_response': {
+      const data = payload as {
+        modes: string[];
+        baseline: number[];
+        policy: number[];
+      };
+      useEZOutputPeopleResponseStore.getState().setPeopleResponseBarData(data);
       break;
     }
 
-    case 'data_chart_time_impact_people_response': {
-      const data = payload as { data: number[] };
-      useEZOutputPeopleResponseStore.getState().setPeopleResponseTimeImpactChartData({
-        averageTimeDeltas: data.data,
-      });
+    case 'data_text_paragraph1_trip_legs': {
+      const data = payload as {
+        totalTrips: number; changedTrips: number; unchangedTrips: number;
+        cancelledTrips: number; newTrips: number; modeShiftTrips: number;
+        netCo2DeltaGrams: number; netTimeDeltaMinutes: number;
+        avgCo2DeltaGrams: number; avgTimeDeltaMinutes: number;
+        improvedCo2Count: number; worsenedCo2Count: number;
+        improvedTimeCount: number; worsenedTimeCount: number;
+        winWinCount: number; loseLoseCount: number;
+        envWinPersonalCostCount: number; personalWinEnvCostCount: number;
+        dominantOutcome: string;
+      };
+      useEZOutputTripLegsStore.getState().setTripLegsParagraphData(data);
       break;
     }
 
@@ -398,18 +415,20 @@ export function handleDataMessage(
         records: Array<{
           legId: string;
           personId: string;
-          originActivityType: string;
-          destinationActivityType: string;
+          originActivity: string;
+          destinationActivity: string;
           co2DeltaGrams: number;
           timeDeltaMinutes: number;
           impact: string;
         }>;
         totalRecords: number;
+        totalAllRecords: number;
         pageSize: number;
       };
       useEZOutputTripLegsStore.getState().setTripLegsFirstPage({
         records: data.records,
         totalRecords: data.totalRecords,
+        totalAllRecords: data.totalAllRecords,
         pageSize: data.pageSize,
       });
       break;

@@ -3,6 +3,7 @@ import {
   useEZOutputOverviewStore,
   useEZOutputEmissionsStore,
   useEZOutputPeopleResponseStore,
+  useEZOutputTripLegsStore,
 } from '~stores/output';
 import { getBackendUrl } from './config';
 import { ApiResponse } from './apiResponse';
@@ -34,25 +35,33 @@ const LOADING_STATE_MAP: Record<string, () => void> = {
     useEZOutputEmissionsStore.getState().setEmissionsBarChartState('loading');
     useEZOutputEmissionsStore.getState().setEmissionsBarChartError(null);
   },
-  chart_pie_emissions: () => {
-    useEZOutputEmissionsStore.getState().setEmissionsPieChartsState('loading');
-    useEZOutputEmissionsStore.getState().setEmissionsPieChartsError(null);
+  chart_line_emissions: () => {
+    useEZOutputEmissionsStore.getState().setEmissionsLineChartState('loading');
+    useEZOutputEmissionsStore.getState().setEmissionsLineChartError(null);
+  },
+  chart_stacked_bar_emissions: () => {
+    useEZOutputEmissionsStore.getState().setEmissionsStackedBarState('loading');
+    useEZOutputEmissionsStore.getState().setEmissionsStackedBarError(null);
+  },
+  warm_cold_intensity_emissions: () => {
+    useEZOutputEmissionsStore.getState().setEmissionsWarmColdIntensityState('loading');
+    useEZOutputEmissionsStore.getState().setEmissionsWarmColdIntensityError(null);
   },
   text_paragraph1_people_response: () => {
-    useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph1State('loading');
-    useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph1Error(null);
+    useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraphState('loading');
+    useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraphError(null);
   },
-  text_paragraph2_people_response: () => {
-    useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph2State('loading');
-    useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph2Error(null);
+  chart_sankey_people_response: () => {
+    useEZOutputPeopleResponseStore.getState().setPeopleResponseSankeyState('loading');
+    useEZOutputPeopleResponseStore.getState().setPeopleResponseSankeyError(null);
   },
-  chart_breakdown_people_response: () => {
-    useEZOutputPeopleResponseStore.getState().setPeopleResponseBreakdownChartState('loading');
-    useEZOutputPeopleResponseStore.getState().setPeopleResponseBreakdownChartError(null);
+  chart_bar_people_response: () => {
+    useEZOutputPeopleResponseStore.getState().setPeopleResponseBarState('loading');
+    useEZOutputPeopleResponseStore.getState().setPeopleResponseBarError(null);
   },
-  chart_time_impact_people_response: () => {
-    useEZOutputPeopleResponseStore.getState().setPeopleResponseTimeImpactChartState('loading');
-    useEZOutputPeopleResponseStore.getState().setPeopleResponseTimeImpactChartError(null);
+  text_paragraph1_trip_legs: () => {
+    useEZOutputTripLegsStore.getState().setTripLegsParagraphState('loading');
+    useEZOutputTripLegsStore.getState().setTripLegsParagraphError(null);
   },
 };
 
@@ -73,25 +82,33 @@ const ERROR_STATE_MAP: Record<string, (msg: string) => void> = {
     useEZOutputEmissionsStore.getState().setEmissionsBarChartState('error');
     useEZOutputEmissionsStore.getState().setEmissionsBarChartError(msg);
   },
-  chart_pie_emissions: (msg) => {
-    useEZOutputEmissionsStore.getState().setEmissionsPieChartsState('error');
-    useEZOutputEmissionsStore.getState().setEmissionsPieChartsError(msg);
+  chart_line_emissions: (msg) => {
+    useEZOutputEmissionsStore.getState().setEmissionsLineChartState('error');
+    useEZOutputEmissionsStore.getState().setEmissionsLineChartError(msg);
+  },
+  chart_stacked_bar_emissions: (msg) => {
+    useEZOutputEmissionsStore.getState().setEmissionsStackedBarState('error');
+    useEZOutputEmissionsStore.getState().setEmissionsStackedBarError(msg);
+  },
+  warm_cold_intensity_emissions: (msg) => {
+    useEZOutputEmissionsStore.getState().setEmissionsWarmColdIntensityState('error');
+    useEZOutputEmissionsStore.getState().setEmissionsWarmColdIntensityError(msg);
   },
   text_paragraph1_people_response: (msg) => {
-    useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph1State('error');
-    useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph1Error(msg);
+    useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraphState('error');
+    useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraphError(msg);
   },
-  text_paragraph2_people_response: (msg) => {
-    useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph2State('error');
-    useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraph2Error(msg);
+  chart_sankey_people_response: (msg) => {
+    useEZOutputPeopleResponseStore.getState().setPeopleResponseSankeyState('error');
+    useEZOutputPeopleResponseStore.getState().setPeopleResponseSankeyError(msg);
   },
-  chart_breakdown_people_response: (msg) => {
-    useEZOutputPeopleResponseStore.getState().setPeopleResponseBreakdownChartState('error');
-    useEZOutputPeopleResponseStore.getState().setPeopleResponseBreakdownChartError(msg);
+  chart_bar_people_response: (msg) => {
+    useEZOutputPeopleResponseStore.getState().setPeopleResponseBarState('error');
+    useEZOutputPeopleResponseStore.getState().setPeopleResponseBarError(msg);
   },
-  chart_time_impact_people_response: (msg) => {
-    useEZOutputPeopleResponseStore.getState().setPeopleResponseTimeImpactChartState('error');
-    useEZOutputPeopleResponseStore.getState().setPeopleResponseTimeImpactChartError(msg);
+  text_paragraph1_trip_legs: (msg) => {
+    useEZOutputTripLegsStore.getState().setTripLegsParagraphState('error');
+    useEZOutputTripLegsStore.getState().setTripLegsParagraphError(msg);
   },
 };
 

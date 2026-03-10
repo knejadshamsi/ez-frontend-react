@@ -1,9 +1,9 @@
 // === SIMULATION PHASE EVENTS ===
 //
 // Phase events follow the pattern:
-// - pa_phase_* (phase started)
-// - success_phase_* (phase completed successfully)
-// - error_phase_* (phase failed)
+// - pa_{step}_started (step in progress)
+// - pa_{step}_complete (step completed)
+// - pa_{step}_failed (step failed)
 //
 // These are detected by prefix checking in handlers, no explicit array needed.
 //

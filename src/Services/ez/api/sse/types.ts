@@ -28,87 +28,152 @@ interface OverviewPayload {
 
 // === EMISSIONS PAYLOADS ===
 
-// Emissions comparison data (SSE: data_text_paragraph1_emissions)
+// Emissions pollutant totals and deltas (SSE: data_text_paragraph1_emissions, data_chart_bar_emissions)
 interface EmissionsParagraph1Payload {
-  co2Baseline: number;
-  co2PostPolicy: number;
-  pm25Baseline: number;
-  pm25PostPolicy: number;
-  noxBaseline: number;
-  noxPostPolicy: number;
-  pm10Baseline: number;
-  pm10PostPolicy: number;
-  modeShiftPercentage: number;
+  // Combined (private scaled + transit)
+  co2Baseline: number; co2Policy: number; co2DeltaPercent: number;
+  noxBaseline: number; noxPolicy: number; noxDeltaPercent: number;
+  pm25Baseline: number; pm25Policy: number; pm25DeltaPercent: number;
+  pm10Baseline: number; pm10Policy: number; pm10DeltaPercent: number;
+  // Private vehicle only (scaled)
+  privateCo2Baseline: number; privateCo2Policy: number; privateCo2DeltaPercent: number;
+  privateNoxBaseline: number; privateNoxPolicy: number; privateNoxDeltaPercent: number;
+  privatePm25Baseline: number; privatePm25Policy: number; privatePm25DeltaPercent: number;
+  privatePm10Baseline: number; privatePm10Policy: number; privatePm10DeltaPercent: number;
+  // Transit only (context)
+  transitCo2Baseline: number; transitCo2Policy: number;
+  transitNoxBaseline: number; transitNoxPolicy: number;
+  transitPm25Baseline: number; transitPm25Policy: number;
+  transitPm10Baseline: number; transitPm10Policy: number;
 }
 
-// Air quality and vehicle fleet data (SSE: data_text_paragraph2_emissions)
+// PM2.5 spatial density (SSE: data_text_paragraph2_emissions)
 interface EmissionsParagraph2Payload {
-  pm25PostPolicy: number;
-  zeroEmissionShareBaseline: number;
-  zeroEmissionSharePostPolicy: number;
-  nearZeroEmissionShareBaseline: number;
-  nearZeroEmissionSharePostPolicy: number;
-  lowEmissionShareBaseline: number;
-  lowEmissionSharePostPolicy: number;
-  midEmissionShareBaseline: number;
-  midEmissionSharePostPolicy: number;
-  highEmissionShareBaseline: number;
-  highEmissionSharePostPolicy: number;
+  pm25PerKm2Baseline: number;
+  pm25PerKm2Policy: number;
+  zoneAreaKm2: number;
+  mixingHeightMeters: number;
 }
 
-// Emissions bar chart arrays (SSE: data_chart_bar_emissions)
-interface EmissionsBarChartPayload {
-  baselineData: number[];
-  postPolicyData: number[];
+// Time-binned emissions (SSE: data_chart_line_emissions)
+interface EmissionsLineChartPayload {
+  timeBins: string[];
+  co2Baseline: number[];
+  co2Policy: number[];
+  noxBaseline: number[];
+  noxPolicy: number[];
+  pm25Baseline: number[];
+  pm25Policy: number[];
+  pm10Baseline: number[];
+  pm10Policy: number[];
 }
 
-// Vehicle emissions pie chart data (SSE: data_chart_pie_emissions)
-interface EmissionsPieChartsPayload {
-  vehicleBaselineData: number[];
-  vehiclePostPolicyData: number[];
+// Emissions by vehicle type (SSE: data_chart_stacked_bar_emissions)
+interface EmissionsStackedBarPayload {
+  baseline: {
+    private: {
+      co2ByType: Record<string, number>;
+      noxByType: Record<string, number>;
+      pm25ByType: Record<string, number>;
+      pm10ByType: Record<string, number>;
+    };
+    transit: { co2: number; nox: number; pm25: number; pm10: number };
+  };
+  policy: {
+    private: {
+      co2ByType: Record<string, number>;
+      noxByType: Record<string, number>;
+      pm25ByType: Record<string, number>;
+      pm10ByType: Record<string, number>;
+    };
+    transit: { co2: number; nox: number; pm25: number; pm10: number };
+  };
+}
+
+// Warm/cold split + CO2 intensity (SSE: data_warm_cold_intensity_emissions)
+interface WarmColdIntensityPayload {
+  warmCold: {
+    warmBaseline: number;
+    coldBaseline: number;
+    warmPolicy: number;
+    coldPolicy: number;
+  };
+  intensity: {
+    co2Baseline: number;
+    co2Policy: number;
+    distanceBaseline: number;
+    distancePolicy: number;
+    co2PerMeterBaseline: number;
+    co2PerMeterPolicy: number;
+  };
 }
 
 // === PEOPLE RESPONSE PAYLOADS ===
 
-// Behavioral response percentages (SSE: data_text_paragraph1_people_response)
-interface PeopleResponseParagraph1Payload {
-  paidPenaltyPct: number;
+// Response categories and counts (SSE: data_text_paragraph1_people_response)
+interface PeopleResponseParagraphPayload {
+  totalTrips: number;
+  affectedTrips: number;
+  affectedAgents: number;
+  modeShiftCount: number;
+  modeShiftPct: number;
+  reroutedCount: number;
   reroutedPct: number;
-  busPct: number;
-  subwayPct: number;
-  walkPct: number;
-  bikePct: number;
-  carPct: number;
+  paidPenaltyCount: number;
+  paidPenaltyPct: number;
+  cancelledCount: number;
   cancelledPct: number;
+  noChangeCount: number;
+  noChangePct: number;
+  dominantResponse: string;
   penaltyCharges: Array<{ zoneName: string; rate: number }>;
-  totalAffectedTrips: number;
 }
 
-// Time impact per response type (SSE: data_text_paragraph2_people_response)
-interface PeopleResponseParagraph2Payload {
-  avgPenaltyTime: number;
-  avgRerouteTime: number;
-  avgBusTime: number;
-  avgSubwayTime: number;
-  avgWalkTime: number;
-  avgBikeTime: number;
-  avgCarTime: number;
+// Mode transition matrix (SSE: data_chart_sankey_people_response)
+interface PeopleResponseSankeyPayload {
+  nodes: string[];
+  flows: Array<{ from: string; to: string; count: number }>;
 }
 
-// Response breakdown chart data (SSE: data_chart_breakdown_people_response, data_chart_time_impact_people_response)
-interface PeopleResponseChartPayload {
-  data: number[];
+// Mode share percentages (SSE: data_chart_bar_people_response)
+interface PeopleResponseBarPayload {
+  modes: string[];
+  baseline: number[];
+  policy: number[];
 }
 
-// === TRIP LEGS PAYLOADS ===
+// === TRIP PERFORMANCE PAYLOADS ===
 
-// Trip legs table data (SSE: data_table_trip_legs)
+// Trip performance paragraph - quadrant analysis (SSE: data_text_paragraph1_trip_legs)
+interface TripPerformanceParagraphPayload {
+  totalTrips: number;
+  changedTrips: number;
+  unchangedTrips: number;
+  cancelledTrips: number;
+  newTrips: number;
+  modeShiftTrips: number;
+  netCo2DeltaGrams: number;
+  netTimeDeltaMinutes: number;
+  avgCo2DeltaGrams: number;
+  avgTimeDeltaMinutes: number;
+  improvedCo2Count: number;
+  worsenedCo2Count: number;
+  improvedTimeCount: number;
+  worsenedTimeCount: number;
+  winWinCount: number;
+  loseLoseCount: number;
+  envWinPersonalCostCount: number;
+  personalWinEnvCostCount: number;
+  dominantOutcome: string;
+}
+
+// Trip performance table data (SSE: data_table_trip_legs)
 interface TripLegsFirstPagePayload {
   records: Array<{
     legId: string;
     personId: string;
-    originActivityType: string;
-    destinationActivityType: string;
+    originActivity: string;
+    destinationActivity: string;
     co2DeltaGrams: number;
     timeDeltaMinutes: number;
     impact: string;
@@ -127,6 +192,7 @@ export type SSEMessage =
   | { messageType: 'heartbeat'; payload: Record<string, never>; timestamp: string }
   | { messageType: 'success_process'; payload: Record<string, never>; timestamp: string }
   | { messageType: 'error_global'; payload: ErrorPayload; timestamp: string }
+  | { messageType: 'error_validation'; payload: { errors: ValidationError[] }; timestamp: string }
   | { messageType: 'pa_cancelled_process'; payload: { status: string; reason: string }; timestamp: string }
 
   // Overview data
@@ -135,14 +201,18 @@ export type SSEMessage =
   // Emissions data
   | { messageType: 'data_text_paragraph1_emissions'; payload: EmissionsParagraph1Payload; timestamp: string }
   | { messageType: 'data_text_paragraph2_emissions'; payload: EmissionsParagraph2Payload; timestamp: string }
-  | { messageType: 'data_chart_bar_emissions'; payload: EmissionsBarChartPayload; timestamp: string }
-  | { messageType: 'data_chart_pie_emissions'; payload: EmissionsPieChartsPayload; timestamp: string }
+  | { messageType: 'data_chart_bar_emissions'; payload: EmissionsParagraph1Payload; timestamp: string }
+  | { messageType: 'data_chart_line_emissions'; payload: EmissionsLineChartPayload; timestamp: string }
+  | { messageType: 'data_chart_stacked_bar_emissions'; payload: EmissionsStackedBarPayload; timestamp: string }
+  | { messageType: 'data_warm_cold_intensity_emissions'; payload: WarmColdIntensityPayload; timestamp: string }
 
   // People response data
-  | { messageType: 'data_text_paragraph1_people_response'; payload: PeopleResponseParagraph1Payload; timestamp: string }
-  | { messageType: 'data_text_paragraph2_people_response'; payload: PeopleResponseParagraph2Payload; timestamp: string }
-  | { messageType: 'data_chart_breakdown_people_response'; payload: PeopleResponseChartPayload; timestamp: string }
-  | { messageType: 'data_chart_time_impact_people_response'; payload: PeopleResponseChartPayload; timestamp: string }
+  | { messageType: 'data_text_paragraph1_people_response'; payload: PeopleResponseParagraphPayload; timestamp: string }
+  | { messageType: 'data_chart_sankey_people_response'; payload: PeopleResponseSankeyPayload; timestamp: string }
+  | { messageType: 'data_chart_bar_people_response'; payload: PeopleResponseBarPayload; timestamp: string }
+
+  // Trip legs data
+  | { messageType: 'data_text_paragraph1_trip_legs'; payload: TripPerformanceParagraphPayload; timestamp: string }
 
   // Trip legs data
   | { messageType: 'data_table_trip_legs'; payload: TripLegsFirstPagePayload; timestamp: string }
@@ -174,6 +244,13 @@ interface SimulationError {
   details?: string;
 }
 
+// Backend validation error from error_validation SSE event
+export interface ValidationError {
+  origin: string;
+  error: string;
+  message: string;
+}
+
 // Configuration for SSE stream connection
 export interface SimulationStreamConfig {
   endpoint: string;
@@ -185,6 +262,7 @@ export interface SimulationStreamConfig {
   onSimulationStart?: () => void;
   onComplete?: () => void;
   onError?: (error: SimulationError) => void;
+  onValidationError?: (errors: ValidationError[]) => void;
   onTimelineEvent?: (event: string) => void;
   onCancelled?: (reason: string) => void;
   onScenarioStatus?: (status: string) => void;

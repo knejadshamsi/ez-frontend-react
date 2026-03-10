@@ -26,7 +26,7 @@ export const updateScenarioMetadata = async (
   metadata?: ScenarioMetadata
 ): Promise<void> => {
   const backendUrl = getBackendUrl();
-  const url = `${backendUrl}/scenario/${requestId}/input/metadata`;
+  const url = `${backendUrl}/scenario/${requestId}/session-data`;
 
   const payload = metadata || createMetadataPayload();
 

@@ -2,7 +2,7 @@ import { resetAllEZOutputStores, setIncompleteComponentsToError } from '~stores/
 import type { SSEMessage, SimulationStreamConfig } from './types';
 import { handleSSEMessage } from './handlers';
 
-const UNIVERSAL_TIMEOUT_MS = 300000;
+const UNIVERSAL_TIMEOUT_MS = 1800000; // 30 minutes
 
 // Starts an SSE simulation stream with lifecycle management
 export function startSimulationStream(config: SimulationStreamConfig): () => void {
@@ -41,7 +41,7 @@ export function startSimulationStream(config: SimulationStreamConfig): () => voi
       clearTimeout(universalTimeoutId);
     }
     universalTimeoutId = setTimeout(() => {
-      console.error('[SSE] Universal timeout - no data received within 5 minutes');
+      console.error('[SSE] Universal timeout - no data received within 30 minutes');
 
       // Set all incomplete components to error state
       setIncompleteComponentsToError();
@@ -134,9 +134,9 @@ export function startSimulationStream(config: SimulationStreamConfig): () => voi
         for (const line of lines) {
           if (reachedTerminalState) break;
 
-          if (line.startsWith('data: ')) {
+          if (line.startsWith('data:')) {
             try {
-              const jsonStr = line.slice(6);
+              const jsonStr = line.slice(5).trimStart();
               const message: SSEMessage = JSON.parse(jsonStr);
 
               resetHeartbeatTimer();
@@ -149,7 +149,8 @@ export function startSimulationStream(config: SimulationStreamConfig): () => voi
               // Check for terminal messages before handling
               const isTerminal = message.messageType === 'success_process'
                 || message.messageType === 'pa_cancelled_process'
-                || message.messageType === 'error_global';
+                || message.messageType === 'error_global'
+                || message.messageType === 'error_validation';
 
               handleSSEMessage(message, config);
 

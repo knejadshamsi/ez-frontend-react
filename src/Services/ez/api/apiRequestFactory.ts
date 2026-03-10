@@ -1,4 +1,4 @@
-import { APIPayload, Coordinate, CarDistribution } from '~stores/types';
+import type { APIPayload, Coordinate, CarDistribution, CustomSimulationArea, ScaledSimulationArea } from '~stores/types';
 import { useEZSessionStore } from '~stores/session';
 
 const MIN_SIMULATION_OPTIONS = 1;
@@ -19,7 +19,8 @@ export interface APIRequest {
       interval?: number;
     }>;
   }[];
-  simulationArea: Coordinate[][];
+  customSimulationAreas: CustomSimulationArea[];
+  scaledSimulationAreas: ScaledSimulationArea[];
   sources: {
     population: { year: number; name: string };
     network: { year: number; name: string };
@@ -66,15 +67,11 @@ export const createAPIRequest = (
     });
   }
 
-  const scaledCoords: Coordinate[][][] = payload.scaledSimulationAreas
-    .filter(area => area.coords && area.coords.length > 0)
-    .map(area => area.coords);
+  const filteredCustomAreas = payload.customSimulationAreas
+    .filter(area => area.coords !== null && area.coords.length > 0) as CustomSimulationArea[];
 
-  const customCoords: Coordinate[][][] = payload.customSimulationAreas
-    .filter(area => area.coords !== null && area.coords.length > 0)
-    .map(area => area.coords!);
-
-  const simulationArea: Coordinate[][] = [...scaledCoords, ...customCoords].flat();
+  const filteredScaledAreas = payload.scaledSimulationAreas
+    .filter(area => area.coords && area.coords.length > 0);
 
   const zonesWithCoords = payload.zones.filter(zone => zone.coords !== null);
 
@@ -92,7 +89,8 @@ export const createAPIRequest = (
     scenarioTitle,
     scenarioDescription,
     zones: filteredZones,
-    simulationArea,
+    customSimulationAreas: filteredCustomAreas,
+    scaledSimulationAreas: filteredScaledAreas,
     sources: payload.sources,
     simulationOptions: payload.simulationOptions,
     carDistribution: enabledDistribution,
@@ -113,6 +111,14 @@ export const validateAPIRequest = (request: APIRequest): { isValid: boolean; err
     return {
       isValid: false,
       error: 'parameterSelection.validation.invalidZones'
+    };
+  }
+
+  const hasEmptyPolicies = request.zones.some(zone => zone.policies.length === 0);
+  if (hasEmptyPolicies) {
+    return {
+      isValid: false,
+      error: 'parameterSelection.validation.noPolicies'
     };
   }
 
