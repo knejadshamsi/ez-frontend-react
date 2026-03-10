@@ -71,14 +71,14 @@ export interface EZSessionStore {
   setScenarioTitle: (title: string) => void;
   setScenarioDescription: (description: string) => void;
   setRequestId: (id: string) => void;
-  setZoneProperty: (zoneId: string, property: keyof ZoneSessionData, value: any) => void;
+  setZoneProperty: <K extends keyof ZoneSessionData>(zoneId: string, property: K, value: ZoneSessionData[K]) => void;
   setZoneData: (zoneId: string, data: Partial<ZoneSessionData>) => void;
   removeZone: (zoneId: string) => void;
   setCustomAreaData: (areaId: string, data: Partial<CustomAreaSessionData>) => void;
-  setCustomAreaProperty: (areaId: string, property: keyof CustomAreaSessionData, value: any) => void;
+  setCustomAreaProperty: <K extends keyof CustomAreaSessionData>(areaId: string, property: K, value: CustomAreaSessionData[K]) => void;
   removeCustomArea: (areaId: string) => void;
   setScaledAreaData: (areaId: string, data: Partial<ScaledAreaSessionData>) => void;
-  setScaledAreaProperty: (areaId: string, property: keyof ScaledAreaSessionData, value: any) => void;
+  setScaledAreaProperty: <K extends keyof ScaledAreaSessionData>(areaId: string, property: K, value: ScaledAreaSessionData[K]) => void;
   removeScaledArea: (areaId: string) => void;
   setActiveZone: (zoneId: string | null) => void;
   setActiveCustomArea: (areaId: string | null) => void;
@@ -99,21 +99,19 @@ export interface EZSessionStore {
 export type VisualizationType = 'heatmap' | 'hexagon';
 
 // Pollutant type for emissions display
-export type PollutantType = 'CO2' | 'NOx' | 'PM2.5' | 'PM10';
+export type PollutantType = 'CO2' | 'NOx' | 'PM2.5' | 'PM10' | 'All';
+
+// Scenario type for baseline/policy toggle
+export type EmissionsScenarioType = 'baseline' | 'policy';
 
 // View layer for people response map
 export type ResponseLayerView = 'origin' | 'destination';
 
-// Behavioral response categories
-export type BehavioralResponseType =
-  | 'paidPenalty'
-  | 'rerouted'
-  | 'switchedToBus'
-  | 'switchedToSubway'
-  | 'switchedToWalking'
-  | 'switchedToBiking'
-  | 'switchedToCar'
-  | 'cancelledTrip';
+// People response map categories (4 consolidated categories)
+export type PeopleResponseCategory = 'modeShift' | 'rerouted' | 'paidPenalty' | 'cancelled';
+
+// Emissions view mode for private/all toggle
+export type EmissionsViewMode = 'private' | 'all';
 
 // Output filters store interface
 export interface EZOutputFiltersStore {
@@ -125,13 +123,15 @@ export interface EZOutputFiltersStore {
   // Emissions filter settings
   selectedVisualizationType: VisualizationType;
   selectedPollutantType: PollutantType;
+  selectedEmissionsScenario: EmissionsScenarioType;
+  emissionsViewMode: EmissionsViewMode;
 
   // People response filter settings
   selectedResponseLayerView: ResponseLayerView;
-  selectedBehavioralResponseType: BehavioralResponseType;
+  visibleResponseCategories: Set<PeopleResponseCategory>;
 
   // Trip legs filter settings
-  visibleTripLegIds: Set<string>;
+  tripLegsViewMode: 'baseline' | 'policy' | 'hidden';
 
   // Input layer visibility states (output view only)
   inputZoneLayerOpacity: 'hidden' | 'low' | 'medium' | 'normal';
@@ -141,17 +141,17 @@ export interface EZOutputFiltersStore {
   toggleEmissionsMapVisibility: () => void;
   setSelectedVisualizationType: (type: VisualizationType) => void;
   setSelectedPollutantType: (type: PollutantType) => void;
+  setSelectedEmissionsScenario: (scenario: EmissionsScenarioType) => void;
+  setEmissionsViewMode: (mode: EmissionsViewMode) => void;
 
   // People response map actions
   togglePeopleResponseMapVisibility: () => void;
   setSelectedResponseLayerView: (view: ResponseLayerView) => void;
-  setSelectedBehavioralResponseType: (type: BehavioralResponseType) => void;
+  toggleResponseCategory: (category: PeopleResponseCategory) => void;
 
   // Trip legs map actions
   toggleTripLegsMapVisibility: () => void;
-  toggleTripLegVisibility: (legId: string) => void;
-  showAllTripLegs: (legIds: string[]) => void;
-  hideAllTripLegs: () => void;
+  setTripLegsViewMode: (mode: 'baseline' | 'policy' | 'hidden') => void;
 
   // Input layer actions
   cycleInputZoneLayerOpacity: () => void;

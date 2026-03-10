@@ -2,7 +2,6 @@
 export type OriginType = 'center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
 
 // ============= CONSTANTS =============
-export const DEFAULT_ZONE_ID = 'default-zone-00000000';
 
 // ============= EZ SERVICE STATE TYPES =============
 export type EZStateType =
