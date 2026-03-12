@@ -1,18 +1,25 @@
 import { useEffect } from 'react';
-import { Radio, Spin } from 'antd';
+import { Radio, Checkbox, Spin } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useEZOutputMapStore } from '~stores/output';
 import { useEZOutputFiltersStore } from '~stores/session';
 import { useEZServiceStore } from '~store';
 import { fetchMapData } from '~ez/api';
+import type { PeopleResponseCategory } from '~stores/session/types';
 import { MapContainer } from '../utils';
 import outputStyles from '../Output.module.less';
 import './locales';
 
-/**
- * People Response Map - spatial distribution of behavioral responses
- * SSE Message: success_map_people_response
- */
+const CATEGORIES: PeopleResponseCategory[] = ['modeShift', 'rerouted', 'paidPenalty', 'cancelled'];
+
+const CATEGORY_COLORS: Record<string, string> = {
+  modeShift: '#4096ff',
+  rerouted: '#fa8c16',
+  paidPenalty: '#8c8c8c',
+  cancelled: '#eb2f96',
+};
+
+// Interactive people response map with view type and color-coded category checkboxes on separate rows
 export const PeopleResponse = () => {
   const { t } = useTranslation('ez-output-maps');
   const state = useEZOutputMapStore((s) => s.peopleResponseMapState);
@@ -21,12 +28,12 @@ export const PeopleResponse = () => {
   const setState = useEZOutputMapStore((s) => s.setPeopleResponseMapState);
   const setError = useEZOutputMapStore((s) => s.setPeopleResponseMapError);
 
-  const responseLayerView = useEZOutputFiltersStore((s) => s.selectedResponseLayerView);
-  const responseType = useEZOutputFiltersStore((s) => s.selectedBehavioralResponseType);
+  const selectedView = useEZOutputFiltersStore((s) => s.selectedResponseLayerView);
+  const visibleCategories = useEZOutputFiltersStore((s) => s.visibleResponseCategories);
   const isMapVisible = useEZOutputFiltersStore((s) => s.isPeopleResponseMapVisible);
 
-  const setResponseLayerView = useEZOutputFiltersStore((s) => s.setSelectedResponseLayerView);
-  const setResponseType = useEZOutputFiltersStore((s) => s.setSelectedBehavioralResponseType);
+  const setSelectedView = useEZOutputFiltersStore((s) => s.setSelectedResponseLayerView);
+  const toggleCategory = useEZOutputFiltersStore((s) => s.toggleResponseCategory);
   const toggleMapVisibility = useEZOutputFiltersStore((s) => s.togglePeopleResponseMapVisibility);
 
   const isDemoMode = !useEZServiceStore((s) => s.isEzBackendAlive);
@@ -62,15 +69,14 @@ export const PeopleResponse = () => {
       error={state === 'error_initial' || state === 'error' ? error : null}
       onRetry={handleRetry}
     >
-
       <div className={outputStyles.mapControlsContainerVertical}>
         <div className={outputStyles.controlGroup}>
           <label className={outputStyles.controlLabel}>
             {t('peopleResponse.controls.viewType')}
           </label>
           <Radio.Group
-            value={responseLayerView}
-            onChange={(e) => setResponseLayerView(e.target.value)}
+            value={selectedView}
+            onChange={(e) => setSelectedView(e.target.value)}
             size="small"
           >
             <Radio.Button value="origin">{t('peopleResponse.viewTypes.origin')}</Radio.Button>
@@ -80,23 +86,20 @@ export const PeopleResponse = () => {
 
         <div className={outputStyles.controlGroup}>
           <label className={outputStyles.controlLabel}>
-            {t('peopleResponse.controls.responseType')}
+            {t('peopleResponse.controls.responseCategory')}
           </label>
-          <div className={outputStyles.responseTypeWrapper}>
-            <Radio.Group
-              value={responseType}
-              onChange={(e) => setResponseType(e.target.value)}
-              size="small"
-            >
-              <Radio.Button value="paidPenalty">{t('peopleResponse.responseTypes.paidPenalty')}</Radio.Button>
-              <Radio.Button value="rerouted">{t('peopleResponse.responseTypes.rerouted')}</Radio.Button>
-              <Radio.Button value="switchedToBus">{t('peopleResponse.responseTypes.switchedToBus')}</Radio.Button>
-              <Radio.Button value="switchedToSubway">{t('peopleResponse.responseTypes.switchedToSubway')}</Radio.Button>
-              <Radio.Button value="switchedToWalking">{t('peopleResponse.responseTypes.switchedToWalking')}</Radio.Button>
-              <Radio.Button value="switchedToBiking">{t('peopleResponse.responseTypes.switchedToBiking')}</Radio.Button>
-              <Radio.Button value="switchedToCar">{t('peopleResponse.responseTypes.switchedToCar')}</Radio.Button>
-              <Radio.Button value="cancelledTrip">{t('peopleResponse.responseTypes.cancelledTrip')}</Radio.Button>
-            </Radio.Group>
+          <div className={outputStyles.categoryCheckboxRow}>
+            {CATEGORIES.map((cat) => (
+              <Checkbox
+                key={cat}
+                checked={visibleCategories.has(cat)}
+                onChange={() => toggleCategory(cat)}
+              >
+                <span style={{ color: CATEGORY_COLORS[cat] }}>
+                  {t(`peopleResponse.categories.${cat}`)}
+                </span>
+              </Checkbox>
+            ))}
           </div>
         </div>
       </div>

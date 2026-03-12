@@ -9,7 +9,8 @@ import { MapContainer } from '../utils';
 import outputStyles from '../Output.module.less';
 import './locales';
 
-// Interactive emissions map with pollutant selector and visualization toggle
+// Interactive emissions map with scenario toggle, visualization toggle, and private/all toggle
+// Pollutant is controlled by the shared toggle in the parent (index.tsx)
 export const Emissions = () => {
   const { t } = useTranslation('ez-output-maps');
   const state = useEZOutputMapStore((s) => s.emissionsMapState);
@@ -19,11 +20,13 @@ export const Emissions = () => {
   const setError = useEZOutputMapStore((s) => s.setEmissionsMapError);
 
   const visualizationType = useEZOutputFiltersStore((s) => s.selectedVisualizationType);
-  const selectedPollutant = useEZOutputFiltersStore((s) => s.selectedPollutantType);
+  const selectedScenario = useEZOutputFiltersStore((s) => s.selectedEmissionsScenario);
+  const emissionsViewMode = useEZOutputFiltersStore((s) => s.emissionsViewMode);
   const isMapVisible = useEZOutputFiltersStore((s) => s.isEmissionsMapVisible);
 
   const setVisualizationType = useEZOutputFiltersStore((s) => s.setSelectedVisualizationType);
-  const setSelectedPollutant = useEZOutputFiltersStore((s) => s.setSelectedPollutantType);
+  const setSelectedScenario = useEZOutputFiltersStore((s) => s.setSelectedEmissionsScenario);
+  const setEmissionsViewMode = useEZOutputFiltersStore((s) => s.setEmissionsViewMode);
   const toggleMapVisibility = useEZOutputFiltersStore((s) => s.toggleEmissionsMapVisibility);
 
   const isDemoMode = !useEZServiceStore((s) => s.isEzBackendAlive);
@@ -62,6 +65,34 @@ export const Emissions = () => {
       <div className={outputStyles.mapControlsContainer}>
         <div className={outputStyles.controlGroup}>
           <label className={outputStyles.controlLabel}>
+            {t('emissions.controls.scenario')}
+          </label>
+          <Radio.Group
+            value={selectedScenario}
+            onChange={(e) => setSelectedScenario(e.target.value)}
+            size="small"
+          >
+            <Radio.Button value="baseline">{t('emissions.scenarios.baseline')}</Radio.Button>
+            <Radio.Button value="policy">{t('emissions.scenarios.policy')}</Radio.Button>
+          </Radio.Group>
+        </div>
+
+        <div className={outputStyles.controlGroup}>
+          <label className={outputStyles.controlLabel}>
+            {t('emissions.controls.viewMode')}
+          </label>
+          <Radio.Group
+            value={emissionsViewMode}
+            onChange={(e) => setEmissionsViewMode(e.target.value)}
+            size="small"
+          >
+            <Radio.Button value="private">{t('emissions.viewModes.private')}</Radio.Button>
+            <Radio.Button value="all">{t('emissions.viewModes.all')}</Radio.Button>
+          </Radio.Group>
+        </div>
+
+        <div className={outputStyles.controlGroup}>
+          <label className={outputStyles.controlLabel}>
             {t('emissions.controls.visualizationType')}
           </label>
           <Radio.Group
@@ -71,22 +102,6 @@ export const Emissions = () => {
           >
             <Radio.Button value="hexagon">{t('emissions.visualizationTypes.hexagon')}</Radio.Button>
             <Radio.Button value="heatmap">{t('emissions.visualizationTypes.heatmap')}</Radio.Button>
-          </Radio.Group>
-        </div>
-
-        <div className={outputStyles.controlGroup}>
-          <label className={outputStyles.controlLabel}>
-            {t('emissions.controls.pollutantType')}
-          </label>
-          <Radio.Group
-            value={selectedPollutant}
-            onChange={(e) => setSelectedPollutant(e.target.value)}
-            size="small"
-          >
-            <Radio.Button value="CO2">{t('emissions.pollutants.co2')}</Radio.Button>
-            <Radio.Button value="NOx">{t('emissions.pollutants.nox')}</Radio.Button>
-            <Radio.Button value="PM2.5">{t('emissions.pollutants.pm25')}</Radio.Button>
-            <Radio.Button value="PM10">{t('emissions.pollutants.pm10')}</Radio.Button>
           </Radio.Group>
         </div>
       </div>

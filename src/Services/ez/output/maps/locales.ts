@@ -7,18 +7,21 @@ const locales = {
       description: 'Interactive map showing emissions distribution across the network',
       loadingTip: 'Preparing emissions map...',
       controls: {
+        scenario: 'Scenario',
         visualizationType: 'Visualization Type',
-        pollutantType: 'Pollutant Type',
+        viewMode: 'View Mode',
+      },
+      scenarios: {
+        baseline: 'Baseline',
+        policy: 'Post-Policy',
       },
       visualizationTypes: {
         hexagon: 'Hex Layer',
         heatmap: 'Heat Map',
       },
-      pollutants: {
-        co2: 'CO₂',
-        nox: 'NOₓ',
-        pm25: 'PM2.5',
-        pm10: 'PM10',
+      viewModes: {
+        private: 'Private Only',
+        all: 'All Vehicles',
       },
     },
     peopleResponse: {
@@ -27,27 +30,21 @@ const locales = {
       loadingTip: 'Preparing people response map...',
       controls: {
         viewType: 'View Type',
-        responseType: 'Response Type',
+        responseCategory: 'Response Categories',
       },
       viewTypes: {
         origin: 'Origin',
         destination: 'Destination',
       },
-      responseTypes: {
-        paidPenalty: 'Paid Penalty',
+      categories: {
+        modeShift: 'Mode Shift',
         rerouted: 'Rerouted',
-        switchedToBus: 'Changed to Bus',
-        switchedToSubway: 'Changed to Subway',
-        switchedToWalking: 'Changed to Walking',
-        switchedToBiking: 'Changed to Biking',
-        switchedToCar: 'Changed to Car',
-        cancelledTrip: 'Trip Cancelled',
+        paidPenalty: 'Paid Penalty',
+        cancelled: 'Cancelled',
       },
     },
     tripLegs: {
-      title: 'Trip Leg Visualization',
-      description: 'Line layer showing the selected trip route on the network',
-      loadingTip: 'Preparing trip legs map...',
+      loadingTip: 'Preparing trip performance map...',
     },
   },
   fr: {
@@ -56,18 +53,21 @@ const locales = {
       description: 'Carte interactive montrant la distribution des émissions sur le réseau',
       loadingTip: 'Préparation de la carte des émissions...',
       controls: {
+        scenario: 'Scenario',
         visualizationType: 'Type de visualisation',
-        pollutantType: 'Type de polluant',
+        viewMode: 'Mode de vue',
+      },
+      scenarios: {
+        baseline: 'Reference',
+        policy: 'Post-politique',
       },
       visualizationTypes: {
         hexagon: 'Couche hexagonale',
         heatmap: 'Carte de chaleur',
       },
-      pollutants: {
-        co2: 'CO₂',
-        nox: 'NOₓ',
-        pm25: 'PM2,5',
-        pm10: 'PM10',
+      viewModes: {
+        private: 'Vehicules prives',
+        all: 'Tous les vehicules',
       },
     },
     peopleResponse: {
@@ -76,27 +76,21 @@ const locales = {
       loadingTip: 'Préparation de la carte de réponse des personnes...',
       controls: {
         viewType: 'Type de vue',
-        responseType: 'Type de réponse',
+        responseCategory: 'Categories de reponse',
       },
       viewTypes: {
         origin: 'Origine',
         destination: 'Destination',
       },
-      responseTypes: {
-        paidPenalty: 'Pénalité payée',
-        rerouted: 'Redirigé',
-        switchedToBus: 'Changé pour autobus',
-        switchedToSubway: 'Changé pour métro',
-        switchedToWalking: 'Changé pour marche',
-        switchedToBiking: 'Changé pour vélo',
-        switchedToCar: 'Passé en voiture',
-        cancelledTrip: 'Trajet annulé',
+      categories: {
+        modeShift: 'Changement de mode',
+        rerouted: 'Reachemine',
+        paidPenalty: 'Penalite payee',
+        cancelled: 'Annule',
       },
     },
     tripLegs: {
-      title: 'Visualisation des segments de trajet',
-      description: 'Couche de lignes montrant l\'itinéraire du trajet sélectionné sur le réseau',
-      loadingTip: 'Préparation de la carte des segments de trajet...',
+      loadingTip: 'Preparation de la carte de performance...',
     },
   },
 } as const;

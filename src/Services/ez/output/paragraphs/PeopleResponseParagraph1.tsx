@@ -1,197 +1,20 @@
 import { Spin, Alert, Button } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { useEZOutputPeopleResponseStore, type EZPeopleResponseParagraph1Data } from '~stores/output';
+import { useEZOutputPeopleResponseStore } from '~stores/output';
 import { useEZSessionStore } from '~stores/session';
 import { retryComponentData } from '~ez/api';
-import {
-  LEZ_BENCHMARKS,
-  BEHAVIOR_THRESHOLDS,
-  BENCHMARK_DELTAS
-} from '../utils/calculations';
-import { HighlightedText } from '../utils';
+import { SmartNumber, Sentence } from '../components';
 import outputStyles from '../Output.module.less';
 
-// ENGLISH TEXT GENERATION
-
-interface BehaviorSplit {
-  avoidancePct: number;
-  modalShiftPct: number;
-  characterization: string;
-}
-
-function calculateBehaviorSplit(data: EZPeopleResponseParagraph1Data): BehaviorSplit {
-  const avoidancePct = data.paidPenaltyPercentage + data.reroutedPercentage + data.switchedToCarPercentage;
-  const modalShiftPct = data.switchedToBusPercentage + data.switchedToSubwayPercentage +
-                        data.switchedToWalkingPercentage + data.switchedToBikingPercentage;
-
-  let characterization: string;
-  if (avoidancePct > BEHAVIOR_THRESHOLDS.OVERWHELMING) {
-    characterization = 'overwhelmingly favored avoidance strategies';
-  } else if (avoidancePct > BEHAVIOR_THRESHOLDS.PREDOMINANT) {
-    characterization = 'predominantly chose avoidance strategies';
-  } else if (modalShiftPct > BEHAVIOR_THRESHOLDS.OVERWHELMING) {
-    characterization = 'overwhelmingly adopted sustainable modes';
-  } else if (modalShiftPct > BEHAVIOR_THRESHOLDS.PREDOMINANT) {
-    characterization = 'predominantly shifted to sustainable modes';
-  } else if (Math.abs(avoidancePct - modalShiftPct) < BEHAVIOR_THRESHOLDS.BALANCED) {
-    characterization = 'showed balanced response between avoidance and modal shift';
-  } else if (modalShiftPct > avoidancePct) {
-    characterization = 'favored modal shift over avoidance';
-  } else {
-    characterization = 'favored avoidance over modal shift';
-  }
-
-  return { avoidancePct, modalShiftPct, characterization };
-}
-
-function compareToBenchmarks(modalShiftPct: number): string {
-  const londonDiff = modalShiftPct - LEZ_BENCHMARKS.londonULEZ;
-  const parisDiff = modalShiftPct - LEZ_BENCHMARKS.parisZFE;
-
-  if (modalShiftPct >= LEZ_BENCHMARKS.parisZFE) {
-    if (parisDiff > BENCHMARK_DELTAS.SIGNIFICANT_OUTPERFORM) {
-      return `significantly outperforms both London ULEZ (${LEZ_BENCHMARKS.londonULEZ}%) and Paris ZFE (${LEZ_BENCHMARKS.parisZFE}%), exceeding Paris by ${parisDiff.toFixed(1)} percentage points`;
-    } else if (parisDiff > BENCHMARK_DELTAS.MODERATE_OUTPERFORM) {
-      return `outperforms both London ULEZ (${LEZ_BENCHMARKS.londonULEZ}%) and Paris ZFE (${LEZ_BENCHMARKS.parisZFE}%), exceeding Paris by ${parisDiff.toFixed(1)} percentage points`;
-    } else {
-      return `matches Paris ZFE performance (${LEZ_BENCHMARKS.parisZFE}%), outperforming London ULEZ (${LEZ_BENCHMARKS.londonULEZ}%)`;
-    }
-  } else if (modalShiftPct >= LEZ_BENCHMARKS.londonULEZ) {
-    if (londonDiff > 0) {
-      return `outperforms London ULEZ (${LEZ_BENCHMARKS.londonULEZ}%) by ${londonDiff.toFixed(1)} percentage points but lags Paris ZFE (${LEZ_BENCHMARKS.parisZFE}%) by ${Math.abs(parisDiff).toFixed(1)} percentage points`;
-    } else {
-      return `matches London ULEZ performance (${LEZ_BENCHMARKS.londonULEZ}%) but lags Paris ZFE (${LEZ_BENCHMARKS.parisZFE}%) by ${Math.abs(parisDiff).toFixed(1)} percentage points`;
-    }
-  } else {
-    if (londonDiff > BENCHMARK_DELTAS.SIGNIFICANT_UNDERPERFORM) {
-      return `lags London ULEZ (${LEZ_BENCHMARKS.londonULEZ}%) by ${Math.abs(londonDiff).toFixed(1)} percentage points and Paris ZFE (${LEZ_BENCHMARKS.parisZFE}%) by ${Math.abs(parisDiff).toFixed(1)} percentage points`;
-    } else {
-      return `significantly lags both London ULEZ (${LEZ_BENCHMARKS.londonULEZ}%) and Paris ZFE (${LEZ_BENCHMARKS.parisZFE}%), falling short by ${Math.abs(londonDiff).toFixed(1)} and ${Math.abs(parisDiff).toFixed(1)} percentage points respectively`;
-    }
-  }
-}
-
-function analyzeValueOfTime(data: EZPeopleResponseParagraph1Data): string | null {
-  if (!data.penaltyCharges || data.penaltyCharges.length === 0 || data.paidPenaltyPercentage === 0) {
-    return null;
-  }
-
-  if (data.penaltyCharges.length === 1) {
-    const charge = data.penaltyCharges[0];
-    return `The $${charge.rate.toFixed(2)} charge in ${charge.zoneName} resulted in ${data.paidPenaltyPercentage.toFixed(0)}% choosing to pay the penalty.`;
-  }
-
-  const chargeDescriptions = data.penaltyCharges.map(c => `$${c.rate.toFixed(2)} (${c.zoneName})`).join(' and ');
-  return `Charges of ${chargeDescriptions} resulted in ${data.paidPenaltyPercentage.toFixed(0)}% choosing to pay the penalty.`;
-}
-
-function generateEnglishParagraph1(data: EZPeopleResponseParagraph1Data): string {
-  const { avoidancePct, modalShiftPct, characterization } = calculateBehaviorSplit(data);
-  const benchmarkComparison = compareToBenchmarks(modalShiftPct);
-
-  const sentence1 = `Affected trips ${characterization}, with ${avoidancePct.toFixed(0)}% choosing avoidance (${data.paidPenaltyPercentage.toFixed(0)}% paid penalty, ${data.reroutedPercentage.toFixed(0)}% rerouted, ${data.switchedToCarPercentage.toFixed(0)}% switched to car) versus ${modalShiftPct.toFixed(0)}% adopting sustainable modes.`;
-  const sentence2 = `Modal shift performance ${benchmarkComparison}.`;
-  const votAnalysis = analyzeValueOfTime(data);
-  const sentence3 = votAnalysis || '';
-
-  return [sentence1, sentence2, sentence3].filter(s => s).join(' ');
-}
-
-// FRENCH TEXT GENERATION
-
-interface RepartitionComportement {
-  pctEvitement: number;
-  pctTransfertModal: number;
-  caracterisation: string;
-}
-
-function calculerRepartitionComportement(data: EZPeopleResponseParagraph1Data): RepartitionComportement {
-  const pctEvitement = data.paidPenaltyPercentage + data.reroutedPercentage + data.switchedToCarPercentage;
-  const pctTransfertModal = data.switchedToBusPercentage + data.switchedToSubwayPercentage +
-                           data.switchedToWalkingPercentage + data.switchedToBikingPercentage;
-
-  let caracterisation: string;
-  if (pctEvitement > BEHAVIOR_THRESHOLDS.OVERWHELMING) {
-    caracterisation = "ont largement privilégié les stratégies d'évitement";
-  } else if (pctEvitement > BEHAVIOR_THRESHOLDS.PREDOMINANT) {
-    caracterisation = "ont principalement choisi les stratégies d'évitement";
-  } else if (pctTransfertModal > BEHAVIOR_THRESHOLDS.OVERWHELMING) {
-    caracterisation = "ont largement adopté les modes durables";
-  } else if (pctTransfertModal > BEHAVIOR_THRESHOLDS.PREDOMINANT) {
-    caracterisation = "ont principalement opté pour les modes durables";
-  } else if (Math.abs(pctEvitement - pctTransfertModal) < BEHAVIOR_THRESHOLDS.BALANCED) {
-    caracterisation = "ont montré une réponse équilibrée entre évitement et transfert modal";
-  } else if (pctTransfertModal > pctEvitement) {
-    caracterisation = "ont favorisé le transfert modal plutôt que l'évitement";
-  } else {
-    caracterisation = "ont favorisé l'évitement plutôt que le transfert modal";
-  }
-
-  return { pctEvitement, pctTransfertModal, caracterisation };
-}
-
-function comparerAuxReferences(pctTransfertModal: number): string {
-  const diffLondres = pctTransfertModal - LEZ_BENCHMARKS.londonULEZ;
-  const diffParis = pctTransfertModal - LEZ_BENCHMARKS.parisZFE;
-
-  if (pctTransfertModal >= LEZ_BENCHMARKS.parisZFE) {
-    if (diffParis > BENCHMARK_DELTAS.SIGNIFICANT_OUTPERFORM) {
-      return `surpasse nettement Londres ULEZ (${LEZ_BENCHMARKS.londonULEZ} %) et Paris ZFE (${LEZ_BENCHMARKS.parisZFE} %), dépassant Paris de ${diffParis.toFixed(1).replace('.', ',')} points de pourcentage`;
-    } else if (diffParis > BENCHMARK_DELTAS.MODERATE_OUTPERFORM) {
-      return `surpasse Londres ULEZ (${LEZ_BENCHMARKS.londonULEZ} %) et Paris ZFE (${LEZ_BENCHMARKS.parisZFE} %), dépassant Paris de ${diffParis.toFixed(1).replace('.', ',')} points de pourcentage`;
-    } else {
-      return `égale la performance de Paris ZFE (${LEZ_BENCHMARKS.parisZFE} %), surpassant Londres ULEZ (${LEZ_BENCHMARKS.londonULEZ} %)`;
-    }
-  } else if (pctTransfertModal >= LEZ_BENCHMARKS.londonULEZ) {
-    if (diffLondres > 0) {
-      return `surpasse Londres ULEZ (${LEZ_BENCHMARKS.londonULEZ} %) de ${diffLondres.toFixed(1).replace('.', ',')} points de pourcentage mais reste en deçà de Paris ZFE (${LEZ_BENCHMARKS.parisZFE} %) de ${Math.abs(diffParis).toFixed(1).replace('.', ',')} points de pourcentage`;
-    } else {
-      return `égale la performance de Londres ULEZ (${LEZ_BENCHMARKS.londonULEZ} %) mais reste en deçà de Paris ZFE (${LEZ_BENCHMARKS.parisZFE} %) de ${Math.abs(diffParis).toFixed(1).replace('.', ',')} points de pourcentage`;
-    }
-  } else {
-    if (diffLondres > BENCHMARK_DELTAS.SIGNIFICANT_UNDERPERFORM) {
-      return `reste en deçà de Londres ULEZ (${LEZ_BENCHMARKS.londonULEZ} %) de ${Math.abs(diffLondres).toFixed(1).replace('.', ',')} points de pourcentage et de Paris ZFE (${LEZ_BENCHMARKS.parisZFE} %) de ${Math.abs(diffParis).toFixed(1).replace('.', ',')} points de pourcentage`;
-    } else {
-      return `reste nettement en deçà de Londres ULEZ (${LEZ_BENCHMARKS.londonULEZ} %) et de Paris ZFE (${LEZ_BENCHMARKS.parisZFE} %), avec des écarts de ${Math.abs(diffLondres).toFixed(1).replace('.', ',')} et ${Math.abs(diffParis).toFixed(1).replace('.', ',')} points de pourcentage respectivement`;
-    }
-  }
-}
-
-function analyserValeurDuTemps(data: EZPeopleResponseParagraph1Data): string | null {
-  if (!data.penaltyCharges || data.penaltyCharges.length === 0 || data.paidPenaltyPercentage === 0) {
-    return null;
-  }
-
-  if (data.penaltyCharges.length === 1) {
-    const charge = data.penaltyCharges[0];
-    return `Des frais de ${charge.rate.toFixed(2).replace('.', ',')} $ dans ${charge.zoneName} ont entraîné que ${data.paidPenaltyPercentage.toFixed(0)} % ont choisi de payer la pénalité.`;
-  }
-
-  const descriptionsCharges = data.penaltyCharges.map(c => `${c.rate.toFixed(2).replace('.', ',')} $ (${c.zoneName})`).join(' et ');
-  return `Des frais de ${descriptionsCharges} ont entraîné que ${data.paidPenaltyPercentage.toFixed(0)} % ont choisi de payer la pénalité.`;
-}
-
-function generateFrenchParagraph1(data: EZPeopleResponseParagraph1Data): string {
-  const { pctEvitement, pctTransfertModal, caracterisation } = calculerRepartitionComportement(data);
-  const comparaisonReferences = comparerAuxReferences(pctTransfertModal);
-
-  const phrase1 = `Les déplacements touchés ${caracterisation}, avec ${pctEvitement.toFixed(0)} % choisissant l'évitement (${data.paidPenaltyPercentage.toFixed(0)} % ont payé la pénalité, ${data.reroutedPercentage.toFixed(0)} % ont dévié leur trajet, ${data.switchedToCarPercentage.toFixed(0)} % sont passés en voiture) contre ${pctTransfertModal.toFixed(0)} % adoptant des modes durables.`;
-  const phrase2 = `La performance du transfert modal ${comparaisonReferences}.`;
-  const analyseVDT = analyserValeurDuTemps(data);
-  const phrase3 = analyseVDT || '';
-
-  return [phrase1, phrase2, phrase3].filter(p => p).join(' ');
-}
-
 /**
- * People Response Paragraph 1 - behavioral breakdown and benchmarks
+ * People Response Paragraph - narrative behavioral response summary
  * SSE Message: data_text_paragraph1_people_response
  */
 export const PeopleResponseParagraph1 = () => {
   const { i18n, t } = useTranslation('ez-output');
-  const paragraph1Data = useEZOutputPeopleResponseStore((state) => state.peopleResponseParagraph1Data);
-  const paragraph1State = useEZOutputPeopleResponseStore((state) => state.peopleResponseParagraph1State);
-  const paragraph1Error = useEZOutputPeopleResponseStore((state) => state.peopleResponseParagraph1Error);
+  const data = useEZOutputPeopleResponseStore((state) => state.peopleResponseParagraphData);
+  const componentState = useEZOutputPeopleResponseStore((state) => state.peopleResponseParagraphState);
+  const error = useEZOutputPeopleResponseStore((state) => state.peopleResponseParagraphError);
   const requestId = useEZSessionStore((state) => state.requestId);
 
   const handleRetry = async () => {
@@ -200,11 +23,11 @@ export const PeopleResponseParagraph1 = () => {
     }
   };
 
-  if (paragraph1Error) {
+  if (error) {
     return (
       <Alert
         message={t('paragraphs.peopleResponse1Error')}
-        description={paragraph1Error}
+        description={error}
         type="error"
         showIcon
         className={outputStyles.sectionErrorAlert}
@@ -217,7 +40,7 @@ export const PeopleResponseParagraph1 = () => {
     );
   }
 
-  if (paragraph1State === 'inactive' || paragraph1State === 'loading' || !paragraph1Data) {
+  if (componentState === 'inactive' || componentState === 'loading' || !data) {
     return (
       <div className={outputStyles.paragraphSpinnerContainer}>
         <Spin size="small" />
@@ -225,13 +48,126 @@ export const PeopleResponseParagraph1 = () => {
     );
   }
 
-  const paragraphText = i18n.language === 'fr'
-    ? generateFrenchParagraph1(paragraph1Data)
-    : generateEnglishParagraph1(paragraph1Data);
+  const isFr = i18n.language === 'fr';
+  const affectedPct = data.totalTrips > 0 ? (data.affectedTrips / data.totalTrips) * 100 : 0;
+  const unchangedPct = data.totalTrips > 0 ? (data.noChangeCount / data.totalTrips) * 100 : 0;
+
+  if (data.affectedTrips === 0) {
+    return (
+      <div className={outputStyles.contentParagraph}>
+        <p>
+          {isFr
+            ? 'La politique n\'a eu aucun impact comportemental. Les habitudes de deplacement de la population sont demeurees entierement inchangees.'
+            : 'The policy had no behavioral impact. The population\'s travel patterns remained entirely unchanged.'}
+        </p>
+      </div>
+    );
+  }
+
+  // Build the narrative response breakdown
+  const responses: { label: string; count: number; pct: number }[] = [];
+  if (data.modeShiftCount > 0) {
+    responses.push({
+      label: isFr ? 'ont change de mode de transport' : 'switched their mode of transport',
+      count: data.modeShiftCount,
+      pct: data.modeShiftPct,
+    });
+  }
+  if (data.reroutedCount > 0) {
+    responses.push({
+      label: isFr ? 'ont choisi un itineraire alternatif' : 'chose an alternative route',
+      count: data.reroutedCount,
+      pct: data.reroutedPct,
+    });
+  }
+  if (data.paidPenaltyCount > 0) {
+    responses.push({
+      label: isFr ? 'ont absorbe la charge de congestion' : 'absorbed the congestion charge',
+      count: data.paidPenaltyCount,
+      pct: data.paidPenaltyPct,
+    });
+  }
+  if (data.cancelledCount > 0) {
+    responses.push({
+      label: isFr ? 'ont annule leur deplacement' : 'cancelled their trip',
+      count: data.cancelledCount,
+      pct: data.cancelledPct,
+    });
+  }
+
+  if (isFr) {
+    return (
+      <div className={outputStyles.contentParagraph}>
+        <p>
+          <Sentence>
+            La politique a affecte <SmartNumber value={data.affectedTrips} unitType="count" decimals={0} /> des
+            <SmartNumber value={data.totalTrips} unitType="count" decimals={0} /> deplacements analyses
+            (<SmartNumber value={affectedPct} unitType="percent" decimals={1} />),
+            touchant <SmartNumber value={data.affectedAgents} unitType="count" decimals={0} /> voyageurs.
+          </Sentence>
+          {' '}
+          {responses.map((r, i) => (
+            <span key={i}>
+              <Sentence>
+                <SmartNumber value={r.count} unitType="count" decimals={0} /> deplacements
+                (<SmartNumber value={r.pct} unitType="percent" decimals={1} />) {r.label}.
+              </Sentence>
+              {' '}
+            </span>
+          ))}
+          <Sentence>
+            Les <SmartNumber value={data.noChangeCount} unitType="count" decimals={0} /> deplacements restants
+            (<SmartNumber value={unchangedPct} unitType="percent" decimals={1} />)
+            n'ont pas ete affectes par la politique.
+          </Sentence>
+          {data.paidPenaltyCount > 0 && data.penaltyCharges.length > 0 && (
+            <>
+              {' '}
+              <Sentence>
+                Le taux de congestion etait de
+                <SmartNumber value={data.penaltyCharges[0].rate} unitType="currency" decimals={0} /> par passage.
+              </Sentence>
+            </>
+          )}
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <p className={outputStyles.contentParagraph}>
-      <HighlightedText text={paragraphText} />
-    </p>
+    <div className={outputStyles.contentParagraph}>
+      <p>
+        <Sentence>
+          The policy affected <SmartNumber value={data.affectedTrips} unitType="count" decimals={0} /> of the
+          <SmartNumber value={data.totalTrips} unitType="count" decimals={0} /> trips analyzed
+          (<SmartNumber value={affectedPct} unitType="percent" decimals={1} />),
+          impacting <SmartNumber value={data.affectedAgents} unitType="count" decimals={0} /> travelers.
+        </Sentence>
+        {' '}
+        {responses.map((r, i) => (
+          <span key={i}>
+            <Sentence>
+              <SmartNumber value={r.count} unitType="count" decimals={0} /> trips
+              (<SmartNumber value={r.pct} unitType="percent" decimals={1} />) {r.label}.
+            </Sentence>
+            {' '}
+          </span>
+        ))}
+        <Sentence>
+          The remaining <SmartNumber value={data.noChangeCount} unitType="count" decimals={0} /> trips
+          (<SmartNumber value={unchangedPct} unitType="percent" decimals={1} />)
+          were unaffected by the policy.
+        </Sentence>
+        {data.paidPenaltyCount > 0 && data.penaltyCharges.length > 0 && (
+          <>
+            {' '}
+            <Sentence>
+              The congestion charge rate was
+              <SmartNumber value={data.penaltyCharges[0].rate} unitType="currency" decimals={0} /> per passage.
+            </Sentence>
+          </>
+        )}
+      </p>
+    </div>
   );
 };

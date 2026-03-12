@@ -64,11 +64,6 @@
   margin-bottom: 24px;
 }
 
-.highlightedNumber {
-  font-weight: bold;
-  text-decoration: underline;
-}
-
 .sectionTitle {
   font-size: 18px;
   font-weight: 700;
@@ -102,6 +97,22 @@
   padding: 16px;
   border-radius: 4px;
   margin-bottom: 20px;
+}
+
+.emissionsBarRow {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  min-width: 0;
+}
+
+.emissionsBarCell {
+  flex: 1;
+  min-width: 0;
+  height: 250px;
+  background-color: rgba(250, 250, 250, 0.7);
+  padding: 16px;
+  border-radius: 4px;
 }
 
 .peopleResponseChartContainer {
@@ -173,6 +184,10 @@
 
 .legPerformanceTable {
   margin-bottom: 24px;
+
+  :global(.ant-table-row) {
+    cursor: pointer;
+  }
 }
 
 .positiveDelta {
@@ -230,6 +245,10 @@
   background-color: #f6ffed !important;
 }
 
+.ncRow {
+  opacity: 0.5;
+}
+
 .tripLegsErrorAlert {
   margin-bottom: 16px;
 }
@@ -256,6 +275,100 @@
   align-items: center;
 }
 
+.pollutantSelector {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.lineChartContainer {
+  height: 280px;
+  background-color: rgba(250, 250, 250, 0.7);
+  padding: 16px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.donutLegendRow {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 6px;
+}
+
+.donutScenarioLabel {
+  font-size: 12px;
+  color: #8c8c8c;
+  font-weight: 500;
+}
+
+.stackedBarContainer {
+  height: 280px;
+  background-color: rgba(250, 250, 250, 0.7);
+  padding: 16px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.warmColdContainer {
+  margin-bottom: 20px;
+}
+
+.warmColdBarContainer {
+  height: 140px;
+  background-color: rgba(250, 250, 250, 0.7);
+  padding: 16px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.transitFootnote {
+  font-size: 13px;
+  color: #8c8c8c;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.intensityText {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #333;
+  margin-bottom: 0;
+}
+
+.sankeyContainer {
+  height: 300px;
+  background-color: rgba(250, 250, 250, 0.7);
+  padding: 16px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.sankeyToggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.sankeyToggleLabel {
+  font-size: 13px;
+  color: #595959;
+}
+
+.sankeyLabel {
+  font-size: 12px;
+  fill: #333;
+}
+
+.peopleResponseBarContainer {
+  height: 280px;
+  background-color: rgba(250, 250, 250, 0.7);
+  padding: 16px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
 .backArrowIcon {
   font-size: 12px;
 }
@@ -265,5 +378,124 @@
   justify-content: center;
   align-items: center;
   min-height: 200px;
+}
+
+.pieChartsRow {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.pieChartCell {
+  flex: 1;
+  min-width: 0;
+  height: 280px;
+  background-color: rgba(250, 250, 250, 0.7);
+  padding: 16px;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+}
+
+.pieChartTitle {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.sankeyLegend {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.sankeyLegendItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #333;
+  transition: opacity 0.15s;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+}
+
+.sankeyLegendSwatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  display: inline-block;
+  transition: opacity 0.15s;
+}
+
+.categoryCheckboxRow {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  span {
+    font-weight: 500;
+  }
+}
+
+.categoryCheckboxLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.categoryColorDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.treemapLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.treemapLegendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #595959;
+}
+
+.treemapLegendSwatch {
+  width: 14px;
+  height: 10px;
+  border-radius: 2px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.tableControlPanel {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 8px 0;
+  margin-bottom: 8px;
+}
+
+.tableControlButtonRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
