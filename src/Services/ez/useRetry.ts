@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import type { MessageInstance } from 'antd/es/message/interface';
 import i18n from '~i18nConfig';
 import '~ez/locales';
@@ -9,23 +9,23 @@ import { resetOutputState } from '~stores/reset';
 const t = i18n.t.bind(i18n);
 
 export const useBackendAliveWatcher = (messageApi: MessageInstance): void => {
-  const ezState = useEZServiceStore((state) => state.state);
-  const setState = useEZServiceStore((state) => state.setState);
   const isEzBackendAlive = useEZServiceStore((state) => state.isEzBackendAlive);
-
-  const isNewSimulation = useEZSessionStore((state) => state.isNewSimulation);
-  const setRequestId = useEZSessionStore((state) => state.setRequestId);
-  const abortSseStream = useEZSessionStore((state) => state.abortSseStream);
+  const wasAliveRef = useRef(isEzBackendAlive);
 
   useEffect(() => {
-    if (!isEzBackendAlive) return;
+    const prev = wasAliveRef.current;
+    wasAliveRef.current = isEzBackendAlive;
 
+    // Only act on false -> true transition
+    if (!isEzBackendAlive || prev) return;
+
+    const { state: ezState, setState } = useEZServiceStore.getState();
     if (ezState !== 'AWAIT_RESULTS') return;
 
+    const { isNewSimulation, setRequestId, abortSseStream } = useEZSessionStore.getState();
+
     abortSseStream();
-
     resetOutputState();
-
     setRequestId('');
 
     if (isNewSimulation) {
@@ -35,13 +35,5 @@ export const useBackendAliveWatcher = (messageApi: MessageInstance): void => {
       setState('WELCOME');
       messageApi.success(t('ez-root:connectionMessages.backendOnlineLoadScenario'));
     }
-  }, [
-    isEzBackendAlive,
-    ezState,
-    isNewSimulation,
-    abortSseStream,
-    setRequestId,
-    setState,
-    messageApi,
-  ]);
+  }, [isEzBackendAlive, messageApi]);
 };

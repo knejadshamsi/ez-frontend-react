@@ -49,6 +49,7 @@ const locales = {
     },
     polling: {
       reconnecting: 'Connection lost - monitoring simulation progress...',
+      failed: 'Simulation failed',
     },
     queued: {
       title: 'Simulation queued',
@@ -108,6 +109,7 @@ const locales = {
     },
     polling: {
       reconnecting: 'Connexion perdue - surveillance de la progression...',
+      failed: 'La simulation a echoue',
     },
     queued: {
       title: 'Simulation en file d\'attente',

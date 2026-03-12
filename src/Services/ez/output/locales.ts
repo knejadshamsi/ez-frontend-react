@@ -6,7 +6,7 @@ const locales = {
     sections: {
       emissions: '1. Emissions and Comparisons',
       peopleResponse: '2. People Response',
-      legPerformance: '3. Leg Performance',
+      legPerformance: '3. Trip Performance',
     },
     editParametersModal: {
       title: 'Edit Parameters',
@@ -20,7 +20,17 @@ const locales = {
       loadingTip: 'Loading overview data...',
       error: 'Failed to load overview data',
       retry: 'Retry',
-      description: 'The simulation included <strong>{{totalPersonCount}}</strong> people and analyzed <strong>{{totalLegCount}}</strong> legs over a 24-hour period, covering an area of <strong>{{totalAreaCoverageKm2}}</strong> km² with a network of <strong>{{totalNetworkNodes}}</strong> nodes and <strong>{{totalNetworkLinks}}</strong> links, analyzing a total of <strong>{{totalKilometersTraveled}}</strong> km traveled.',
+      descriptionPre: 'The simulation included',
+      descriptionPeople: 'people and analyzed',
+      descriptionLegs: 'legs over a 24-hour period, covering an area of',
+      descriptionNetwork: 'with a network of',
+      descriptionNodes: 'nodes and',
+      descriptionLinks: 'links, analyzing a total of',
+      descriptionPost: 'traveled',
+      descriptionSample: 'sample',
+    },
+    pollutantSelector: {
+      all: 'All',
     },
     layerToggle: {
       zones: 'Zones',
@@ -34,7 +44,7 @@ const locales = {
       emissions1Error: 'Failed to load emissions comparison data',
       emissions2Error: 'Failed to load air quality data',
       peopleResponse1Error: 'Failed to load behavioral response data',
-      peopleResponse2Error: 'Failed to load time impact data',
+      tripPerformanceError: 'Failed to load trip performance data',
       retry: 'Retry',
     },
   },
@@ -43,7 +53,7 @@ const locales = {
     sections: {
       emissions: '1. Émissions et comparaisons',
       peopleResponse: '2. Réponse des personnes',
-      legPerformance: '3. Performance des segments',
+      legPerformance: '3. Performance des deplacements',
     },
     editParametersModal: {
       title: 'Modifier les paramètres',
@@ -57,7 +67,17 @@ const locales = {
       loadingTip: 'Chargement des données de vue d\'ensemble...',
       error: 'Échec du chargement des données de vue d\'ensemble',
       retry: 'Réessayer',
-      description: 'La simulation a inclus <strong>{{totalPersonCount}}</strong> personnes et a analysé <strong>{{totalLegCount}}</strong> segments sur une période de 24 heures, couvrant une superficie de <strong>{{totalAreaCoverageKm2}}</strong> km² avec un réseau de <strong>{{totalNetworkNodes}}</strong> nœuds et <strong>{{totalNetworkLinks}}</strong> liens, analysant un total de <strong>{{totalKilometersTraveled}}</strong> km parcourus.',
+      descriptionPre: 'La simulation a inclus',
+      descriptionPeople: 'personnes et a analyse',
+      descriptionLegs: 'segments sur une periode de 24 heures, couvrant une superficie de',
+      descriptionNetwork: 'avec un reseau de',
+      descriptionNodes: 'noeuds et',
+      descriptionLinks: 'liens, analysant un total de',
+      descriptionPost: 'parcourus',
+      descriptionSample: 'echantillon',
+    },
+    pollutantSelector: {
+      all: 'Tous',
     },
     layerToggle: {
       zones: 'Zones',
@@ -71,8 +91,8 @@ const locales = {
       emissions1Error: 'Échec du chargement des données de comparaison des émissions',
       emissions2Error: 'Échec du chargement des données de qualité de l\'air',
       peopleResponse1Error: 'Échec du chargement des données de réponse comportementale',
-      peopleResponse2Error: 'Échec du chargement des données d\'impact sur le temps',
-      retry: 'Réessayer',
+      tripPerformanceError: 'Echec du chargement des donnees de performance des deplacements',
+      retry: 'Reessayer',
     },
   },
 } as const;

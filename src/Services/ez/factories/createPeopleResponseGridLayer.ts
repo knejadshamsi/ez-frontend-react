@@ -10,20 +10,16 @@ interface CreatePeopleResponseGridLayerInput {
   idSuffix?: string; // Optional layer ID suffix
 }
 
-// Color mapping for different response types
+// Color mapping for response categories
 const RESPONSE_TYPE_COLORS: Record<string, [number, number, number]> = {
-  paidPenalty: [201, 201, 201],      // Gray
-  rerouted: [255, 212, 163],          // Light orange
-  switchedToBus: [184, 212, 232],   // Light blue
-  switchedToSubway: [168, 199, 221], // Blue
-  switchedToWalking: [200, 230, 201], // Light green
-  switchedToBiking: [178, 223, 178], // Green
-  switchedToCar: [232, 208, 179],    // Warm tan
-  cancelledTrip: [245, 183, 177],    // Light red
+  modeShift: [64, 150, 255],       // Blue
+  rerouted: [250, 140, 22],        // Orange
+  paidPenalty: [250, 219, 20],      // Yellow
+  cancelled: [255, 77, 79],         // Red
 };
 
 // Create a screen grid layer for people response visualization
-export const createPeopleResponseGridLayer = ({
+const createPeopleResponseGridLayer = ({
   data,
   color = DEFAULT_GRID_COLOR,
   idSuffix = '',

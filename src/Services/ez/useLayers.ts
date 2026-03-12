@@ -2,7 +2,7 @@ import { useEffect, useCallback } from 'react';
 import { useServiceStore } from '~globalStores';
 import { useEZServiceStore, useAPIPayloadStore, useDrawToolStore, useDrawingStateStore } from '~store';
 import { useEZSessionStore, useEZOutputFiltersStore } from '~stores/session';
-import { useEZOutputMapStore } from '~stores/output';
+import { useEZOutputMapStore, useEZOutputTripLegsStore } from '~stores/output';
 import { useNotificationStore } from '~/Services/CustomNotification';
 import { createEditablePolygonLayer } from './factories/createEditablePolygonLayer';
 import { createZoneDisplayLayer } from './factories/createZoneDisplayLayer';
@@ -10,7 +10,7 @@ import { createSimulationAreaDisplayLayer } from './factories/createSimulationAr
 import { createEmissionsHeatmapLayer } from './factories/createEmissionsHeatmapLayer';
 import { createEmissionsHexagonLayer } from './factories/createEmissionsHexagonLayer';
 import { createPeopleResponseGridLayerForType } from './factories/createPeopleResponseGridLayer';
-import { createTripLegsPathLayer } from './factories/createTripLegsPathLayer';
+import { createTripLegsArcLayer, createTripLegsOriginDots } from './factories/createTripLegsPathLayer';
 import { validatePolygon } from '~utils/polygonValidation';
 import { coordsToGeoJSON } from '~utils/geoJson';
 import { hexToRgb, DEFAULT_CUSTOM_AREA_COLOR, DEFAULT_SCALED_AREA_COLOR, DEFAULT_ZONE_COLOR } from '~utils/colors';
@@ -95,12 +95,14 @@ export function useLayers() {
   // Output filter settings
   const isEmissionsMapVisible = useEZOutputFiltersStore((state) => state.isEmissionsMapVisible);
   const isPeopleResponseMapVisible = useEZOutputFiltersStore((state) => state.isPeopleResponseMapVisible);
-  const isTripLegsMapVisible = useEZOutputFiltersStore((state) => state.isTripLegsMapVisible);
   const selectedVisualizationType = useEZOutputFiltersStore((state) => state.selectedVisualizationType);
   const selectedPollutantType = useEZOutputFiltersStore((state) => state.selectedPollutantType);
+  const selectedEmissionsScenario = useEZOutputFiltersStore((state) => state.selectedEmissionsScenario);
+  const emissionsViewMode = useEZOutputFiltersStore((state) => state.emissionsViewMode);
   const selectedResponseLayerView = useEZOutputFiltersStore((state) => state.selectedResponseLayerView);
-  const selectedBehavioralResponseType = useEZOutputFiltersStore((state) => state.selectedBehavioralResponseType);
-  const visibleTripLegIds = useEZOutputFiltersStore((state) => state.visibleTripLegIds);
+  const visibleResponseCategories = useEZOutputFiltersStore((state) => state.visibleResponseCategories);
+  const selectedTripIds = useEZOutputTripLegsStore((state) => state.selectedTripIds);
+  const tripLegsViewMode = useEZOutputFiltersStore((state) => state.tripLegsViewMode);
   const inputZoneLayerOpacity = useEZOutputFiltersStore((state) => state.inputZoneLayerOpacity);
   const inputSimulationAreaLayerOpacity = useEZOutputFiltersStore((state) => state.inputSimulationAreaLayerOpacity);
 
@@ -161,7 +163,7 @@ export function useLayers() {
   }, [ezState, activeService, isPolygonMode, hideAllZones, hideAllAreas, setOtherLayersExpanded]);
 
   // Consolidated edit handler for both zones and areas (handles DRAW and EDIT modes)
-  const handlePolygonEdit = useCallback(({ updatedData, editType, editContext }: any) => {
+  const handlePolygonEdit = useCallback(({ updatedData, editType }: any) => {
     if (!updatedData || !updatedData.features) {
       return;
     }
@@ -425,7 +427,7 @@ export function useLayers() {
 
   const emissionsOutputLayer = isResultView && isEmissionsMapVisible && emissionsMapData
     ? (() => {
-        const points = selectEmissionsMapPoints(emissionsMapData, selectedPollutantType);
+        const points = selectEmissionsMapPoints(emissionsMapData, selectedPollutantType, selectedEmissionsScenario, emissionsViewMode);
         if (points.length === 0) return null;
         return selectedVisualizationType === 'heatmap'
           ? createEmissionsHeatmapLayer({ data: points })
@@ -433,19 +435,32 @@ export function useLayers() {
       })()
     : null;
 
-  const peopleResponseOutputLayer = isResultView && isPeopleResponseMapVisible && peopleResponseMapData
+  const peopleResponseOutputLayers = isResultView && isPeopleResponseMapVisible && peopleResponseMapData
     ? (() => {
-        const points = selectPeopleResponseMapPoints(peopleResponseMapData, selectedResponseLayerView, selectedBehavioralResponseType);
-        if (points.length === 0) return null;
-        return createPeopleResponseGridLayerForType(points, selectedBehavioralResponseType);
+        const layers: ReturnType<typeof createPeopleResponseGridLayerForType>[] = [];
+        for (const category of visibleResponseCategories) {
+          const points = selectPeopleResponseMapPoints(peopleResponseMapData, selectedResponseLayerView, category);
+          if (points.length > 0) {
+            layers.push(createPeopleResponseGridLayerForType(points, category));
+          }
+        }
+        return layers.length > 0 ? layers : null;
       })()
     : null;
 
-  const tripLegsOutputLayer = isResultView && isTripLegsMapVisible && tripLegsMapData.length > 0
+  const tripLegsOutputLayers = isResultView && tripLegsViewMode !== 'hidden' && tripLegsMapData && selectedTripIds.size > 0
     ? (() => {
-        const visiblePaths = tripLegsMapData.filter(path => visibleTripLegIds.has(path.id));
-        if (visiblePaths.length === 0) return null;
-        return createTripLegsPathLayer({ data: visiblePaths });
+        const layers: any[] = [];
+        for (const tripId of selectedTripIds) {
+          const tripData = tripLegsMapData[tripId];
+          if (!tripData) continue;
+          const scenarioData = tripData.policy || tripData.baseline;
+          if (scenarioData) {
+            layers.push(createTripLegsArcLayer({ data: scenarioData, scenario: 'policy', idSuffix: `-${tripId}` }));
+            layers.push(createTripLegsOriginDots({ data: scenarioData, scenario: 'policy', idSuffix: `-${tripId}` }));
+          }
+        }
+        return layers.length > 0 ? layers : null;
       })()
     : null;
 
@@ -522,8 +537,8 @@ export function useLayers() {
     drawingLayers.zoneLayer,
     displayLayer,
     emissionsOutputLayer,
-    peopleResponseOutputLayer,
-    tripLegsOutputLayer,
+    ...(peopleResponseOutputLayers || []),
+    ...(tripLegsOutputLayers || []),
     editablePolygonLayer
   ].filter(Boolean);
 }

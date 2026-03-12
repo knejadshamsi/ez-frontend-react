@@ -39,33 +39,43 @@ export const setIncompleteComponentsToError = (): void => {
     emissionsStore.setEmissionsBarChartError(errorMessage);
   }
 
-  if (emissionsStore.emissionsPieChartsState !== 'success') {
-    emissionsStore.setEmissionsPieChartsState('error');
-    emissionsStore.setEmissionsPieChartsError(errorMessage);
+  if (emissionsStore.emissionsLineChartState !== 'success') {
+    emissionsStore.setEmissionsLineChartState('error');
+    emissionsStore.setEmissionsLineChartError(errorMessage);
+  }
+
+  if (emissionsStore.emissionsStackedBarState !== 'success') {
+    emissionsStore.setEmissionsStackedBarState('error');
+    emissionsStore.setEmissionsStackedBarError(errorMessage);
+  }
+
+  if (emissionsStore.emissionsWarmColdIntensityState !== 'success') {
+    emissionsStore.setEmissionsWarmColdIntensityState('error');
+    emissionsStore.setEmissionsWarmColdIntensityError(errorMessage);
   }
 
   // People Response components
-  if (peopleStore.peopleResponseParagraph1State !== 'success') {
-    peopleStore.setPeopleResponseParagraph1State('error');
-    peopleStore.setPeopleResponseParagraph1Error(errorMessage);
+  if (peopleStore.peopleResponseParagraphState !== 'success') {
+    peopleStore.setPeopleResponseParagraphState('error');
+    peopleStore.setPeopleResponseParagraphError(errorMessage);
   }
 
-  if (peopleStore.peopleResponseParagraph2State !== 'success') {
-    peopleStore.setPeopleResponseParagraph2State('error');
-    peopleStore.setPeopleResponseParagraph2Error(errorMessage);
+  if (peopleStore.peopleResponseSankeyState !== 'success') {
+    peopleStore.setPeopleResponseSankeyState('error');
+    peopleStore.setPeopleResponseSankeyError(errorMessage);
   }
 
-  if (peopleStore.peopleResponseBreakdownChartState !== 'success') {
-    peopleStore.setPeopleResponseBreakdownChartState('error');
-    peopleStore.setPeopleResponseBreakdownChartError(errorMessage);
-  }
-
-  if (peopleStore.peopleResponseTimeImpactChartState !== 'success') {
-    peopleStore.setPeopleResponseTimeImpactChartState('error');
-    peopleStore.setPeopleResponseTimeImpactChartError(errorMessage);
+  if (peopleStore.peopleResponseBarState !== 'success') {
+    peopleStore.setPeopleResponseBarState('error');
+    peopleStore.setPeopleResponseBarError(errorMessage);
   }
 
   // Trip Legs
+  if (tripLegsStore.tripLegsParagraphState !== 'success') {
+    tripLegsStore.setTripLegsParagraphState('error');
+    tripLegsStore.setTripLegsParagraphError(errorMessage);
+  }
+
   if (tripLegsStore.tripLegsTableState !== 'success') {
     tripLegsStore.setTripLegsTableState('error');
     tripLegsStore.setTripLegsTableError(errorMessage);

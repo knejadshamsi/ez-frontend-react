@@ -1,48 +1,75 @@
+import { ArcLayer, ScatterplotLayer } from '@deck.gl/layers';
+import type { TripLegArc } from '~stores/output';
 
-import { PathLayer } from '@deck.gl/layers';
-import type { MapPathData } from '~stores/output';
-
-const CO2_DELTA_MIN = -500;
-const CO2_DELTA_MAX = 500;
-
-interface CreateTripLegsPathLayerInput {
-  data: MapPathData[]; // Array of path data
-  selectedPathId?: string | null; // ID of selected path to highlight
-  idSuffix?: string; // Optional layer ID suffix
-}
-
-// Get path color based on CO2 delta
-const getPathColor = (co2Delta: number, isSelected: boolean): [number, number, number, number] => {
-  if (isSelected) {
-    return [0, 100, 255, 255]; // Bright blue for selected
-  }
-
-  // Normalize and interpolate color
-  const normalizedDelta = Math.max(CO2_DELTA_MIN, Math.min(CO2_DELTA_MAX, co2Delta));
-  const ratio = (normalizedDelta - CO2_DELTA_MIN) / (CO2_DELTA_MAX - CO2_DELTA_MIN);
-  const r = Math.round(ratio * 255);
-  const g = Math.round((1 - ratio) * 200);
-  const b = 50;
-
-  return [r, g, b, 180];
+// Mode colors matching Section 2 palette
+const MODE_COLORS: Record<string, [number, number, number]> = {
+  car: [64, 150, 255],     // blue
+  bus: [250, 140, 22],     // orange
+  subway: [114, 46, 209],  // purple
+  walk: [82, 196, 26],     // green
+  bike: [19, 194, 194],    // teal
+  pt: [82, 196, 26],       // green (transit access legs)
 };
 
-// Create a path layer for trip legs visualization
-export const createTripLegsPathLayer = ({
+const DEFAULT_COLOR: [number, number, number] = [150, 150, 150];
+
+// Darker version of a color for the target end of the arc
+const darken = (rgb: [number, number, number], factor = 0.5): [number, number, number] => [
+  Math.round(rgb[0] * factor),
+  Math.round(rgb[1] * factor),
+  Math.round(rgb[2] * factor),
+];
+
+interface CreateTripLegsArcLayerInput {
+  data: TripLegArc[];
+  scenario: 'baseline' | 'policy';
+  idSuffix?: string;
+}
+
+// Create arc + origin dot layers for trip legs visualization
+// Source end uses the mode color, target end uses a darker shade to show direction
+export const createTripLegsArcLayer = ({
   data,
-  selectedPathId = null,
+  scenario,
   idSuffix = '',
-}: CreateTripLegsPathLayerInput) => {
-  return new PathLayer<MapPathData>({
-    id: `ez-trip-legs-path${idSuffix}`,
+}: CreateTripLegsArcLayerInput) => {
+  return new ArcLayer<TripLegArc>({
+    id: `ez-trip-legs-arc-${scenario}${idSuffix}`,
     data,
-    getPath: (d) => d.path,
-    getColor: (d) => getPathColor(d.co2Delta, d.id === selectedPathId),
-    getWidth: (d) => (d.id === selectedPathId ? 8 : 4),
-    widthMinPixels: 2,
-    widthMaxPixels: 10,
-    capRounded: true,
-    jointRounded: true,
+    getSourcePosition: (d) => d.from,
+    getTargetPosition: (d) => d.to,
+    getSourceColor: (d) => {
+      const rgb = MODE_COLORS[d.mode] || DEFAULT_COLOR;
+      return [...rgb, 220] as [number, number, number, number];
+    },
+    getTargetColor: (d) => {
+      const rgb = MODE_COLORS[d.mode] || DEFAULT_COLOR;
+      const dark = darken(rgb);
+      return [...dark, 220] as [number, number, number, number];
+    },
+    getWidth: 3,
+    greatCircle: false,
     pickable: true,
+  });
+};
+
+// Create origin dots for selected trip legs
+export const createTripLegsOriginDots = ({
+  data,
+  scenario,
+  idSuffix = '',
+}: CreateTripLegsArcLayerInput) => {
+  return new ScatterplotLayer<TripLegArc>({
+    id: `ez-trip-legs-origin-${scenario}${idSuffix}`,
+    data,
+    getPosition: (d) => d.from,
+    getFillColor: (d) => {
+      const rgb = MODE_COLORS[d.mode] || DEFAULT_COLOR;
+      return [...rgb, 255] as [number, number, number, number];
+    },
+    getRadius: 80,
+    radiusMinPixels: 4,
+    radiusMaxPixels: 8,
+    pickable: false,
   });
 };

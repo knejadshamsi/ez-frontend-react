@@ -33,6 +33,32 @@ export const SuccessState = () => {
   );
 };
 
+interface StatusNotificationProps {
+  title: string;
+  subtitle?: string | null;
+  onCancel?: () => void;
+  cancelLabel?: string;
+}
+
+const StatusNotification = ({ title, subtitle, onCancel, cancelLabel }: StatusNotificationProps) => (
+  <div className={styles.simulationNotification}>
+    <div className={styles.queuedContent}>
+      <LoadingOutlined className={styles.queuedSpinner} />
+      <div className={styles.queuedTextContainer}>
+        <span className={styles.queuedTitle}>{title}</span>
+        {subtitle && <span className={styles.queuedSubtitle}>{subtitle}</span>}
+      </div>
+    </div>
+    {onCancel && (
+      <div className={styles.queuedFooter}>
+        <button className={styles.cancelButton} onClick={onCancel}>
+          {cancelLabel}
+        </button>
+      </div>
+    )}
+  </div>
+);
+
 interface QueuedStateProps {
   onCancel: () => void;
 }
@@ -41,20 +67,12 @@ export const QueuedState = ({ onCancel }: QueuedStateProps) => {
   const { t } = useTranslation('ez-progress');
 
   return (
-    <div className={styles.simulationNotification}>
-      <div className={styles.queuedContent}>
-        <LoadingOutlined className={styles.queuedSpinner} />
-        <div className={styles.queuedTextContainer}>
-          <span className={styles.queuedTitle}>{t('queued.title')}</span>
-          <span className={styles.queuedSubtitle}>{t('queued.subtitle')}</span>
-        </div>
-      </div>
-      <div className={styles.queuedFooter}>
-        <button className={styles.cancelButton} onClick={onCancel}>
-          {t('buttons.cancel')}
-        </button>
-      </div>
-    </div>
+    <StatusNotification
+      title={t('queued.title')}
+      subtitle={t('queued.subtitle')}
+      onCancel={onCancel}
+      cancelLabel={t('buttons.cancel')}
+    />
   );
 };
 
@@ -62,12 +80,7 @@ export const CancellingState = () => {
   const { t } = useTranslation('ez-progress');
 
   return (
-    <div className={styles.simulationNotification}>
-      <div className={styles.loadingContent}>
-        <LoadingOutlined className={styles.spinner} />
-        <span className={styles.loadingText}>{t('cancellation.inProgress')}</span>
-      </div>
-    </div>
+    <StatusNotification title={t('cancellation.inProgress')} />
   );
 };
 
@@ -103,24 +116,12 @@ export const PollingState = ({ pollingProgress, onCancel }: PollingStateProps) =
   const { t } = useTranslation('ez-progress');
 
   return (
-    <div className={styles.simulationNotification}>
-      <div className={styles.loadingContent}>
-        <LoadingOutlined className={styles.spinner} />
-        <span className={styles.loadingText}>
-          {t('polling.reconnecting')}
-        </span>
-      </div>
-      {pollingProgress && (
-        <div className={styles.pollingProgress}>
-          {pollingProgress}
-        </div>
-      )}
-      <div className={styles.notificationFooter}>
-        <button className={styles.cancelButton} onClick={onCancel}>
-          {t('buttons.cancel')}
-        </button>
-      </div>
-    </div>
+    <StatusNotification
+      title={t('polling.reconnecting')}
+      subtitle={pollingProgress}
+      onCancel={onCancel}
+      cancelLabel={t('buttons.cancel')}
+    />
   );
 };
 
