@@ -8,12 +8,14 @@ const STATUS_MAP: Record<string, StepState> = {
 };
 
 export function decodeProgressAlert(message: string): boolean {
+  // Strip pa_ prefix from SSE messages (demo mode sends without prefix)
+  const normalized = message.startsWith('pa_') ? message.slice(3) : message;
   const statusSuffixes = ['_started', '_complete', '_failed'];
 
   for (const suffix of statusSuffixes) {
-    if (message.endsWith(suffix)) {
+    if (normalized.endsWith(suffix)) {
       const statusKey = suffix.slice(1);
-      const stepName = message.slice(0, -suffix.length);
+      const stepName = normalized.slice(0, -suffix.length);
       const stepState = STATUS_MAP[statusKey];
 
       if (!stepState) {

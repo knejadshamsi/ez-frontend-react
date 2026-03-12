@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEZSessionStore } from '~stores/session'
 import { useAPIPayloadStore, useEZServiceStore } from '~store'
@@ -10,19 +10,22 @@ import { resetAllEZStores } from '~stores/reset'
 import { hasInputChangedFromDefault } from '~ez/exitHandler'
 import { useScenarioSnapshotStore, hasInputChanged } from '~stores/scenario'
 
-import { Button, Input, Modal, message } from 'antd'
+import { Button, Input, Modal, message, notification } from 'antd'
 import { ArrowLeftOutlined, SendOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons'
+import type { ValidationError } from '~ez/api/sse'
 import { showEZModal } from '~ez/components/EZModal'
 import '~ez/locales'
 
 import styles from './ParameterSelectionView.module.less'
 
 const MAX_NAME_LENGTH = 50;
+const SIMULATION_START_COOLDOWN_MS = 3000;
 
 export const ParameterSelectionView = () => {
   const { t } = useTranslation('ez-root');
   const [modal, contextHolder] = Modal.useModal();
   const [messageApi, messageContextHolder] = message.useMessage();
+  const [notificationApi, notificationContextHolder] = notification.useNotification();
 
   const setState = useEZServiceStore((state) => state.setState)
   const isEzBackendAlive = useEZServiceStore((state) => state.isEzBackendAlive)
@@ -36,14 +39,49 @@ export const ParameterSelectionView = () => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState(scenarioTitle);
   const [isStarting, setIsStarting] = useState(false);
+  const startTimeRef = useRef<number>(0);
 
   useEffect(() => {
     setEditedTitle(scenarioTitle);
   }, [scenarioTitle]);
 
+  const resetAfterCooldown = (callback: () => void) => {
+    const elapsed = Date.now() - startTimeRef.current;
+    const remaining = Math.max(0, SIMULATION_START_COOLDOWN_MS - elapsed);
+    setTimeout(() => {
+      setIsStarting(false);
+      callback();
+    }, remaining);
+  };
+
   const handleSimulationError = (errorMessage: string) => {
-    messageApi.error(errorMessage || 'Simulation failed');
-    setState('PARAMETER_SELECTION');
+    resetAfterCooldown(() => {
+      messageApi.error(errorMessage || t('parameterSelection.simulationFailed'));
+    });
+  };
+
+  const handleValidationErrors = (errors: ValidationError[]) => {
+    resetAfterCooldown(() => {
+      notificationApi.error({
+        message: t('parameterSelection.validation.backendError'),
+        icon: <></>,
+        description: (
+          <ul className={styles.validationErrorList}>
+            {errors.map((e, i) => (
+              <li key={i} className={styles.validationErrorItem}>
+                <span className={styles.validationErrorMarker}>x</span>
+                <span>{e.message}</span>
+              </li>
+            ))}
+          </ul>
+        ),
+        placement: 'top',
+        className: styles.validationNotification,
+        style: { width: 520 },
+        closable: false,
+        duration: 10,
+      });
+    });
   };
 
   const handleBackToWelcome = () => {
@@ -85,7 +123,7 @@ export const ParameterSelectionView = () => {
     const validation = validateAPIRequest(apiRequest);
 
     if (!validation.isValid) {
-      messageApi.error(validation.error);
+      messageApi.error(t(validation.error));
       return;
     }
 
@@ -98,6 +136,7 @@ export const ParameterSelectionView = () => {
     }
 
     setIsStarting(true);
+    startTimeRef.current = Date.now();
 
     if (outputExists) {
       // Input changed - clean slate before new simulation
@@ -108,17 +147,17 @@ export const ParameterSelectionView = () => {
     }
 
     setIsNewSimulation(true);
-    setState('AWAIT_RESULTS');
-    startSimulation(setState, handleSimulationError);
+    startSimulation(setState, handleSimulationError, handleValidationErrors);
   }
 
   return (
     <>
       {contextHolder}
       {messageContextHolder}
+      {notificationContextHolder}
       <div className={styles.backButtonContainer}>
           <Button type="link" onClick={handleBackToWelcome} className={styles.backButton}>
-            <ArrowLeftOutlined style={{fontSize: '12px'}} />
+            <ArrowLeftOutlined />
             {t('parameterSelection.backToWelcome')}
           </Button>
         </div>
@@ -172,7 +211,7 @@ export const ParameterSelectionView = () => {
           className={styles.simulationButton}
         >
           <div className={styles.buttonText}>
-            <SendOutlined />
+            {!isStarting && <SendOutlined />}
             <span>{t('parameterSelection.startSimulation')}</span>
           </div>
         </Button>

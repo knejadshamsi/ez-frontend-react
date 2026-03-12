@@ -8,7 +8,7 @@ import type {
   EmissionsMapData,
   PeopleResponseMapData,
   MapPointData,
-  MapPathData,
+  TripLegsMapData,
   OutputComponentState,
 } from '~stores/output';
 
@@ -22,14 +22,10 @@ const DEMO_CONFIG = {
   co2Delta: { bias: -0.3, range: 500 },
   timeDelta: { bias: -0.2, range: 20 },
   responseTypeMultipliers: {
-    paidPenalty: 1.0,
-    rerouted: 1.0,
-    switchedToBus: 0.5,
-    switchedToSubway: 0.4,
-    switchedToWalking: 0.3,
-    switchedToBiking: 0.2,
-    switchedToCar: 0.35,
-    cancelledTrip: 0.3,
+    modeShift: 1.0,
+    rerouted: 0.8,
+    paidPenalty: 0.6,
+    cancelled: 0.3,
   },
   tripImpacts: [
     'Car → Bus',
@@ -74,36 +70,22 @@ const generateRandomPoints = (count: number, bounds: BBox): MapPointData[] => {
   }));
 };
 
-const generateRandomPaths = (count: number, bounds: BBox): MapPathData[] => {
-  const paths: MapPathData[] = [];
-  const { min, max } = DEMO_CONFIG.waypoints;
-  const { bias: co2Bias, range: co2Range } = DEMO_CONFIG.co2Delta;
-  const { bias: timeBias, range: timeRange } = DEMO_CONFIG.timeDelta;
-
-  for (let i = 0; i < count; i++) {
-    const waypointCount = Math.floor(Math.random() * (max - min + 1)) + min;
-    const waypoints = generateRandomPoints(waypointCount, bounds);
-
-    paths.push({
-      id: `leg_${(i + 1).toString().padStart(5, '0')}`,
-      path: waypoints.map(p => p.position),
-      co2Delta: Math.round((Math.random() + co2Bias) * co2Range),
-      timeDelta: Math.round((Math.random() + timeBias) * timeRange),
-      impact: DEMO_CONFIG.tripImpacts[Math.floor(Math.random() * DEMO_CONFIG.tripImpacts.length)],
-    });
-  }
-
-  return paths;
-};
 
 const generateDemoEmissionsMapData = (): EmissionsMapData => {
   const bounds = computeZonesBoundingBox();
 
-  return {
+  const generatePollutantSet = () => ({
     CO2: generateRandomPoints(DEMO_CONFIG.pointsPerCategory, bounds),
     NOx: generateRandomPoints(DEMO_CONFIG.pointsPerCategory, bounds),
     'PM2.5': generateRandomPoints(DEMO_CONFIG.pointsPerCategory, bounds),
     PM10: generateRandomPoints(DEMO_CONFIG.pointsPerCategory, bounds),
+  });
+
+  return {
+    baseline: generatePollutantSet(),
+    policy: generatePollutantSet(),
+    privateBaseline: generatePollutantSet(),
+    privatePolicy: generatePollutantSet(),
   };
 };
 
@@ -114,14 +96,10 @@ const generateDemoPeopleResponseMapData = (): PeopleResponseMapData => {
   const base = DEMO_CONFIG.pointsPerCategory;
 
   const generateViewData = () => ({
-    paidPenalty: generateRandomPoints(Math.floor(base * mult.paidPenalty), bounds),
+    modeShift: generateRandomPoints(Math.floor(base * mult.modeShift), bounds),
     rerouted: generateRandomPoints(Math.floor(base * mult.rerouted), bounds),
-    switchedToBus: generateRandomPoints(Math.floor(base * mult.switchedToBus), bounds),
-    switchedToSubway: generateRandomPoints(Math.floor(base * mult.switchedToSubway), bounds),
-    switchedToWalking: generateRandomPoints(Math.floor(base * mult.switchedToWalking), bounds),
-    switchedToBiking: generateRandomPoints(Math.floor(base * mult.switchedToBiking), bounds),
-    switchedToCar: generateRandomPoints(Math.floor(base * mult.switchedToCar), bounds),
-    cancelledTrip: generateRandomPoints(Math.floor(base * mult.cancelledTrip), bounds),
+    paidPenalty: generateRandomPoints(Math.floor(base * mult.paidPenalty), bounds),
+    cancelled: generateRandomPoints(Math.floor(base * mult.cancelled), bounds),
   });
 
   return {
@@ -130,9 +108,26 @@ const generateDemoPeopleResponseMapData = (): PeopleResponseMapData => {
   };
 };
 
-const generateDemoTripLegsMapData = (): MapPathData[] => {
+const generateDemoTripLegsMapData = (): TripLegsMapData => {
   const bounds = computeZonesBoundingBox();
-  return generateRandomPaths(DEMO_CONFIG.tripLegPaths, bounds);
+  const modes = ['car', 'bus', 'walk', 'bike', 'subway'];
+  const result: TripLegsMapData = {};
+
+  for (let i = 0; i < DEMO_CONFIG.tripLegPaths; i++) {
+    const tripId = `${100 + i}_1`;
+    const points = generateRandomPoints(2, bounds);
+    const from = points[0]?.position || [-73.57, 45.50];
+    const to = points[1]?.position || [-73.56, 45.51];
+    const baseMode = modes[Math.floor(Math.random() * modes.length)];
+    const policyMode = modes[Math.floor(Math.random() * modes.length)];
+
+    result[tripId] = {
+      baseline: [{ from, to, mode: baseMode }],
+      policy: [{ from, to, mode: policyMode }],
+    };
+  }
+
+  return result;
 };
 
 type MapType = 'emissions' | 'peopleResponse' | 'tripLegs';
@@ -178,7 +173,7 @@ export const loadDemoMapData = (mapType: MapType): void => {
       break;
 
     case 'tripLegs':
-      loadMapDataWithDelay<MapPathData[]>(
+      loadMapDataWithDelay<TripLegsMapData>(
         () => store.tripLegsMapData,
         store.setTripLegsMapState,
         store.setTripLegsMapData,

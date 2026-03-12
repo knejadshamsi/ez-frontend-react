@@ -12,8 +12,7 @@ import '../progress/locales';
 import '../locales';
 import { loadDemoData } from '../output/demo';
 import { restoreStoresFromInput } from './fetchScenarioInput';
-import { updateScenarioMetadata } from './updateScenarioMetadata';
-import { useScenarioSnapshotStore } from '~stores/scenario';
+import { useScenarioSnapshotStore, takeInputSnapshot } from '~stores/scenario';
 import { useDraftStore } from '~stores/session';
 import { deleteDraft } from './draft';
 import { fetchScenarioStatus, isTerminalStatus } from './scenarioStatus';
@@ -108,6 +107,7 @@ const runDemoSimulation = (setState: (state: EZStateType) => void): (() => void)
 
   const dataLoadId = setTimeout(() => {
     loadDemoData();
+    takeInputSnapshot();
     useProgressStore.getState().setStatus('DISPLAY_COMPLETE');
     // Auto-transition to RESULT_VIEW is handled by Progress component
   }, DEMO_QUEUED_DELAY_MS + 8000);
@@ -146,18 +146,11 @@ const runRealSimulation = (
     endpoint: `${backendUrl}/simulate`,
     payload: apiRequest as unknown as Record<string, unknown>,
 
-    onStarted: async (requestId: string) => {
+    onStarted: (requestId: string) => {
       console.log('[EZ API] Request ID:', requestId);
       setRequestId(requestId);
       useProgressStore.getState().reset();
       setState('AWAIT_RESULTS');
-
-      try {
-        await updateScenarioMetadata(requestId);
-      } catch (error) {
-        // Metadata is non-critical (title/description only) - log and continue
-        console.error('[EZ API] Failed to send metadata:', error);
-      }
     },
 
     onSimulationStart: () => {
@@ -177,6 +170,7 @@ const runRealSimulation = (
 
     onComplete: () => {
       setSseCleanup(null);
+      takeInputSnapshot();
       useProgressStore.getState().setStatus('DISPLAY_COMPLETE');
       setTimeout(() => {
         setState('RESULT_VIEW');
@@ -215,6 +209,7 @@ export const loadScenario = async (
   const setSseCleanup = useEZSessionStore.getState().setSseCleanup;
 
   setIsNewSimulation(false);
+  useProgressStore.getState().reset();
   setState('AWAIT_RESULTS');
 
   if (!isEzBackendAlive) {
@@ -233,6 +228,7 @@ const runDemoScenarioLoad = (setState: (state: EZStateType) => void): (() => voi
   const dataLoadId = setTimeout(() => {
     loadDemoData();
     loadDemoInputData();
+    takeInputSnapshot();
   }, 1000);
 
   timeoutIds.push(dataLoadId);
@@ -315,6 +311,7 @@ const runRealScenarioLoad = (
 
     onComplete: () => {
       setSseCleanup(null);
+      takeInputSnapshot();
       setTimeout(() => {
         setState('RESULT_VIEW');
       }, SCENARIO_LOAD_TRANSITION_DELAY_MS);

@@ -1,7 +1,4 @@
 import { create } from 'zustand';
-
-const DEFAULT_PAGE_SIZE = 10;
-
 import type {
   EZOutputOverviewData,
   EZEmissionsParagraph1Data,
@@ -18,6 +15,8 @@ import type {
   EZTripLegsParagraphData,
   OutputComponentState,
 } from './types';
+
+const DEFAULT_PAGE_SIZE = 10;
 
 // === OVERVIEW STORE ===
 

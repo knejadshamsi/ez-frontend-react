@@ -1,4 +1,4 @@
-import { Button, Divider, Modal } from 'antd';
+import { Button, Divider, Modal, Radio } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { showEZModal } from '~ez/components/EZModal';
 import { useTranslation } from 'react-i18next';
@@ -8,12 +8,15 @@ import {
   LinearScale,
   BarElement,
   ArcElement,
+  LineElement,
+  PointElement,
+  Filler,
   Title,
   Tooltip,
   Legend
 } from 'chart.js';
 import { useAPIPayloadStore, useEZServiceStore } from '~store';
-import { useEZSessionStore } from '~stores/session';
+import { useEZSessionStore, useEZOutputFiltersStore } from '~stores/session';
 import { resetOutputState } from '~stores/reset';
 import outputStyles from './Output.module.less';
 import parameterStyles from '../input/ParameterSelectionView.module.less';
@@ -29,6 +32,9 @@ ChartJS.register(
   LinearScale,
   BarElement,
   ArcElement,
+  LineElement,
+  PointElement,
+  Filler,
   Title,
   Tooltip,
   Legend
@@ -44,6 +50,9 @@ export const OutputView = () => {
   const resetApiPayload = useAPIPayloadStore((state) => state.reset);
   const resetSession = useEZSessionStore((state) => state.reset);
   const setRequestId = useEZSessionStore((state) => state.setRequestId);
+
+  const selectedPollutant = useEZOutputFiltersStore((s) => s.selectedPollutantType);
+  const setSelectedPollutant = useEZOutputFiltersStore((s) => s.setSelectedPollutantType);
 
   const handleEditParameters = () => {
     const instance = showEZModal(modal, {
@@ -96,27 +105,44 @@ export const OutputView = () => {
       </Divider>
 
       <Emissions.Paragraph1 />
-      <Emissions.BarChart />
-      <Emissions.Map />
       <Emissions.Paragraph2 />
-      <Emissions.VehicleFleetChart />
+      <Emissions.WarmColdIntensity />
+
+      <div className={outputStyles.pollutantSelector}>
+        <Radio.Group
+          value={selectedPollutant}
+          onChange={(e) => setSelectedPollutant(e.target.value)}
+          size="small"
+        >
+          <Radio.Button value="All">{t('pollutantSelector.all')}</Radio.Button>
+          <Radio.Button value="CO2">CO{'\u2082'}</Radio.Button>
+          <Radio.Button value="NOx">NOx</Radio.Button>
+          <Radio.Button value="PM2.5">PM2.5</Radio.Button>
+          <Radio.Button value="PM10">PM10</Radio.Button>
+        </Radio.Group>
+      </div>
+
+      <Emissions.BarChart />
+      <Emissions.LineChart />
+      <Emissions.StackedBar />
+      <Emissions.Map />
 
       <Divider orientation="left">
         <span className={outputStyles.sectionTitle}>{t('sections.peopleResponse')}</span>
       </Divider>
 
-      <PeopleResponse.Paragraph1 />
-      <PeopleResponse.ResponseBreakdown />
+      <PeopleResponse.Paragraph />
+      <PeopleResponse.Sankey />
+      <PeopleResponse.Bar />
       <PeopleResponse.Map />
-      <PeopleResponse.Paragraph2 />
-      <PeopleResponse.TimeImpact />
 
       <Divider orientation="left">
         <span className={outputStyles.sectionTitle}>{t('sections.legPerformance')}</span>
       </Divider>
 
-      <TripLegs.Map />
+      <TripLegs.Paragraph />
       <TripLegs.Table />
+      <TripLegs.Map />
     </div>
   );
 };

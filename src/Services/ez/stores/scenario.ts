@@ -25,6 +25,24 @@ export const useScenarioSnapshotStore = create<ScenarioSnapshotStore>((set) => (
   reset: () => set({ status: null, input: null, session: null }),
 }));
 
+// Captures the current store state as the immutable snapshot for change detection
+export const takeInputSnapshot = (): void => {
+  const payload = useAPIPayloadStore.getState().payload;
+  const session = useEZSessionStore.getState();
+
+  useScenarioSnapshotStore.getState().setInput({
+    scenarioTitle: session.scenarioTitle,
+    scenarioDescription: session.scenarioDescription,
+    zones: payload.zones,
+    customSimulationAreas: payload.customSimulationAreas,
+    scaledSimulationAreas: payload.scaledSimulationAreas,
+    sources: payload.sources,
+    simulationOptions: payload.simulationOptions,
+    carDistribution: payload.carDistribution,
+    modeUtilities: payload.modeUtilities,
+  });
+};
+
 // Compares current editable stores against the immutable snapshot
 export const hasInputChanged = (): boolean => {
   const snapshot = useScenarioSnapshotStore.getState().input;

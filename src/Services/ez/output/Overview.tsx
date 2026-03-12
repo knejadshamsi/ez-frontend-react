@@ -1,11 +1,12 @@
 import { Spin, Alert, Button, message } from 'antd';
-import { useTranslation, Trans } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { useEZOutputOverviewStore } from '~stores/output';
 import { useEZSessionStore, useEZOutputFiltersStore } from '~stores/session';
 import { useEZServiceStore, useAPIPayloadStore } from '~store';
 import { retryComponentData } from '~ez/api';
 import { CopyRequestIdButton } from '../components/CopyRequestIdButton';
 import { InputLayerToggleButton } from './InputLayerToggleButton';
+import { SmartNumber, Sentence } from './components';
 import outputStyles from './Output.module.less';
 import './locales';
 
@@ -14,8 +15,7 @@ import './locales';
  * SSE Message: data_text_overview
  */
 export const Overview = () => {
-  const { t, i18n } = useTranslation('ez-output');
-  const locale = i18n.language === 'fr' ? 'fr-CA' : 'en-US';
+  const { t } = useTranslation('ez-output');
   const [messageApi, contextHolder] = message.useMessage();
   const overviewData = useEZOutputOverviewStore((state) => state.overviewData);
   const overviewState = useEZOutputOverviewStore((state) => state.overviewState);
@@ -103,21 +103,16 @@ export const Overview = () => {
         </div>
       </div>
       <p className={outputStyles.description}>
-        <Trans
-          i18nKey="overview.description"
-          ns="ez-output"
-          values={{
-            totalPersonCount: overviewData.totalPersonCount.toLocaleString(locale),
-            totalLegCount: overviewData.totalLegCount.toLocaleString(locale),
-            totalAreaCoverageKm2: overviewData.totalAreaCoverageKm2,
-            totalNetworkNodes: overviewData.totalNetworkNodes.toLocaleString(locale),
-            totalNetworkLinks: overviewData.totalNetworkLinks.toLocaleString(locale),
-            totalKilometersTraveled: overviewData.totalKilometersTraveled.toLocaleString(locale),
-          }}
-          components={{
-            strong: <span className={outputStyles.highlightedNumber} />,
-          }}
-        />
+        <Sentence>
+          {t('overview.descriptionPre')} <SmartNumber value={overviewData.personCount} unitType="count" />
+          {t('overview.descriptionPeople')} <SmartNumber value={overviewData.legCount} unitType="count" />
+          {t('overview.descriptionLegs')}
+          <SmartNumber value={overviewData.totalAreaCoverageKm2} unitType="area" /> {t('overview.descriptionNetwork')}
+          <SmartNumber value={overviewData.totalNetworkNodes} unitType="count" /> {t('overview.descriptionNodes')}
+          <SmartNumber value={overviewData.totalNetworkLinks} unitType="count" /> {t('overview.descriptionLinks')}
+          <SmartNumber value={overviewData.totalKmTraveled} unitType="distance" />
+          {t('overview.descriptionPost')} ({overviewData.samplePercentage}% {t('overview.descriptionSample')}).
+        </Sentence>
       </p>
     </>
   );

@@ -342,8 +342,8 @@ const createInitialFiltersState = () => ({
   selectedResponseLayerView: DEFAULT_RESPONSE_VIEW,
   visibleResponseCategories: new Set(DEFAULT_VISIBLE_RESPONSE_CATEGORIES),
   tripLegsViewMode: 'baseline',
-  inputZoneLayerOpacity: OPACITY_STATES.HIDDEN,
-  inputSimulationAreaLayerOpacity: OPACITY_STATES.HIDDEN,
+  inputZoneLayerOpacity: OPACITY_STATES.MEDIUM,
+  inputSimulationAreaLayerOpacity: OPACITY_STATES.MEDIUM,
 });
 
 const cycleOpacity = (current: OpacityState): OpacityState => {

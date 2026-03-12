@@ -1,5 +1,6 @@
-import type { APIPayload, Coordinate, CarDistribution, CustomSimulationArea, ScaledSimulationArea } from '~stores/types';
+import type { APIPayload, Coordinate, CarDistribution, CustomSimulationArea, ScaledSimulationArea, ScenarioMetadata } from '~stores/types';
 import { useEZSessionStore } from '~stores/session';
+import { createMetadataPayload } from './updateScenarioMetadata';
 
 const MIN_SIMULATION_OPTIONS = 1;
 const MAX_SIMULATION_OPTIONS = 10;
@@ -39,6 +40,7 @@ export interface APIRequest {
     subway: number;
     bus: number;
   };
+  sessionData: ScenarioMetadata;
 }
 
 export const createAPIRequest = (
@@ -94,7 +96,8 @@ export const createAPIRequest = (
     sources: payload.sources,
     simulationOptions: payload.simulationOptions,
     carDistribution: enabledDistribution,
-    modeUtilities: payload.modeUtilities
+    modeUtilities: payload.modeUtilities,
+    sessionData: createMetadataPayload()
   };
 };
 

@@ -179,42 +179,6 @@ export interface EZTripLegsPaginationInfo {
   totalPages: number;
 }
 
-// === CHART CONFIGURATION TYPES ===
-
-export interface EZPeopleResponseChartConfig {
-  categoryIds: string[];
-  categoryLabels: string[];
-  categoryColors: string[];
-}
-
-export interface EZTimeImpactChartConfig {
-  categoryIds: string[];
-  categoryLabels: string[];
-  categoryColors: string[];
-}
-
-export interface EZEmissionsBarChartConfig {
-  pollutantIds: string[];
-  pollutantLabels: string[];
-  baselineBarColor: string;
-  postPolicyBarColor: string;
-}
-
-export interface EZVehicleEmissionsChartConfig {
-  vehicleTypeIds: string[];
-  vehicleTypeColors: string[];
-}
-
-export interface EZTripLegsTableConfig {
-  columns: {
-    title: string;
-    dataIndex: string;
-    key: string;
-    width: number;
-    isSortable?: boolean;
-  }[];
-}
-
 // === MAP VISUALIZATION TYPES ===
 
 // Point data for heatmap/hexagon visualization

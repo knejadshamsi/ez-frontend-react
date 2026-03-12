@@ -84,3 +84,30 @@
   background: none !important;
   margin-top: 5px;
 }
+
+.validationNotification {
+  // TODO: re-enable user-select: none after validation issues are resolved
+
+  :global(.ant-notification-notice-message) {
+    font-weight: 700;
+  }
+}
+
+.validationErrorList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.validationErrorItem {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.validationErrorMarker {
+  color: #ff4d4f;
+  font-weight: 700;
+  flex-shrink: 0;
+}

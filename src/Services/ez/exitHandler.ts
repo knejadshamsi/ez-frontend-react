@@ -1,10 +1,10 @@
 import i18n from '~i18nConfig';
 import '~ez/locales';
-import { useEZServiceStore, useAPIPayloadStore, useDrawToolStore, createInitialPayload } from '~store';
+import { useEZServiceStore, useAPIPayloadStore, useDrawToolStore } from '~store';
 import { useEZSessionStore, createInitialSessionState } from '~stores/session';
 import type { EZStateType } from '~stores/types';
 import type { ExitWarning } from '~stores/session/types';
-import { DEFAULT_ZONE_ID } from '~stores/types';
+import { INITIAL_PAYLOAD, DEFAULT_ZONE_ID } from '~stores/defaults';
 
 const t = i18n.t.bind(i18n);
 
@@ -14,18 +14,17 @@ export const hasInputChangedFromDefault = (): boolean => {
   const drawToolGeoJson = useDrawToolStore.getState().drawToolGeoJson;
   const sessionStore = useEZSessionStore.getState();
 
-  const defaults = createInitialPayload();
   const sessionDefaults = createInitialSessionState();
 
   if (payload.zones.some(z => z.coords !== null && z.coords.length > 0)) return true;
-  if (payload.zones.length !== defaults.zones.length) return true;
+  if (payload.zones.length !== INITIAL_PAYLOAD.zones.length) return true;
   if (payload.zones.some(z => z.policies && z.policies.length > 0)) return true;
   if (payload.zones.some(z => z.trip.length !== 1 || z.trip[0] !== 'start')) return true;
   if (payload.customSimulationAreas.length > 0 || payload.scaledSimulationAreas.length > 0) return true;
-  if (JSON.stringify(payload.carDistribution) !== JSON.stringify(defaults.carDistribution)) return true;
-  if (JSON.stringify(payload.modeUtilities) !== JSON.stringify(defaults.modeUtilities)) return true;
-  if (JSON.stringify(payload.simulationOptions) !== JSON.stringify(defaults.simulationOptions)) return true;
-  if (JSON.stringify(payload.sources) !== JSON.stringify(defaults.sources)) return true;
+  if (JSON.stringify(payload.carDistribution) !== JSON.stringify(INITIAL_PAYLOAD.carDistribution)) return true;
+  if (JSON.stringify(payload.modeUtilities) !== JSON.stringify(INITIAL_PAYLOAD.modeUtilities)) return true;
+  if (JSON.stringify(payload.simulationOptions) !== JSON.stringify(INITIAL_PAYLOAD.simulationOptions)) return true;
+  if (JSON.stringify(payload.sources) !== JSON.stringify(INITIAL_PAYLOAD.sources)) return true;
   if (drawToolGeoJson.features.length > 0) return true;
   if (sessionStore.scenarioTitle !== sessionDefaults.scenarioTitle) return true;
   if (sessionStore.scenarioDescription !== sessionDefaults.scenarioDescription) return true;

@@ -1,5 +1,6 @@
 import { useAPIPayloadStore } from '~store';
 import { useEZSessionStore } from '~stores/session';
+import { COLOR_PALETTE } from '~stores/session/defaults';
 import type { MainInputPayload, ScenarioMetadata } from '~ez/stores/types';
 
 export function restoreStoresFromInput(
@@ -11,26 +12,36 @@ export function restoreStoresFromInput(
     const apiPayloadStore = useAPIPayloadStore.getState();
     const sessionStore = useEZSessionStore.getState();
 
-    // Restore session metadata
-    sessionStore.setScenarioTitle(mainInput.scenarioTitle);
-    sessionStore.setScenarioDescription(mainInput.scenarioDescription);
+    // Restore session metadata (may be absent if sent via separate metadata endpoint)
+    if (mainInput.scenarioTitle) {
+      sessionStore.setScenarioTitle(mainInput.scenarioTitle);
+    }
+    if (mainInput.scenarioDescription) {
+      sessionStore.setScenarioDescription(mainInput.scenarioDescription);
+    }
 
     // Restore UI metadata if available
     if (metadata) {
       // Restore zone session data
-      Object.entries(metadata.zoneSessionData).forEach(([zoneId, zoneData]) => {
-        sessionStore.setZoneData(zoneId, zoneData);
-      });
+      if (metadata.zoneSessionData) {
+        Object.entries(metadata.zoneSessionData).forEach(([zoneId, zoneData]) => {
+          sessionStore.setZoneData(zoneId, zoneData);
+        });
+      }
 
       // Restore display config
-      sessionStore.setSimulationAreaDisplay(metadata.simulationAreaDisplay);
+      if (metadata.simulationAreaDisplay) {
+        sessionStore.setSimulationAreaDisplay(metadata.simulationAreaDisplay);
+      }
 
       // Restore car distribution categories
-      Object.entries(metadata.carDistributionCategories).forEach(([category, enabled]) => {
-        if (!enabled) {
-          sessionStore.toggleCarDistributionCategory(category);
-        }
-      });
+      if (metadata.carDistributionCategories) {
+        Object.entries(metadata.carDistributionCategories).forEach(([category, enabled]) => {
+          if (!enabled) {
+            sessionStore.toggleCarDistributionCategory(category);
+          }
+        });
+      }
 
       // Restore active selections
       if (metadata.activeZone) {
@@ -43,6 +54,18 @@ export function restoreStoresFromInput(
 
     // Restore API payload (simulation data)
     apiPayloadStore.setZones(mainInput.zones);
+
+    // Ensure every zone has session data (fallback for missing metadata)
+    mainInput.zones.forEach((zone, index) => {
+      if (!sessionStore.zones[zone.id]) {
+        sessionStore.setZoneData(zone.id, {
+          name: `Zone ${index + 1}`,
+          color: COLOR_PALETTE[index % COLOR_PALETTE.length],
+          hidden: false,
+          scale: [100, 'center'],
+        });
+      }
+    });
     apiPayloadStore.setSources(mainInput.sources);
     apiPayloadStore.setSimulationOptions(mainInput.simulationOptions);
     apiPayloadStore.setCarDistribution(mainInput.carDistribution);

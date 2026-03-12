@@ -36,8 +36,7 @@ export const Progress = () => {
   const overviewData = useEZOutputOverviewStore((s) => s.overviewData);
   const emissionsPara1 = useEZOutputEmissionsStore((s) => s.emissionsParagraph1Data);
   const emissionsPara2 = useEZOutputEmissionsStore((s) => s.emissionsParagraph2Data);
-  const peoplePara1 = useEZOutputPeopleResponseStore((s) => s.peopleResponseParagraph1Data);
-  const peoplePara2 = useEZOutputPeopleResponseStore((s) => s.peopleResponseParagraph2Data);
+  const peoplePara = useEZOutputPeopleResponseStore((s) => s.peopleResponseParagraphData);
   const tripLegRecords = useEZOutputTripLegsStore((s) => s.tripLegRecords);
 
   const { status } = state;
@@ -72,8 +71,7 @@ export const Progress = () => {
         overviewData ||
         emissionsPara1 ||
         emissionsPara2 ||
-        peoplePara1 ||
-        peoplePara2 ||
+        peoplePara ||
         (tripLegRecords && tripLegRecords.length > 0)
       );
 
@@ -87,8 +85,7 @@ export const Progress = () => {
     overviewData,
     emissionsPara1,
     emissionsPara2,
-    peoplePara1,
-    peoplePara2,
+    peoplePara,
     tripLegRecords,
     setState,
   ]);
