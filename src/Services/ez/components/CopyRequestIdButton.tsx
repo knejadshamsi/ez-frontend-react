@@ -5,6 +5,26 @@ import type { MessageInstance } from 'antd/es/message/interface';
 import { useTranslation } from 'react-i18next';
 import './locales';
 
+export async function copyToClipboard(text: string): Promise<void> {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    await navigator.clipboard.writeText(text);
+  } else {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand('copy');
+    } finally {
+      document.body.removeChild(textArea);
+    }
+  }
+}
+
 type CopyState = 'idle' | 'copying' | 'success';
 
 interface CopyRequestIdButtonProps {
