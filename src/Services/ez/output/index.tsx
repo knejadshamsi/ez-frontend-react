@@ -1,6 +1,6 @@
 import { Button, Divider, Modal, Radio } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
-import { showEZModal } from '~ez/components/EZModal';
+import { EZFeedbackModal } from '~ez/components/EZFeedbackModal';
 import { useTranslation } from 'react-i18next';
 import {
   Chart as ChartJS,
@@ -46,6 +46,7 @@ export const OutputView = () => {
 
   const [modal, contextHolder] = Modal.useModal();
   const setState = useEZServiceStore((state) => state.setState);
+  const sessionIntent = useEZServiceStore((state) => state.sessionIntent);
   const zones = useAPIPayloadStore((state) => state.payload.zones);
   const resetApiPayload = useAPIPayloadStore((state) => state.reset);
   const resetSession = useEZSessionStore((state) => state.reset);
@@ -55,30 +56,32 @@ export const OutputView = () => {
   const setSelectedPollutant = useEZOutputFiltersStore((s) => s.setSelectedPollutantType);
 
   const handleEditParameters = () => {
-    const instance = showEZModal(modal, {
+    if (sessionIntent === 'VIEW_SCENARIO_OFFLINE') {
+      setState('VIEW_PARAMETERS');
+      return;
+    }
+
+    EZFeedbackModal(modal, {
       title: t('editParametersModal.title'),
       content: t('editParametersModal.content'),
       actions: [
-        { label: t('editParametersModal.cancel'), onClick: () => instance.destroy() },
+        { label: t('editParametersModal.cancel') },
         {
           label: t('editParametersModal.reset'),
           danger: true,
-          ghost: true,
           onClick: () => {
             resetApiPayload();
             resetSession();
             resetOutputState();
             setRequestId('');
-            setState('PARAMETER_SELECTION');
-            instance.destroy();
+            setState('SELECT_PARAMETERS');
           },
         },
         {
           label: t('editParametersModal.keepInputs'),
-          type: 'primary',
+          highlight: true,
           onClick: () => {
-            setState('PARAMETER_SELECTION');
-            instance.destroy();
+            setState('VIEW_PARAMETERS');
           },
         },
       ],

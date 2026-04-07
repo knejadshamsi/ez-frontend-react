@@ -39,7 +39,16 @@
   font-size: 12px;
   line-height: 20px;
   height: 20px;
-  margin-left: 30px;
+}
+
+.offlineBadgeContainer {
+  background-color: #d9d9d9;
+  color: rgba(0, 0, 0, 0.88);
+  border-radius: 10px;
+  padding: 0 8px;
+  font-size: 12px;
+  line-height: 20px;
+  height: 20px;
 }
 
 .retryButton {
@@ -110,4 +119,156 @@
 
 .headerButtonFr {
   padding: 6px 8px;
+}
+
+// ============= BATCH POPOVER =============
+
+.batchPopoverList {
+  max-height: 300px;
+  min-width: 280px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #e0e0e0 #f8f8f8;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #f8f8f8;
+    border-radius: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #e0e0e0;
+    border-radius: 4px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: #d0d0d0;
+  }
+  &:hover {
+    scrollbar-color: #d0d0d0 #f8f8f8;
+  }
+}
+
+.batchSimItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 4px;
+  border-bottom: 1px solid #f0f0f0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.batchSimItem_active {
+  background-color: #e6f7ff;
+  border-radius: 4px;
+}
+
+.batchDismissButton {
+  padding: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: #999;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #ff4d4f;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+
+    &:hover {
+      color: #999;
+    }
+  }
+}
+
+.batchSimRequestId {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-family: monospace;
+  color: #333;
+  max-width: 160px;
+}
+
+.batchSimActions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.batchCopyButton {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+
+  .batchSimItem:hover & {
+    opacity: 1;
+  }
+}
+
+.batchStatus_queued {
+  color: #999;
+  font-size: 14px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
+.batchStatus_running {
+  color: #1890ff;
+  font-size: 14px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
+.batchStatus_completed {
+  color: #52c41a;
+  font-size: 14px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
+.batchStatus_error {
+  color: #ff4d4f;
+  font-size: 14px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  cursor: help;
+}
+
+.batchStatus_new {
+  color: #1890ff;
+  font-size: 14px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
+.batchStatus_drafted {
+  color: #722ed1;
+  font-size: 14px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
 }

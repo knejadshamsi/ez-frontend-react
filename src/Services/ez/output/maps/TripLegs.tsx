@@ -18,15 +18,18 @@ export const TripLegs = () => {
   const state = useEZOutputMapStore((s) => s.tripLegsMapState);
 
   const tripLegsViewMode = useEZOutputFiltersStore((s) => s.tripLegsViewMode);
-  const isDemoMode = !useEZServiceStore((s) => s.isEzBackendAlive);
+  const sessionIntent = useEZServiceStore((s) => s.sessionIntent);
+  const isDemoMode = sessionIntent === 'LOAD_DEMO_SCENARIO';
+  const isOffline = sessionIntent === 'VIEW_SCENARIO_OFFLINE';
 
   const isVisible = tripLegsViewMode !== 'hidden';
 
   useEffect(() => {
+    if (isOffline) return;
     if (isVisible && state === 'success_initial') {
       fetchMapData('tripLegs', isDemoMode);
     }
-  }, [isVisible, state, isDemoMode]);
+  }, [isVisible, state, isDemoMode, isOffline]);
 
   if (!isVisible) return null;
 

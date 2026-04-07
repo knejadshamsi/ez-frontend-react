@@ -40,6 +40,12 @@ const locales = {
       opacityHidden: 'Hidden',
       opacityNormal: 'Normal',
     },
+    pin: {
+      tooltipPin: 'Pin scenario',
+      tooltipUnpin: 'Unpin scenario',
+      tooltipDisabled: 'Pinning unavailable',
+      pinFailed: 'Failed to toggle pin',
+    },
     paragraphs: {
       emissions1Error: 'Failed to load emissions comparison data',
       emissions2Error: 'Failed to load air quality data',
@@ -86,6 +92,12 @@ const locales = {
       tooltipArea: 'Alterner l\'opacité de la couche d\'aire',
       opacityHidden: 'Masqué',
       opacityNormal: 'Normal',
+    },
+    pin: {
+      tooltipPin: 'Epingler le scenario',
+      tooltipUnpin: 'Desepingler le scenario',
+      tooltipDisabled: 'Epinglage indisponible',
+      pinFailed: 'Echec du basculement de l\'epingle',
     },
     paragraphs: {
       emissions1Error: 'Échec du chargement des données de comparaison des émissions',

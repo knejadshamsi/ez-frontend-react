@@ -53,8 +53,6 @@ const locales = {
     },
     peopleResponseBar: {
       description: 'Breakdown of travelers who changed their mode of transport.',
-      error: 'Failed to load mode share chart',
-      retry: 'Retry',
     },
   },
   fr: {
@@ -109,8 +107,6 @@ const locales = {
     },
     peopleResponseBar: {
       description: 'Repartition des voyageurs ayant change de mode de transport.',
-      error: 'Echec du chargement du graphique de parts modales',
-      retry: 'Reessayer',
     },
   },
 } as const;

@@ -15,7 +15,6 @@ import {
   type EZEmissionsWarmColdIntensityData,
   type EZPeopleResponseParagraphData,
   type EZPeopleResponseSankeyData,
-  type EZPeopleResponseBarData,
   type EZTripLegsParagraphData,
   type EZTripLegRecord,
 } from '~stores/output';
@@ -139,12 +138,6 @@ const DEMO_PEOPLE_RESPONSE_SANKEY_DATA: EZPeopleResponseSankeyData = {
   ],
 };
 
-const DEMO_PEOPLE_RESPONSE_BAR_DATA: EZPeopleResponseBarData = {
-  modes: ['car', 'bus', 'subway', 'walk', 'bike'],
-  baseline: [66.67, 0.0, 0.0, 11.11, 22.22],
-  policy: [77.78, 0.0, 0.0, 0.0, 22.22],
-};
-
 const DEMO_TRIP_PERFORMANCE_PARAGRAPH_DATA: EZTripLegsParagraphData = {
   totalTrips: 18,
   changedTrips: 2,
@@ -204,9 +197,6 @@ export const loadDemoData = (): void => {
   useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraphState('success');
   useEZOutputPeopleResponseStore.getState().setPeopleResponseSankeyData(DEMO_PEOPLE_RESPONSE_SANKEY_DATA);
   useEZOutputPeopleResponseStore.getState().setPeopleResponseSankeyState('success');
-  useEZOutputPeopleResponseStore.getState().setPeopleResponseBarData(DEMO_PEOPLE_RESPONSE_BAR_DATA);
-  useEZOutputPeopleResponseStore.getState().setPeopleResponseBarState('success');
-
   useEZOutputTripLegsStore.getState().setTripLegsParagraphData(DEMO_TRIP_PERFORMANCE_PARAGRAPH_DATA);
   useEZOutputTripLegsStore.getState().setTripLegsParagraphState('success');
 
@@ -222,12 +212,12 @@ export const loadDemoData = (): void => {
   useEZOutputMapStore.getState().setTripLegsMapState('success_initial');
 };
 
-// Watches backend status and loads demo data when backend is unavailable
+// Watches intent and loads demo data when in demo mode
 export const useDemoDataLoader = () => {
-  const isEzBackendAlive = useEZServiceStore((state) => state.isEzBackendAlive);
+  const sessionIntent = useEZServiceStore((state) => state.sessionIntent);
 
   useEffect(() => {
-    if (isEzBackendAlive) return;
+    if (sessionIntent !== 'LOAD_DEMO_SCENARIO') return;
     loadDemoData();
-  }, [isEzBackendAlive]);
+  }, [sessionIntent]);
 };

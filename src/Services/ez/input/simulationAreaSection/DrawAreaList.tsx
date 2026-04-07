@@ -81,14 +81,14 @@ const DrawAreaList = (): ReactElement => {
                     e.stopPropagation()
                     if (area.coords) {
                       setActiveCustomArea(area.id)
-                      setState('EDIT_SIM_AREA')
+                      setState('EDIT_SIMULATION_AREA')
                     }
                   }}
                   onKeyDown={(e) => {
                     if ((e.key === 'Enter' || e.key === ' ') && area.coords) {
                       e.preventDefault()
                       setActiveCustomArea(area.id)
-                      setState('EDIT_SIM_AREA')
+                      setState('EDIT_SIMULATION_AREA')
                     }
                   }}
                   style={{

@@ -6,6 +6,7 @@ import { useEZServiceStore, useAPIPayloadStore } from '~store';
 import { retryComponentData } from '~ez/api';
 import { CopyRequestIdButton } from '../components/CopyRequestIdButton';
 import { InputLayerToggleButton } from './InputLayerToggleButton';
+import { PinScenarioButton } from './PinScenarioButton';
 import { SmartNumber, Sentence } from './components';
 import outputStyles from './Output.module.less';
 import './locales';
@@ -21,7 +22,6 @@ export const Overview = () => {
   const overviewState = useEZOutputOverviewStore((state) => state.overviewState);
   const overviewError = useEZOutputOverviewStore((state) => state.overviewError);
   const requestId = useEZSessionStore((state) => state.requestId);
-  const isEzBackendAlive = useEZServiceStore((state) => state.isEzBackendAlive);
 
   const inputZoneLayerOpacity = useEZOutputFiltersStore((state) => state.inputZoneLayerOpacity);
   const inputSimulationAreaLayerOpacity = useEZOutputFiltersStore((state) => state.inputSimulationAreaLayerOpacity);
@@ -88,7 +88,13 @@ export const Overview = () => {
             onCycle={cycleZoneOpacity}
             className={outputStyles.layerToggleButton}
           />
-          {isEzBackendAlive && requestId && (
+          {requestId && (
+            <PinScenarioButton
+              requestId={requestId}
+              messageApi={messageApi}
+            />
+          )}
+          {requestId && (
             <CopyRequestIdButton
               requestId={requestId}
               showText={true}

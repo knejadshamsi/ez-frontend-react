@@ -2,51 +2,25 @@ import i18n from '~i18nConfig';
 
 export const locales = {
   en: {
-    exitWarnings: {
-      unsavedConfiguration: {
-        title: 'Unsaved Configuration',
-        message: 'You have configured emission zones and parameters. Session will be lost. Continue?',
-      },
-      unsavedEmissionZone: {
-        title: 'Unsaved Emission Zone',
-        message: 'You have an unsaved emission zone. Session will be lost. Continue?',
-      },
-      unsavedChangesZone: {
-        title: 'Unsaved Changes',
-        message: 'You have unsaved changes to the emission zone. Session will be lost. Continue?',
-      },
-      zoneRedrawInProgress: {
-        title: 'Zone Redraw in Progress',
-        message: 'You are redrawing an emission zone. Session will be lost. Continue?',
-      },
-      unsavedSimulationArea: {
-        title: 'Unsaved Simulation Area',
-        message: 'You have an unsaved simulation area. Session will be lost. Continue?',
-      },
-      unsavedChangesArea: {
-        title: 'Unsaved Changes',
-        message: 'You have unsaved changes to the simulation area. Session will be lost. Continue?',
-      },
-      simulationInProgress: {
-        title: 'Simulation in Progress',
-        message: 'The simulation is currently running. You can exit and your scenario will be saved, or delete it permanently.',
-      },
-      sessionWillBeLost: {
-        title: 'Exit Simulation',
-        message: 'Your scenario and results are saved. You can exit safely or delete the scenario permanently.',
-      },
-      confirmExit: {
-        title: 'Exit',
-        message: 'Are you sure you want to exit?',
-      },
-      offlineDataLost: {
-        title: 'Backend Offline',
-        message: 'The backend is currently offline. Your configuration cannot be saved and will be lost.',
-      },
-    },
     connectionMessages: {
+      switchingToDemo: 'Connection lost - switching to demo mode.',
+      connected: 'Connection established - backend is online.',
+      recoveredTitle: 'Backend is back online',
+      recoveredDescription: 'The live backend is available again. You can switch to live mode or stay in demo.',
+      switchToLive: 'Switch to Live',
       backendOnlineNewSim: 'Connection established! Backend is now online. Please start your simulation again.',
       backendOnlineLoadScenario: 'Connection established! Backend is now online. Please load your scenario again.',
+    },
+    connectionLost: {
+      title: 'Connection Lost',
+      content: 'The backend is offline. You can wait for it to reconnect or switch to demo mode.',
+      contentViewMode: 'The backend is offline. You can stay offline and keep viewing your data, or switch to demo mode.',
+      wait: 'Wait for Reconnection',
+      stayOffline: 'Stay Offline',
+      switchToDemo: 'Switch to Demo Mode',
+    },
+    offlineMode: {
+      label: 'Offline',
     },
     validation: {
       outsideBoundary: 'The drawn area must be entirely within the Montreal region boundary.',
@@ -82,10 +56,63 @@ export const locales = {
       label: 'DEMO MODE',
       scenarioTitle: 'Demo Scenario',
     },
+    batch: {
+      headerTooltip: 'Simulations',
+      popoverTitle: 'Simulations',
+      status: {
+        new: 'New Simulation',
+        queued: 'Queued',
+        running: 'Running',
+        completed: 'Completed',
+        error: 'Error',
+        drafted: 'Draft',
+      },
+      viewButton: 'View',
+      reconnectButton: 'Watch',
+      dismissButton: 'Dismiss',
+      copyDraftId: 'Copy Draft ID',
+      goToNewButton: 'Continue Setup',
+      viewWarning: {
+        title: 'Unsaved Input Data',
+        content: 'Your current input data will be lost. Would you like to save it as a draft first?',
+        saveDraftAndView: 'Save Draft & View',
+        savingDraft: 'Saving draft...',
+        discardAndView: 'Discard & View',
+      },
+      nonCompleted: {
+        title: 'Simulation Unavailable',
+        content: 'This simulation cannot be viewed. Would you like to edit its parameters instead?',
+        dismiss: 'Dismiss',
+        editParameters: 'Edit Parameters',
+      },
+      removeConfirm: {
+        title: 'Remove Simulation?',
+        content: 'This will remove the simulation from your list.',
+        confirm: 'Remove',
+        keep: 'Keep',
+      },
+      viewErrorButton: 'View Error',
+      simFailed: 'The background simulation failed.',
+      errorModal: {
+        title: 'Simulation Error',
+      },
+      dismissConfirm: {
+        title: 'Cancel Simulation?',
+        content: 'This simulation is still in progress. Cancelling will stop it permanently.',
+        confirm: 'Cancel & Remove',
+        cancelling: 'Cancelling...',
+        keep: 'Keep',
+        cancelFailed: 'Failed to cancel simulation',
+      },
+      draftLoadFailed: 'Failed to load draft',
+      draftRestoreFailed: 'Draft data is invalid or corrupted',
+    },
     parameterSelection: {
       backToWelcome: 'Back to Welcome page',
       newScenario: 'New Scenario',
       startSimulation: 'Start Simulation',
+      backToResults: 'Back to Results',
+      discardChanges: 'Discard Changes and Back to Results',
       cancel: 'Cancel',
       editTitle: 'Edit scenario title',
       saveTitle: 'Save scenario title',
@@ -105,55 +132,31 @@ export const locales = {
         invalidPercentage: 'Simulation percentage must be between 1 and 10.',
         noPolicies: 'Each emission zone must have at least one vehicle restriction.',
         backendError: 'Validation Error',
+        viewDetails: 'View Details',
+        dismiss: 'Dismiss',
       },
     },
   },
   fr: {
-    exitWarnings: {
-      unsavedConfiguration: {
-        title: 'Configuration non sauvegardée',
-        message: 'Vous avez configuré des zones d\'émission et des paramètres. La session sera perdue. Continuer?',
-      },
-      unsavedEmissionZone: {
-        title: 'Zone d\'émission non sauvegardée',
-        message: 'Vous avez une zone d\'émission non sauvegardée. La session sera perdue. Continuer?',
-      },
-      unsavedChangesZone: {
-        title: 'Modifications non sauvegardées',
-        message: 'Vous avez des modifications non sauvegardées à la zone d\'émission. La session sera perdue. Continuer?',
-      },
-      zoneRedrawInProgress: {
-        title: 'Redessin de zone en cours',
-        message: 'Vous êtes en train de redessiner une zone d\'émission. La session sera perdue. Continuer?',
-      },
-      unsavedSimulationArea: {
-        title: 'Zone de simulation non sauvegardée',
-        message: 'Vous avez une zone de simulation non sauvegardée. La session sera perdue. Continuer?',
-      },
-      unsavedChangesArea: {
-        title: 'Modifications non sauvegardées',
-        message: 'Vous avez des modifications non sauvegardées à la zone de simulation. La session sera perdue. Continuer?',
-      },
-      simulationInProgress: {
-        title: 'Simulation en cours',
-        message: 'La simulation est en cours d\'exécution. Vous pouvez quitter et votre scénario sera sauvegardé, ou le supprimer définitivement.',
-      },
-      sessionWillBeLost: {
-        title: 'Quitter la simulation',
-        message: 'Votre scénario et vos résultats sont sauvegardés. Vous pouvez quitter en toute sécurité ou supprimer le scénario définitivement.',
-      },
-      confirmExit: {
-        title: 'Quitter',
-        message: 'Êtes-vous sûr de vouloir quitter?',
-      },
-      offlineDataLost: {
-        title: 'Serveur hors ligne',
-        message: 'Le serveur est actuellement hors ligne. Votre configuration ne peut pas être sauvegardée et sera perdue.',
-      },
-    },
     connectionMessages: {
+      switchingToDemo: 'Connexion perdue - passage en mode demo.',
+      connected: 'Connexion etablie - le serveur est en ligne.',
+      recoveredTitle: 'Le serveur est de retour en ligne',
+      recoveredDescription: 'Le serveur est a nouveau disponible. Vous pouvez passer en mode en ligne ou rester en demo.',
+      switchToLive: 'Passer en ligne',
       backendOnlineNewSim: 'Connexion établie! Le serveur est maintenant en ligne. Veuillez redémarrer votre simulation.',
       backendOnlineLoadScenario: 'Connexion établie! Le serveur est maintenant en ligne. Veuillez recharger votre scénario.',
+    },
+    connectionLost: {
+      title: 'Connexion perdue',
+      content: 'Le serveur est hors ligne. Vous pouvez attendre la reconnexion ou passer en mode demo.',
+      contentViewMode: 'Le serveur est hors ligne. Vous pouvez rester hors ligne et continuer a consulter vos donnees, ou passer en mode demo.',
+      wait: 'Attendre la reconnexion',
+      stayOffline: 'Rester hors ligne',
+      switchToDemo: 'Passer en mode demo',
+    },
+    offlineMode: {
+      label: 'Hors ligne',
     },
     validation: {
       outsideBoundary: 'La zone dessinée doit être entièrement dans les limites de la région de Montréal.',
@@ -189,10 +192,63 @@ export const locales = {
       label: 'MODE DÉMO',
       scenarioTitle: 'Scenario de demonstration',
     },
+    batch: {
+      headerTooltip: 'Simulations',
+      popoverTitle: 'Simulations',
+      status: {
+        new: 'Nouvelle simulation',
+        queued: 'En file d\'attente',
+        running: 'En cours',
+        completed: 'Terminee',
+        error: 'Erreur',
+        drafted: 'Brouillon',
+      },
+      viewButton: 'Voir',
+      reconnectButton: 'Surveiller',
+      dismissButton: 'Retirer',
+      copyDraftId: 'Copier l\'ID du brouillon',
+      goToNewButton: 'Continuer la configuration',
+      viewWarning: {
+        title: 'Donnees non sauvegardees',
+        content: 'Vos donnees de configuration actuelles seront perdues. Voulez-vous les sauvegarder en brouillon?',
+        saveDraftAndView: 'Sauvegarder et voir',
+        savingDraft: 'Sauvegarde en cours...',
+        discardAndView: 'Ignorer et voir',
+      },
+      nonCompleted: {
+        title: 'Simulation indisponible',
+        content: 'Cette simulation ne peut pas etre consultee. Voulez-vous modifier ses parametres a la place?',
+        dismiss: 'Fermer',
+        editParameters: 'Modifier les parametres',
+      },
+      removeConfirm: {
+        title: 'Retirer la simulation?',
+        content: 'Cela retirera la simulation de votre liste.',
+        confirm: 'Retirer',
+        keep: 'Garder',
+      },
+      viewErrorButton: 'Voir l\'erreur',
+      simFailed: 'La simulation en arriere-plan a echoue.',
+      errorModal: {
+        title: 'Erreur de simulation',
+      },
+      dismissConfirm: {
+        title: 'Annuler la simulation?',
+        content: 'Cette simulation est encore en cours. L\'annulation l\'arretera definitivement.',
+        confirm: 'Annuler et retirer',
+        cancelling: 'Annulation en cours...',
+        keep: 'Garder',
+        cancelFailed: 'Echec de l\'annulation',
+      },
+      draftLoadFailed: 'Echec du chargement du brouillon',
+      draftRestoreFailed: 'Les donnees du brouillon sont invalides ou corrompues',
+    },
     parameterSelection: {
       backToWelcome: 'Retour à la page d\'accueil',
       newScenario: 'Nouveau scénario',
       startSimulation: 'Lancer la simulation',
+      backToResults: 'Retour aux résultats',
+      discardChanges: 'Annuler les modifications et retour aux résultats',
       cancel: 'Annuler',
       editTitle: 'Modifier le titre du scénario',
       saveTitle: 'Enregistrer le titre du scénario',
@@ -212,6 +268,8 @@ export const locales = {
         invalidPercentage: 'Le pourcentage de simulation doit être entre 1 et 10.',
         noPolicies: 'Chaque zone d\'emission doit avoir au moins une restriction de vehicule.',
         backendError: 'Erreur de validation',
+        viewDetails: 'Voir les details',
+        dismiss: 'Fermer',
       },
     },
   },

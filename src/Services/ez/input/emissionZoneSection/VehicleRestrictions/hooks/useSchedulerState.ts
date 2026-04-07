@@ -15,16 +15,14 @@ export const useSchedulerState = ({ zoneId }: UseSchedulerStateParams): UseSched
       const apiZone = apiZones.find(z => z.id === zoneId);
       const currentPolicies = apiZone?.policies || [];
 
-      const defaultVehicles: Vehicle[] = VEHICLE_TYPE_IDS.map(type => ({
-        type,
-        blocks: []
-      }));
+      const policyVehicles = policyToVehicles(currentPolicies);
 
-      setVehicles(
-        currentPolicies.length === 0
-          ? defaultVehicles
-          : policyToVehicles(currentPolicies)
-      );
+      const fullVehicles: Vehicle[] = VEHICLE_TYPE_IDS.map(type => {
+        const existing = policyVehicles.find(v => v.type === type);
+        return existing || { type, blocks: [] };
+      });
+
+      setVehicles(fullVehicles);
     }
   }, [zoneId, apiZones]);
 

@@ -1,11 +1,17 @@
 import { useEffect, useState } from 'react';
-import { Typography, message } from 'antd';
-import { SyncOutlined, CloseOutlined, GlobalOutlined } from '@ant-design/icons';
+import { Typography, message, Modal, Popover } from 'antd';
+import { SyncOutlined, CloseOutlined, GlobalOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import '~ez/locales';
 import { useEZServiceStore } from '~store';
+import { useEZSessionStore } from '~stores/session';
+import { useBatchStore } from '~stores/batch';
+import { useServiceStore } from '~globalStores';
+import { isProcessState } from '~ez/stores/types';
 import { checkBackendHealth, getBackendUrl } from '~ez/api';
 import { handleExit } from '~ez/exitHandler';
+import { BatchPopover } from './BatchPopover';
+import '~ez/components/locales';
 import styles from './header.module.less';
 
 const { Title } = Typography;
@@ -13,10 +19,16 @@ const { Title } = Typography;
 export default function EzHeader() {
   const { t, i18n } = useTranslation('ez-root');
   const [messageApi, contextHolder] = message.useMessage();
+  const [modal, modalContextHolder] = Modal.useModal();
   const [retrying, setRetrying] = useState(false);
-
   const ezState = useEZServiceStore((state) => state.state);
-  const isEzBackendAlive = useEZServiceStore((state) => state.isEzBackendAlive);
+  const connectionState = useEZServiceStore((state) => state.connectionState);
+  const sessionIntent = useEZServiceStore((state) => state.sessionIntent);
+  const isExiting = useEZServiceStore((state) => state.isExiting);
+
+  const batchSimulations = useBatchStore((s) => s.simulations);
+
+  const setActiveService = useServiceStore((state) => state.setActiveService);
 
   const toggleLanguage = () => {
     const newLang = i18n.language === 'en' ? 'fr' : 'en';
@@ -24,8 +36,7 @@ export default function EzHeader() {
   };
 
   const handleExitClick = () => {
-    console.log('[EZ Header] Exit button clicked');
-    handleExit();
+    handleExit(modal, messageApi, () => setActiveService('REST'));
   };
 
   const [stepTitle, setStepTitle] = useState(t('stepTitles.welcome'));
@@ -35,36 +46,51 @@ export default function EzHeader() {
       case 'WELCOME':
         setStepTitle(t('stepTitles.welcome'));
         break;
-      case 'PARAMETER_SELECTION':
+      case 'SELECT_PARAMETERS':
         setStepTitle(t('stepTitles.parameterSelection'));
         break;
-      case 'DRAW_EM_ZONE':
+      case 'DRAW_EMISSION_ZONE':
         setStepTitle(t('stepTitles.drawEmissionZone'));
         break;
-      case 'EDIT_EM_ZONE':
+      case 'EDIT_EMISSION_ZONE':
         setStepTitle(t('stepTitles.editEmissionZone'));
         break;
-      case 'REDRAW_EM_ZONE':
+      case 'REDRAW_EMISSION_ZONE':
         setStepTitle(t('stepTitles.redrawEmissionZone'));
         break;
-      case 'DRAW_SIM_AREA':
+      case 'DRAW_SIMULATION_AREA':
         setStepTitle(t('stepTitles.drawSimulationArea'));
         break;
-      case 'EDIT_SIM_AREA':
+      case 'EDIT_SIMULATION_AREA':
         setStepTitle(t('stepTitles.editSimulationArea'));
         break;
-      case 'AWAIT_RESULTS':
-        setStepTitle(t('stepTitles.processing'));
-        break;
-      case 'RESULT_VIEW':
+      case 'VIEW_RESULTS':
         setStepTitle(t('stepTitles.viewResults'));
         break;
+      case 'VIEW_PARAMETERS':
+        setStepTitle(t('stepTitles.parameterSelection'));
+        break;
       default:
+        if (isProcessState(ezState)) {
+          setStepTitle(t('stepTitles.processing'));
+        }
         break;
     }
   }, [ezState, t]);
 
   const handleRetryConnection = async () => {
+    // If backend is already connected, just switch intent to live
+    if (connectionState === 'FULL_CONNECT' && sessionIntent === 'LOAD_DEMO_SCENARIO') {
+      const requestId = useEZSessionStore.getState().requestId;
+      if (requestId && requestId.trim() !== '') {
+        useEZServiceStore.getState().setSessionIntent('LOAD_PREVIOUS_SCENARIO');
+      } else {
+        useEZServiceStore.getState().setSessionIntent('RUN_NEW_SIMULATION');
+      }
+      messageApi.success(t('retryConnection.success'));
+      return;
+    }
+
     setRetrying(true);
 
     try {
@@ -95,30 +121,56 @@ export default function EzHeader() {
   return (
     <div className={styles.headerContainer}>
       {contextHolder}
+      {modalContextHolder}
       <div className={styles.titleContainer}>
         <Title level={4} className={styles.title}>
           EZ Service
         </Title>
-        {!isEzBackendAlive && (
+        {sessionIntent === 'VIEW_SCENARIO_OFFLINE' ? (
+          <div className={styles.demoModeWrapper}>
+            <div className={styles.offlineBadgeContainer}>
+              <span>{t('offlineMode.label')}</span>
+            </div>
+          </div>
+        ) : sessionIntent === 'LOAD_DEMO_SCENARIO' && (
           <div className={styles.demoModeWrapper}>
             <div className={styles.demoBadgeContainer}>
               <span>{t('demoMode.label')}</span>
             </div>
-            <button
-              onClick={handleRetryConnection}
-              title={t('retryConnection.tooltip')}
-              aria-label={t('retryConnection.tooltip')}
-              className={styles.retryButton}
-              disabled={retrying}
-            >
-              <SyncOutlined spin={retrying} />
-            </button>
+            {(connectionState === 'FULL_DISCONNECT' || sessionIntent === 'LOAD_DEMO_SCENARIO') && (
+              <button
+                onClick={handleRetryConnection}
+                title={t('retryConnection.tooltip')}
+                aria-label={t('retryConnection.tooltip')}
+                className={styles.retryButton}
+                disabled={retrying}
+              >
+                <SyncOutlined spin={retrying} />
+              </button>
+            )}
           </div>
         )}
       </div>
       <div className={styles.stepTitleContainer}>
         <span className={styles.stepTitle}>{stepTitle}</span>
       </div>
+      {batchSimulations.length >= 2 && (
+        <Popover
+          content={<BatchPopover messageApi={messageApi} modal={modal} />}
+          title={t('batch.popoverTitle')}
+          trigger="click"
+          placement="bottomRight"
+        >
+          <button
+            title={t('batch.headerTooltip')}
+            aria-label={t('batch.headerTooltip')}
+            className={styles.headerButton}
+          >
+            <UnorderedListOutlined />
+            <span>{batchSimulations.length}</span>
+          </button>
+        </Popover>
+      )}
       <button
         title={t('header.toggleLanguage')}
         aria-label={t('header.toggleLanguage')}
@@ -133,6 +185,7 @@ export default function EzHeader() {
         aria-label={t('header.exit')}
         className={`${styles.headerButton} ${i18n.language === 'fr' ? styles.headerButtonFr : ''}`}
         onClick={handleExitClick}
+        disabled={isExiting}
       >
         <CloseOutlined />
         <span>{t('header.exit')}</span>

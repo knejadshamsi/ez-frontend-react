@@ -1,68 +1,77 @@
-import { Space, Button, Input, Typography, message, Modal } from 'antd'
-import { showEZModal } from '~ez/components/EZModal'
+import { Space, Button, Input, Typography } from 'antd'
 import { useTranslation } from 'react-i18next'
+import type { MessageInstance } from 'antd/es/message/interface'
+import type { NotificationInstance } from 'antd/es/notification/interface'
+import type { HookAPI } from 'antd/es/modal/useModal'
 import { useEZSessionStore, useDraftStore } from '~stores/session'
 import { useEZServiceStore, useAPIPayloadStore } from '~store'
 import { loadScenario } from '~ez/api'
 import { resetOutputState } from '~stores/reset'
-import { useScenarioSnapshotStore } from '~stores/scenario'
 import { restoreStoresFromInput } from '~ez/api/fetchScenarioInput'
 import { fetchDraft } from '~ez/api/draft'
+import { fetchScenarioStatus } from '~ez/api/scenarioStatus'
+import { fetchScenarioPreamble } from '~ez/api/fetchScenarioPreamble'
+import { EZFeedbackModal } from '~ez/components/EZFeedbackModal'
 import previousScenarios from './previousScenarios.json'
 import './locales'
 import styles from './WelcomeView.module.less'
 
 const { Text } = Typography
 
-export const WelcomeView = () => {
-  const { t } = useTranslation('ez-welcome');
-  const [messageApi, contextHolder] = message.useMessage();
-  const [modal, modalContextHolder] = Modal.useModal();
+interface WelcomeViewProps {
+  messageApi: MessageInstance;
+  notificationApi: NotificationInstance;
+  modal: HookAPI;
+}
 
+export const WelcomeView = ({ messageApi, notificationApi, modal }: WelcomeViewProps) => {
+  const { t } = useTranslation('ez-welcome');
+  const showError = (msg: string) => messageApi.error(msg);
   const requestId = useEZSessionStore((state) => state.requestId)
   const setRequestId = useEZSessionStore((state) => state.setRequestId)
   const setState = useEZServiceStore((state) => state.setState)
+  const setSessionIntent = useEZServiceStore((state) => state.setSessionIntent)
+  const connectionState = useEZServiceStore((state) => state.connectionState)
+  const isFullConnect = connectionState === 'FULL_CONNECT'
 
   const handleScenarioLoadError = (errorMessage: string) => {
-    messageApi.error(errorMessage || t('errors.loadFailed'));
+    showError(errorMessage || t('errors.loadFailed'));
     setState('WELCOME');
   };
 
-  const handleNonCompleted = (status: string) => {
-    if (status === 'DELETED') {
-      messageApi.error(t('errors.scenarioDeleted'));
-      setState('WELCOME');
-      resetOutputState();
-      return;
-    }
+  const showNonCompletedModal = (scenarioRequestId: string, status: string) => {
+    const statusLabel = status === 'CANCELLED'
+      ? t('status.cancelled')
+      : t('status.failed');
 
-    // CANCELLED or FAILED
-    const statusLabel = status === 'CANCELLED' ? t('status.cancelled') : t('status.failed');
-
-    const instance = showEZModal(modal, {
+    EZFeedbackModal(modal, {
       title: t('nonCompleted.title'),
       content: t('nonCompleted.content', { status: statusLabel }),
       actions: [
         {
+          label: t('nonCompleted.dismissText'),
+        },
+        {
           label: t('nonCompleted.cancelText'),
           onClick: () => {
+            useEZServiceStore.getState().setSessionIntent('RUN_NEW_SIMULATION');
+            useEZSessionStore.getState().setRequestId('');
             resetOutputState();
-            setState('WELCOME');
-            instance.destroy();
+            useDraftStore.getState().reset();
+            useAPIPayloadStore.getState().reset();
+            useEZSessionStore.getState().reset();
+            setState('SELECT_PARAMETERS');
           },
         },
         {
           label: t('nonCompleted.okText'),
-          type: 'primary',
-          onClick: () => {
-            const snapshot = useScenarioSnapshotStore.getState();
-            if (snapshot.input) {
-              restoreStoresFromInput(snapshot.input, snapshot.session);
-            }
-            setRequestId('');
-            resetOutputState();
-            setState('PARAMETER_SELECTION');
-            instance.destroy();
+          highlight: true,
+          onClick: async () => {
+            const preamble = await fetchScenarioPreamble(scenarioRequestId);
+            useEZServiceStore.getState().setSessionIntent('RUN_NEW_SIMULATION');
+            restoreStoresFromInput(preamble.input, preamble.session);
+            useEZSessionStore.getState().setRequestId('');
+            setState('SELECT_PARAMETERS');
           },
         },
       ],
@@ -71,61 +80,88 @@ export const WelcomeView = () => {
 
   // CLICK HANDLING
 
+  const loadScenarioWithStatusCheck = async (scenarioRequestId: string) => {
+    try {
+      const { status } = await fetchScenarioStatus(scenarioRequestId);
+
+      if (status === 'DELETED') {
+        showError(t('errors.scenarioDeleted'));
+        return;
+      }
+
+      if (status === 'CANCELLED' || status === 'FAILED') {
+        showNonCompletedModal(scenarioRequestId, status);
+        return;
+      }
+
+      // COMPLETED (or other active statuses) - load via SSE stream
+      await loadScenario(scenarioRequestId, setState, handleScenarioLoadError);
+    } catch {
+      showError(t('errors.loadFailed'));
+    }
+  };
+
   const handleViewScenario = async (scenarioRequestId: string) => {
     if (!scenarioRequestId || scenarioRequestId.trim() === '') {
-      messageApi.error(t('errors.invalidId'));
+      showError(t('errors.invalidId'));
       return;
     }
 
+    setSessionIntent('LOAD_PREVIOUS_SCENARIO');
     setRequestId(scenarioRequestId);
-    await loadScenario(scenarioRequestId, setState, handleScenarioLoadError, handleNonCompleted);
+    await loadScenarioWithStatusCheck(scenarioRequestId);
   }
 
   const handleCreateScenario = () => {
-    // Clean slate — clear any lingering data from previous scenarios
+    const isOffline = connectionState === 'FULL_DISCONNECT' || connectionState === 'HALF_DISCONNECT';
+    setSessionIntent(isOffline ? 'LOAD_DEMO_SCENARIO' : 'RUN_NEW_SIMULATION');
     setRequestId('');
     resetOutputState();
     useDraftStore.getState().reset();
     useAPIPayloadStore.getState().reset();
     useEZSessionStore.getState().reset();
-    setState('PARAMETER_SELECTION');
+    setState('SELECT_PARAMETERS');
   }
 
   const loadDraftScenario = async (draftId: string) => {
+    let draft: Awaited<ReturnType<typeof fetchDraft>>;
     try {
-      const draft = await fetchDraft(draftId);
-      restoreStoresFromInput(
-        draft.inputData,
-        draft.sessionData
-      );
+      draft = await fetchDraft(draftId);
+    } catch (error) {
+      console.error('[Load Draft] Fetch failed:', error);
+      const errorMsg = error instanceof Error ? error.message : t('errors.draftLoadFailed');
+      showError(errorMsg);
+      return;
+    }
+
+    try {
+      restoreStoresFromInput(draft.inputData, draft.sessionData);
       useDraftStore.getState().setDraftId(draftId);
       setRequestId('');
-      setState('PARAMETER_SELECTION');
+      setState('SELECT_PARAMETERS');
     } catch (error) {
-      console.error('[Load Draft] Failed:', error);
-      const errorMsg = error instanceof Error ? error.message : t('errors.draftLoadFailed');
-      messageApi.error(errorMsg);
+      console.error('[Load Draft] Restore failed:', error);
+      showError(t('errors.draftRestoreFailed'));
     }
   };
 
   const handleViewPreviousScenario = async () => {
     if (!requestId || requestId.trim() === '') {
-      messageApi.error(t('errors.enterValidId'));
+      showError(t('errors.enterValidId'));
       return;
     }
 
+    setSessionIntent('LOAD_PREVIOUS_SCENARIO');
     if (requestId.startsWith('d_')) {
       await loadDraftScenario(requestId);
     } else {
-      await loadScenario(requestId, setState, handleScenarioLoadError, handleNonCompleted);
+      await loadScenarioWithStatusCheck(requestId);
     }
   }
 
 
   return (
     <div className={styles.container}>
-      {contextHolder}
-      {modalContextHolder}
       <div className={styles.welcomeText}>
         <br />
         {t('welcome.title')}
@@ -148,7 +184,7 @@ export const WelcomeView = () => {
                 {t(`scenarios.${scenario.requestId}.description`)}
               </div>
               <div className={styles.scenarioItemButton}>
-                <Button type="primary" onClick={() => handleViewScenario(scenario.requestId)}>
+                <Button type="primary" disabled={!isFullConnect} onClick={() => handleViewScenario(scenario.requestId)}>
                   {t('previousScenarios.viewButton')}
                 </Button>
               </div>
@@ -166,15 +202,16 @@ export const WelcomeView = () => {
               className={styles.flexInput}
               value={requestId || ''}
               onChange={(e) => setRequestId(e.target.value)}
+              disabled={!isFullConnect}
               onPressEnter={() => {
-                if (requestId && requestId.trim() !== '') {
+                if (isFullConnect && requestId && requestId.trim() !== '') {
                   handleViewPreviousScenario()
                 }
               }}
             />
             <Button
               type="primary"
-              disabled={!requestId || requestId.trim() === ''}
+              disabled={!isFullConnect || !requestId || requestId.trim() === ''}
               onClick={handleViewPreviousScenario}
             >
               {t('buttons.viewPrevious')}

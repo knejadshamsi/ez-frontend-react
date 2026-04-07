@@ -55,6 +55,7 @@ const calculateScaledCoordinates = (
 const SimulationAreaSection = (): ReactElement => {
   const { t } = useTranslation('ez-simulation-area-section')
   const setState = useEZServiceStore((state) => state.setState)
+  const ezState = useEZServiceStore((state) => state.state)
   const setActiveCustomArea = useEZSessionStore((state) => state.setActiveCustomArea)
 
   const apiZones = useAPIPayloadStore((state) => state.payload.zones)
@@ -71,6 +72,8 @@ const SimulationAreaSection = (): ReactElement => {
 
   // Calculate simulation areas for visuals based on emission zone + scale
   useEffect(() => {
+    if (ezState !== 'SELECT_PARAMETERS') return;
+
     const visibleZones = apiZones.filter(zone => {
       const sessionData = sessionZones[zone.id]
       return zone.coords && sessionData && !sessionData.hidden
@@ -102,12 +105,12 @@ const SimulationAreaSection = (): ReactElement => {
         removeScaledSimulationArea(scaledArea.id)
       }
     })
-  }, [apiZones, sessionZones, upsertScaledSimulationArea, removeScaledSimulationArea])
+  }, [ezState, apiZones, sessionZones, upsertScaledSimulationArea, removeScaledSimulationArea])
 
   const handleSelectCustomArea = (): void => {
     const newAreaId = addCustomSimulationArea()
     setActiveCustomArea(newAreaId)
-    setState('DRAW_SIM_AREA')
+    setState('DRAW_SIMULATION_AREA')
   }
 
   return (

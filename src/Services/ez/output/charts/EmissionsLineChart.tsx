@@ -1,3 +1,4 @@
+import { useRef, useEffect } from 'react';
 import { Spin, Alert, Button } from 'antd';
 import { Line } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
@@ -79,6 +80,17 @@ export const EmissionsLineChart = () => {
   const requestId = useEZSessionStore((state) => state.requestId);
   const selectedPollutant = useEZOutputFiltersStore((s) => s.selectedPollutantType);
 
+  // Fix react-chartjs-2 race condition: chart doesn't render on initial mount
+  // because container dimensions aren't finalized yet. Trigger resize after paint.
+  const chartRef = useRef<any>(null);
+  useEffect(() => {
+    if (!lineChartData) return;
+    const frame = requestAnimationFrame(() => {
+      chartRef.current?.resize();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [lineChartData]);
+
   const handleRetry = async () => {
     if (requestId) {
       await retryComponentData(requestId, 'chart_line_emissions');
@@ -119,6 +131,7 @@ export const EmissionsLineChart = () => {
       </span>
       <div className={outputStyles.lineChartContainer}>
         <Line
+          ref={chartRef}
           data={{
             labels: lineChartData.timeBins,
             datasets: [

@@ -29,15 +29,18 @@ export const Emissions = () => {
   const setEmissionsViewMode = useEZOutputFiltersStore((s) => s.setEmissionsViewMode);
   const toggleMapVisibility = useEZOutputFiltersStore((s) => s.toggleEmissionsMapVisibility);
 
-  const isDemoMode = !useEZServiceStore((s) => s.isEzBackendAlive);
+  const sessionIntent = useEZServiceStore((s) => s.sessionIntent);
+  const isDemoMode = sessionIntent === 'LOAD_DEMO_SCENARIO';
+  const isOffline = sessionIntent === 'VIEW_SCENARIO_OFFLINE';
 
   useEffect(() => {
+    if (isOffline) return;
     if (isMapVisible && state === 'success_initial') {
       fetchMapData('emissions', isDemoMode);
     }
-  }, [isMapVisible, state, isDemoMode]);
+  }, [isMapVisible, state, isDemoMode, isOffline]);
 
-  const handleRetry = () => {
+  const handleRetry = isOffline ? undefined : () => {
     setError(null);
     setState('loading');
     fetchMapData('emissions', isDemoMode);
@@ -59,6 +62,7 @@ export const Emissions = () => {
       onToggle={toggleMapVisibility}
       isLoading={state === 'loading'}
       hasData={state === 'success'}
+      disabled={isOffline && state !== 'success'}
       error={state === 'error_initial' || state === 'error' ? error : null}
       onRetry={handleRetry}
     >

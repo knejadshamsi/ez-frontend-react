@@ -167,26 +167,26 @@ export const DrawingControls = () => {
   const setNotification = useNotificationStore(state => state.setNotification);
   const setZoneProperty = useEZSessionStore(state => state.setZoneProperty);
 
-  const isDrawMode = ezState === 'DRAW_EM_ZONE' || ezState === 'DRAW_SIM_AREA' || ezState === 'REDRAW_EM_ZONE';
-  const isEditMode = ezState === 'EDIT_EM_ZONE' || ezState === 'EDIT_SIM_AREA';
-  const isZoneMode = ezState === 'DRAW_EM_ZONE' || ezState === 'EDIT_EM_ZONE' || ezState === 'REDRAW_EM_ZONE';
-  const isAreaMode = ezState === 'DRAW_SIM_AREA' || ezState === 'EDIT_SIM_AREA';
+  const isDrawMode = ezState === 'DRAW_EMISSION_ZONE' || ezState === 'DRAW_SIMULATION_AREA' || ezState === 'REDRAW_EMISSION_ZONE';
+  const isEditMode = ezState === 'EDIT_EMISSION_ZONE' || ezState === 'EDIT_SIMULATION_AREA';
+  const isZoneMode = ezState === 'DRAW_EMISSION_ZONE' || ezState === 'EDIT_EMISSION_ZONE' || ezState === 'REDRAW_EMISSION_ZONE';
+  const isAreaMode = ezState === 'DRAW_SIMULATION_AREA' || ezState === 'EDIT_SIMULATION_AREA';
 
   if (activeService !== 'EZ' || (!isDrawMode && !isEditMode)) return null;
 
   const exitDrawing = () => {
     resetDrawTool();
     resetDrawingState();
-    setState('PARAMETER_SELECTION');
+    setState('SELECT_PARAMETERS');
   };
 
   const handleCancel = () => {
-    if (isDrawMode && ezState === 'DRAW_SIM_AREA' && activeCustomArea) {
+    if (isDrawMode && ezState === 'DRAW_SIMULATION_AREA' && activeCustomArea) {
       removeCustomSimulationArea(activeCustomArea);
     }
 
     // Remove zone if it was never drawn (no coords)
-    if (ezState === 'DRAW_EM_ZONE' && activeZone) {
+    if (ezState === 'DRAW_EMISSION_ZONE' && activeZone) {
       const zone = zones.find(z => z.id === activeZone);
       if (zone && !zone.coords) {
         removeZone(activeZone);

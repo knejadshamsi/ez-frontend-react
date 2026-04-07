@@ -52,7 +52,7 @@ const handlePolygonCompletion = (
     updateFn(activeId, { coords });
 
     // Reset scale to 100% when redrawing emission zone
-    if (entityType === 'zone' && ezState === 'REDRAW_EM_ZONE') {
+    if (entityType === 'zone' && ezState === 'REDRAW_EMISSION_ZONE') {
       const sessionZones = useEZSessionStore.getState().zones;
       const currentScale = sessionZones[activeId]?.scale || [100, 'center'];
       useEZSessionStore.getState().setZoneProperty(activeId, 'scale', [100, currentScale[1]]);
@@ -62,7 +62,7 @@ const handlePolygonCompletion = (
       setDrawToolGeoJson({ type: 'FeatureCollection', features: [] });
     }
 
-    setState('PARAMETER_SELECTION');
+    setState('SELECT_PARAMETERS');
     resetDrawingState();
   }
 };
@@ -118,18 +118,18 @@ export function useLayers() {
 
   // Helper: Check if in any polygon mode
   const isPolygonMode =
-    ezState === 'DRAW_EM_ZONE' ||
-    ezState === 'DRAW_SIM_AREA' ||
-    ezState === 'EDIT_EM_ZONE' ||
-    ezState === 'EDIT_SIM_AREA' ||
-    ezState === 'REDRAW_EM_ZONE';
+    ezState === 'DRAW_EMISSION_ZONE' ||
+    ezState === 'DRAW_SIMULATION_AREA' ||
+    ezState === 'EDIT_EMISSION_ZONE' ||
+    ezState === 'EDIT_SIMULATION_AREA' ||
+    ezState === 'REDRAW_EMISSION_ZONE';
 
   // Initialize drawToolGeoJson when entering DRAW or EDIT mode
   useEffect(() => {
     if (activeService !== 'EZ') return;
 
     // Clear for DRAW and REDRAW modes (blank canvas for drawing)
-    if (ezState === 'DRAW_EM_ZONE' || ezState === 'DRAW_SIM_AREA' || ezState === 'REDRAW_EM_ZONE') {
+    if (ezState === 'DRAW_EMISSION_ZONE' || ezState === 'DRAW_SIMULATION_AREA' || ezState === 'REDRAW_EMISSION_ZONE') {
       setDrawToolGeoJson({
         type: 'FeatureCollection',
         features: []
@@ -138,12 +138,12 @@ export function useLayers() {
     }
 
     // Initialize for EDIT modes
-    if (ezState === 'EDIT_EM_ZONE' && activeZone) {
+    if (ezState === 'EDIT_EMISSION_ZONE' && activeZone) {
       const zone = apiZones.find(z => z.id === activeZone);
       if (zone?.coords) {
         setDrawToolGeoJson(coordsToGeoJSON(zone.coords));
       }
-    } else if (ezState === 'EDIT_SIM_AREA' && activeCustomArea) {
+    } else if (ezState === 'EDIT_SIMULATION_AREA' && activeCustomArea) {
       const area = customSimulationAreas.find(a => a.id === activeCustomArea);
       if (area?.coords) {
         setDrawToolGeoJson(coordsToGeoJSON(area.coords));
@@ -179,7 +179,7 @@ export function useLayers() {
         const coords = feature.geometry.coordinates as Coordinate[][];
 
         // Determine mode from ezState
-        const isZoneMode = ezState === 'DRAW_EM_ZONE' || ezState === 'EDIT_EM_ZONE' || ezState === 'REDRAW_EM_ZONE';
+        const isZoneMode = ezState === 'DRAW_EMISSION_ZONE' || ezState === 'EDIT_EMISSION_ZONE' || ezState === 'REDRAW_EMISSION_ZONE';
         const activeId = isZoneMode ? activeZone : activeCustomArea;
 
         if (!activeId) return;
@@ -214,12 +214,12 @@ export function useLayers() {
     ezState
   ]);
 
-  // Create unified polygon layer for all 4 states (DRAW_EM_ZONE, EDIT_EM_ZONE, DRAW_SIM_AREA, EDIT_SIM_AREA)
+  // Create unified polygon layer for all 4 states (DRAW_EMISSION_ZONE, EDIT_EMISSION_ZONE, DRAW_SIMULATION_AREA, EDIT_SIMULATION_AREA)
   const editablePolygonLayer = (() => {
     if (activeService !== 'EZ') return null;
 
-    // DRAW_EM_ZONE: Drawing new emission zone
-    if (ezState === 'DRAW_EM_ZONE') {
+    // DRAW_EMISSION_ZONE: Drawing new emission zone
+    if (ezState === 'DRAW_EMISSION_ZONE') {
       return createEditablePolygonLayer({
         geoJsonData: drawToolGeoJson,
         onEdit: handlePolygonEdit,
@@ -229,8 +229,8 @@ export function useLayers() {
       });
     }
 
-    // REDRAW_EM_ZONE: Redrawing existing emission zone
-    if (ezState === 'REDRAW_EM_ZONE' && activeZone) {
+    // REDRAW_EMISSION_ZONE: Redrawing existing emission zone
+    if (ezState === 'REDRAW_EMISSION_ZONE' && activeZone) {
       const zone = apiZones.find(z => z.id === activeZone);
       if (!zone) {
         console.error('[useLayers] Cannot redraw zone - zone not found:', activeZone);
@@ -249,8 +249,8 @@ export function useLayers() {
       });
     }
 
-    // EDIT_EM_ZONE: Editing existing emission zone
-    if (ezState === 'EDIT_EM_ZONE' && activeZone) {
+    // EDIT_EMISSION_ZONE: Editing existing emission zone
+    if (ezState === 'EDIT_EMISSION_ZONE' && activeZone) {
       const zone = apiZones.find(z => z.id === activeZone);
       if (!zone?.coords) {
         console.error('[useLayers] Cannot edit zone - no coords found:', activeZone);
@@ -269,8 +269,8 @@ export function useLayers() {
       });
     }
 
-    // DRAW_SIM_AREA: Drawing new simulation area
-    if (ezState === 'DRAW_SIM_AREA') {
+    // DRAW_SIMULATION_AREA: Drawing new simulation area
+    if (ezState === 'DRAW_SIMULATION_AREA') {
       return createEditablePolygonLayer({
         geoJsonData: drawToolGeoJson,
         onEdit: handlePolygonEdit,
@@ -280,8 +280,8 @@ export function useLayers() {
       });
     }
 
-    // EDIT_SIM_AREA: Editing existing simulation area
-    if (ezState === 'EDIT_SIM_AREA' && activeCustomArea) {
+    // EDIT_SIMULATION_AREA: Editing existing simulation area
+    if (ezState === 'EDIT_SIMULATION_AREA' && activeCustomArea) {
       const area = customSimulationAreas.find(a => a.id === activeCustomArea);
       if (!area?.coords) {
         console.error('[useLayers] Cannot edit area - no coords found:', activeCustomArea);
@@ -303,9 +303,9 @@ export function useLayers() {
     return null;
   })();
 
-  // Only show display layers in PARAMETER_SELECTION mode
+  // Only show display layers in SELECT_PARAMETERS mode
   // In polygon modes, use drawingLayers instead (which respect visibility toggles)
-  const shouldShowDisplayLayers = ezState === 'PARAMETER_SELECTION';
+  const shouldShowDisplayLayers = ezState === 'SELECT_PARAMETERS' || ezState === 'VIEW_PARAMETERS' || ezState.startsWith('PROCESS_');
 
   const displayLayer = shouldShowDisplayLayers && activeService === 'EZ'
     ? createZoneDisplayLayer({
@@ -416,15 +416,15 @@ export function useLayers() {
 
   const drawingLayers = isPolygonMode
     ? createDrawingModeDisplayLayers(
-        (ezState === 'DRAW_EM_ZONE' || ezState === 'EDIT_EM_ZONE' || ezState === 'REDRAW_EM_ZONE') ? 'zone' : 'area',
+        (ezState === 'DRAW_EMISSION_ZONE' || ezState === 'EDIT_EMISSION_ZONE' || ezState === 'REDRAW_EMISSION_ZONE') ? 'zone' : 'area',
         activeZone,
         activeCustomArea
       )
     : { zoneLayer: null, areaLayer: null };
 
   // Create output layers
-  const isResultView = ezState === 'RESULT_VIEW' && activeService === 'EZ';
-  const showInputLayers = (ezState === 'RESULT_VIEW' || ezState === 'AWAIT_RESULTS') && activeService === 'EZ';
+  const isResultView = ezState === 'VIEW_RESULTS' && activeService === 'EZ';
+  const showInputLayers = ezState === 'VIEW_RESULTS' && activeService === 'EZ';
 
   const emissionsOutputLayer = isResultView && isEmissionsMapVisible && emissionsMapData
     ? (() => {

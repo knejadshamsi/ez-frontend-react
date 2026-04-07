@@ -82,7 +82,7 @@ const ZoneSettings = ({ zoneId }) => {
           {!zone.coordinates ? (
             <Button
               onClick={() => {
-                setState('DRAW_EM_ZONE');
+                setState('DRAW_EMISSION_ZONE');
               }}
               className={styles.btn}
               disabled={zone.hidden}
@@ -113,7 +113,7 @@ const ZoneSettings = ({ zoneId }) => {
             }}>
               <Button
                 onClick={() => {
-                  setState('REDRAW_EM_ZONE');
+                  setState('REDRAW_EMISSION_ZONE');
                 }}
                 className={`${styles.btn} ${styles.redrawZoneButton}`}
                 disabled={zone.hidden}
@@ -125,7 +125,7 @@ const ZoneSettings = ({ zoneId }) => {
               <Tooltip title={t('zoneSettings.boundaries.editTooltip')}>
                 <Button
                   onClick={() => {
-                    setState('EDIT_EM_ZONE');
+                    setState('EDIT_EMISSION_ZONE');
                   }}
                   disabled={zone.hidden}
                   type="default"

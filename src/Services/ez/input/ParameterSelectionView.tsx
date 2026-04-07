@@ -8,12 +8,13 @@ import { createAPIRequest, validateAPIRequest, startSimulation } from '~ez/api'
 import { hasOutputData, resetAllEZOutputStores } from '~stores/output'
 import { resetAllEZStores } from '~stores/reset'
 import { hasInputChangedFromDefault } from '~ez/exitHandler'
-import { useScenarioSnapshotStore, hasInputChanged } from '~stores/scenario'
+import { useInputSnapshotStore } from '~stores/scenario'
+import { restoreStoresFromInput } from '~ez/api/fetchScenarioInput'
 
-import { Button, Input, Modal, message, notification } from 'antd'
-import { ArrowLeftOutlined, SendOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons'
+import { Button, Input } from 'antd'
+import { ArrowLeftOutlined, SendOutlined, EditOutlined, SaveOutlined, RollbackOutlined } from '@ant-design/icons'
 import type { ValidationError } from '~ez/api/sse'
-import { showEZModal } from '~ez/components/EZModal'
+import { useEZFeedback } from '~ez/components/EZFeedback'
 import '~ez/locales'
 
 import styles from './ParameterSelectionView.module.less'
@@ -23,16 +24,16 @@ const SIMULATION_START_COOLDOWN_MS = 3000;
 
 export const ParameterSelectionView = () => {
   const { t } = useTranslation('ez-root');
-  const [modal, contextHolder] = Modal.useModal();
-  const [messageApi, messageContextHolder] = message.useMessage();
-  const [notificationApi, notificationContextHolder] = notification.useNotification();
+  const { ezFeedback, contextHolder: feedbackContextHolder } = useEZFeedback();
 
   const setState = useEZServiceStore((state) => state.setState)
-  const isEzBackendAlive = useEZServiceStore((state) => state.isEzBackendAlive)
+  const connectionState = useEZServiceStore((state) => state.connectionState)
+  const sessionIntent = useEZServiceStore((state) => state.sessionIntent)
+  const ezState = useEZServiceStore((state) => state.state)
+  const isInputDirty = useEZServiceStore((state) => state.isInputDirty)
   const scenarioTitle = useEZSessionStore((state) => state.scenarioTitle)
   const scenarioDescription = useEZSessionStore((state) => state.scenarioDescription)
   const setScenarioTitle = useEZSessionStore((state) => state.setScenarioTitle)
-  const setIsNewSimulation = useEZSessionStore((state) => state.setIsNewSimulation)
 
   const apiPayload = useAPIPayloadStore(state => state.payload)
 
@@ -45,6 +46,31 @@ export const ParameterSelectionView = () => {
     setEditedTitle(scenarioTitle);
   }, [scenarioTitle]);
 
+  // Subscription-based dirty flag: watch input stores for changes during VIEW_PARAMETERS
+  useEffect(() => {
+    if (ezState !== 'VIEW_PARAMETERS' || sessionIntent === 'VIEW_SCENARIO_OFFLINE') return;
+
+    useEZServiceStore.getState().setIsInputDirty(false);
+
+    const unsubPayload = useAPIPayloadStore.subscribe((state, prev) => {
+      if (state.payload !== prev.payload) {
+        useEZServiceStore.getState().setIsInputDirty(true);
+      }
+    });
+
+    const unsubSession = useEZSessionStore.subscribe((state, prev) => {
+      if (state.scenarioTitle !== prev.scenarioTitle ||
+          state.scenarioDescription !== prev.scenarioDescription) {
+        useEZServiceStore.getState().setIsInputDirty(true);
+      }
+    });
+
+    return () => {
+      unsubPayload();
+      unsubSession();
+    };
+  }, [ezState, sessionIntent]);
+
   const resetAfterCooldown = (callback: () => void) => {
     const elapsed = Date.now() - startTimeRef.current;
     const remaining = Math.max(0, SIMULATION_START_COOLDOWN_MS - elapsed);
@@ -56,30 +82,42 @@ export const ParameterSelectionView = () => {
 
   const handleSimulationError = (errorMessage: string) => {
     resetAfterCooldown(() => {
-      messageApi.error(errorMessage || t('parameterSelection.simulationFailed'));
+      ezFeedback.toast({ type: 'error', message: errorMessage || t('parameterSelection.simulationFailed') });
     });
   };
 
   const handleValidationErrors = (errors: ValidationError[]) => {
     resetAfterCooldown(() => {
-      notificationApi.error({
+      ezFeedback.toast({
+        type: 'error',
         message: t('parameterSelection.validation.backendError'),
-        icon: <></>,
-        description: (
-          <ul className={styles.validationErrorList}>
-            {errors.map((e, i) => (
-              <li key={i} className={styles.validationErrorItem}>
-                <span className={styles.validationErrorMarker}>x</span>
-                <span>{e.message}</span>
-              </li>
-            ))}
-          </ul>
-        ),
-        placement: 'top',
-        className: styles.validationNotification,
-        style: { width: 520 },
+        autoDismiss: false,
         closable: false,
-        duration: 10,
+        actions: [
+          {
+            label: t('parameterSelection.validation.viewDetails'),
+            highlight: true,
+            dismiss: true,
+            onClick: () => {
+              ezFeedback.modal({
+                title: t('parameterSelection.validation.backendError'),
+                content: (
+                  <ul className={styles.validationErrorList}>
+                    {errors.map((e, i) => (
+                      <li key={i} className={styles.validationErrorItem}>
+                        <span className={styles.validationErrorMarker}>x</span>
+                        <span>{e.message}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ),
+                closable: true,
+                actions: [],
+              });
+            },
+          },
+          { label: t('parameterSelection.validation.dismiss'), dismiss: true },
+        ],
       });
     });
   };
@@ -97,66 +135,82 @@ export const ParameterSelectionView = () => {
     // Determine which warning message to show
     const warningKey = hasOutput ? 'both' : 'inputOnly';
 
-    const instance = showEZModal(modal, {
+    ezFeedback.modal({
       title: t('parameterSelection.backToWelcomeWarning.title'),
       content: t(`parameterSelection.backToWelcomeWarning.${warningKey}`),
       actions: [
-        { label: t('parameterSelection.cancel'), onClick: () => instance.destroy() },
+        { label: t('parameterSelection.cancel') },
         {
           label: t('parameterSelection.backToWelcomeWarning.confirm'),
-          type: 'primary',
           danger: true,
           onClick: async () => {
             await resetAllEZStores();
             setState('WELCOME');
-            instance.destroy();
           },
         },
       ],
     });
   };
 
+  const handleDiscardChanges = () => {
+    const snapshot = useInputSnapshotStore.getState();
+    if (snapshot.input) {
+      restoreStoresFromInput(snapshot.input, snapshot.session);
+      useEZServiceStore.getState().setIsInputDirty(false);
+      setState('VIEW_RESULTS');
+    }
+  };
+
   const handleStartSimulation = () => {
     if (isStarting) return;
+
+    // VIEW_PARAMETERS with existing results: back to results (offline silently discards, non-dirty just navigates)
+    if (ezState === 'VIEW_PARAMETERS' && (isOfflineView || !isInputDirty)) {
+      if (isOfflineView) {
+        const snapshot = useInputSnapshotStore.getState();
+        if (snapshot.input) {
+          restoreStoresFromInput(snapshot.input, snapshot.session);
+        }
+      }
+      setState('VIEW_RESULTS');
+      return;
+    }
 
     const apiRequest = createAPIRequest(apiPayload, scenarioTitle, scenarioDescription);
     const validation = validateAPIRequest(apiRequest);
 
     if (!validation.isValid) {
-      messageApi.error(t(validation.error));
-      return;
-    }
-
-    const outputExists = hasOutputData();
-
-    if (outputExists && !hasInputChanged()) {
-      // Input identical to snapshot - silently return to results
-      setState('RESULT_VIEW');
+      ezFeedback.toast({ type: 'error', message: t(validation.error) });
       return;
     }
 
     setIsStarting(true);
     startTimeRef.current = Date.now();
 
-    if (outputExists) {
+    if (hasOutputData()) {
       // Input changed - clean slate before new simulation
       const setRequestId = useEZSessionStore.getState().setRequestId;
       setRequestId('');
-      useScenarioSnapshotStore.getState().reset();
+      useInputSnapshotStore.getState().reset();
       resetAllEZOutputStores();
     }
 
-    setIsNewSimulation(true);
+    const currentIntent = useEZServiceStore.getState().sessionIntent;
+    if (currentIntent !== 'LOAD_DEMO_SCENARIO') {
+      useEZServiceStore.getState().setSessionIntent('RUN_NEW_SIMULATION');
+    }
     startSimulation(setState, handleSimulationError, handleValidationErrors);
   }
 
+  const isViewParameters = ezState === 'VIEW_PARAMETERS';
+  const isOfflineView = sessionIntent === 'VIEW_SCENARIO_OFFLINE';
+  const showBackToResults = isViewParameters && (isOfflineView || !isInputDirty);
+
   return (
     <>
-      {contextHolder}
-      {messageContextHolder}
-      {notificationContextHolder}
+      {feedbackContextHolder}
       <div className={styles.backButtonContainer}>
-          <Button type="link" onClick={handleBackToWelcome} className={styles.backButton}>
+          <Button type="link" onClick={handleBackToWelcome} className={styles.backButton} disabled={isOfflineView}>
             <ArrowLeftOutlined />
             {t('parameterSelection.backToWelcome')}
           </Button>
@@ -203,16 +257,32 @@ export const ParameterSelectionView = () => {
         </div>
       <InputContainer />
       <div className={styles.buttonContainer}>
+        {isViewParameters && isInputDirty && !isOfflineView && (
+          <Button
+            onClick={handleDiscardChanges}
+            className={styles.simulationButton}
+          >
+            <div className={styles.buttonText}>
+              <RollbackOutlined />
+              <span>{t('parameterSelection.discardChanges')}</span>
+            </div>
+          </Button>
+        )}
         <Button
           type="primary"
           onClick={handleStartSimulation}
-          disabled={isStarting}
+          disabled={isStarting || (sessionIntent === 'RUN_NEW_SIMULATION' && connectionState !== 'FULL_CONNECT')}
           loading={isStarting}
           className={styles.simulationButton}
+          aria-label={showBackToResults
+            ? t('parameterSelection.backToResults')
+            : t('parameterSelection.startSimulation')}
         >
           <div className={styles.buttonText}>
             {!isStarting && <SendOutlined />}
-            <span>{t('parameterSelection.startSimulation')}</span>
+            <span>{showBackToResults
+              ? t('parameterSelection.backToResults')
+              : t('parameterSelection.startSimulation')}</span>
           </div>
         </Button>
       </div>

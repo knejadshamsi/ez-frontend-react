@@ -1,28 +1,86 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useEZServiceStore } from '~store';
-import { checkBackendHealth, getBackendUrl } from '~ez/api';
+import { useEZSessionStore } from '~stores/session';
+import { checkBackendHealth, checkBackendHealthInitial, getBackendUrl } from '~ez/api';
+import { loadScenario } from '~ez/api/startSimulation';
+import { fetchScenarioStatus, isTerminalStatus } from '~ez/api/scenarioStatus';
+import { isProcessState } from './stores/types';
+import type { ConnectionState } from './stores/types';
+import i18n from '~i18nConfig';
+import './locales';
 
-const POLL_INTERVAL_MS = 60000;
-
-const SKIP_STATES = new Set([
-  'AWAIT_RESULTS',
-  'DRAW_EM_ZONE',
-  'EDIT_EM_ZONE',
-  'REDRAW_EM_ZONE',
-  'DRAW_SIM_AREA',
-  'EDIT_SIM_AREA',
-]);
+const t = i18n.t.bind(i18n);
+const POLL_INTERVAL_MS = 30000;
 
 export const useHealthCheckPolling = (): void => {
-  const ezState = useEZServiceStore((state) => state.state);
+  const connectionState = useEZServiceStore((s) => s.connectionState);
+  const ezState = useEZServiceStore((s) => s.state);
+  const isSseActive = useEZServiceStore((s) => s.isSseActive);
+  const hasInitialized = useRef(false);
 
+  // Initial health check on mount
   useEffect(() => {
-    if (SKIP_STATES.has(ezState)) return;
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
+    checkBackendHealthInitial(`${getBackendUrl()}/health`);
+  }, []);
 
-    const interval = setInterval(() => {
-      checkBackendHealth(`${getBackendUrl()}/health`);
+  // ConnectionState-driven recovery (Phase 4.4)
+  useEffect(() => {
+    if (ezState !== 'PROCESS_CONNECTION_LOST') return;
+
+    if (connectionState === 'HALF_CONNECT') {
+      useEZServiceStore.getState().setState('PROCESS_POLLING');
+    }
+  }, [connectionState, ezState]);
+
+  // Continuous polling
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      // Sleep while SSE is active
+      if (useEZServiceStore.getState().isSseActive) return;
+
+      const backendUrl = getBackendUrl();
+      const isAlive = await checkBackendHealth(`${backendUrl}/health`);
+
+      // Scenario status polling during PROCESS_POLLING (Phase 4.5)
+      const currentState = useEZServiceStore.getState().state;
+      if (currentState === 'PROCESS_POLLING' && isAlive) {
+        await pollScenarioStatus();
+      }
     }, POLL_INTERVAL_MS);
 
     return () => clearInterval(interval);
-  }, [ezState]);
+  }, []);
 };
+
+async function pollScenarioStatus(): Promise<void> {
+  const requestId = useEZSessionStore.getState().requestId;
+  if (!requestId || requestId.trim() === '') return;
+
+  const { setState, setSessionIntent, connectionState } = useEZServiceStore.getState();
+
+  try {
+    const response = await fetchScenarioStatus(requestId);
+    const { status } = response;
+
+    if (!isTerminalStatus(status)) return; // RUNNING - keep polling
+
+    if (status === 'COMPLETED') {
+      if (connectionState === 'HALF_CONNECT' || connectionState === 'FULL_CONNECT') {
+        setSessionIntent('LOAD_PREVIOUS_SCENARIO');
+        loadScenario(requestId, setState, (errorMsg) => {
+          console.error('[Polling Recovery] Load scenario failed:', errorMsg);
+          setState('SELECT_PARAMETERS');
+        });
+      }
+      // If disconnected, ignore - keep polling until connection is stable
+    } else if (status === 'CANCELLED') {
+      setState('SELECT_PARAMETERS');
+    } else if (status === 'FAILED') {
+      setState('SELECT_PARAMETERS');
+    }
+  } catch (error) {
+    console.error('[Polling] Scenario status check failed:', error);
+  }
+}

@@ -1,9 +1,7 @@
 import { useMemo, useState, useId } from 'react';
-import { Spin, Alert, Button } from 'antd';
+import { Spin } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useEZOutputPeopleResponseStore } from '~stores/output';
-import { useEZSessionStore } from '~stores/session';
-import { retryComponentData } from '~ez/api';
 import outputStyles from '../Output.module.less';
 import './locales';
 
@@ -122,20 +120,12 @@ const PADDING = 2;
 export const PeopleResponseBar = () => {
   const { t, i18n } = useTranslation('ez-output-charts');
   const sankeyData = useEZOutputPeopleResponseStore((state) => state.peopleResponseSankeyData);
-  const barState = useEZOutputPeopleResponseStore((state) => state.peopleResponseBarState);
-  const barError = useEZOutputPeopleResponseStore((state) => state.peopleResponseBarError);
-  const requestId = useEZSessionStore((state) => state.requestId);
+  const sankeyState = useEZOutputPeopleResponseStore((state) => state.peopleResponseSankeyState);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const gradientIdPrefix = useId();
 
   const isFr = i18n.language === 'fr';
   const modeLabels = isFr ? MODE_LABELS_FR : MODE_LABELS_EN;
-
-  const handleRetry = async () => {
-    if (requestId) {
-      await retryComponentData(requestId, 'chart_bar_people_response');
-    }
-  };
 
   const treemapData = useMemo(() => {
     if (!sankeyData) return null;
@@ -162,30 +152,16 @@ export const PeopleResponseBar = () => {
   }, [sankeyData, modeLabels]);
 
 
-  if (barError) {
-    return (
-      <Alert
-        message={t('peopleResponseBar.error')}
-        description={barError}
-        type="error"
-        showIcon
-        className={outputStyles.sectionErrorAlert}
-        action={
-          <Button size="small" danger onClick={handleRetry}>
-            {t('peopleResponseBar.retry')}
-          </Button>
-        }
-      />
-    );
-  }
-
-  if (barState === 'inactive' || barState === 'loading' || !sankeyData || !treemapData) {
+  if (sankeyState === 'inactive' || sankeyState === 'loading' || !sankeyData) {
     return (
       <div className={`${outputStyles.peopleResponseBarContainer} ${outputStyles.chartSpinnerOverlay}`}>
         <Spin size="default" />
       </div>
     );
   }
+
+  // No mode transitions - hide the treemap entirely
+  if (!treemapData) return null;
 
   return (
     <>

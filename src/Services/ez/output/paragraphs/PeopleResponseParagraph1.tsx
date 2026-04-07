@@ -115,6 +115,14 @@ export const PeopleResponseParagraph1 = () => {
               {' '}
             </span>
           ))}
+          {data.modeShiftCount === 0 && (
+            <>
+              <Sentence>
+                Aucun voyageur n'a change de mode de transport.
+              </Sentence>
+              {' '}
+            </>
+          )}
           <Sentence>
             Les <SmartNumber value={data.noChangeCount} unitType="count" decimals={0} /> deplacements restants
             (<SmartNumber value={unchangedPct} unitType="percent" decimals={1} />)
@@ -153,6 +161,14 @@ export const PeopleResponseParagraph1 = () => {
             {' '}
           </span>
         ))}
+        {data.modeShiftCount === 0 && (
+          <>
+            <Sentence>
+              No travelers changed their mode of transport.
+            </Sentence>
+            {' '}
+          </>
+        )}
         <Sentence>
           The remaining <SmartNumber value={data.noChangeCount} unitType="count" decimals={0} /> trips
           (<SmartNumber value={unchangedPct} unitType="percent" decimals={1} />)

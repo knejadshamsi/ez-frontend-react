@@ -13,6 +13,7 @@ interface MapContainerProps {
   onToggle: () => void;
   isLoading?: boolean;
   hasData?: boolean;
+  disabled?: boolean;
   error?: string | null;
   onRetry?: () => void;
 }
@@ -26,6 +27,7 @@ export const MapContainer = ({
   onToggle,
   isLoading = false,
   hasData = true,
+  disabled = false,
   error = null,
   onRetry
 }: MapContainerProps) => {
@@ -72,7 +74,7 @@ export const MapContainer = ({
           type="default"
           onClick={onToggle}
           className={styles.toggleButton}
-          disabled={isLoading}
+          disabled={isLoading || disabled}
           aria-label={isShown ? t('mapContainer.hideMapAriaLabel', { title }) : t('mapContainer.viewMapAriaLabel', { title })}
         >
           {isShown ? t('mapContainer.hideMap') : t('mapContainer.viewMap')}

@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
-import { Drawer, message } from 'antd';
+import { Drawer, message, Modal, notification } from 'antd';
 
 import { useServiceStore } from '~globalStores';
 import { useEZServiceStore } from '~store';
+import { isProcessState } from './stores/types';
 import { useBackendAliveWatcher } from './useRetry';
 import { useHealthCheckPolling } from './useHealthCheckPolling';
 
@@ -11,22 +12,22 @@ import { ParameterSelectionView } from './input/ParameterSelectionView';
 import { OutputView } from './output';
 import { Progress } from './progress';
 import { DrawingControls } from './input/drawingControls';
-import ExitModal from './components/ExitModal';
-
 import styles from './index.module.less';
 
 const EzService = () => {
   const [messageApi, contextHolder] = message.useMessage();
+  const [modal, modalContextHolder] = Modal.useModal();
+  const [notificationApi, notificationContextHolder] = notification.useNotification();
 
   const activeService = useServiceStore((state) => state.activeService);
   const ezState = useEZServiceStore((state) => state.state);
 
-  useBackendAliveWatcher(messageApi);
+  useBackendAliveWatcher(messageApi, modal, notificationApi);
   useHealthCheckPolling();
 
   // Prevent accidental page reload during active simulation
   useEffect(() => {
-    if (ezState !== 'AWAIT_RESULTS') return;
+    if (!isProcessState(ezState)) return;
 
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       e.preventDefault();
@@ -39,8 +40,10 @@ const EzService = () => {
   return (
     <>
       {contextHolder}
+      {modalContextHolder}
+      {notificationContextHolder}
       <Drawer
-        open={activeService === 'EZ' && !['DRAW_EM_ZONE', 'EDIT_EM_ZONE', 'REDRAW_EM_ZONE', 'DRAW_SIM_AREA', 'EDIT_SIM_AREA', 'AWAIT_RESULTS'].includes(ezState)}
+        open={activeService === 'EZ' && !['DRAW_EMISSION_ZONE', 'EDIT_EMISSION_ZONE', 'REDRAW_EMISSION_ZONE', 'DRAW_SIMULATION_AREA', 'EDIT_SIMULATION_AREA'].includes(ezState) && !isProcessState(ezState)}
         mask={false}
         width={730}
         placement="right"
@@ -48,19 +51,19 @@ const EzService = () => {
         closable={false}
         classNames={{
           wrapper: styles.drawerWrapper,
-          content: ezState === 'RESULT_VIEW' ? styles.drawerContentWithGradient : styles.drawerContent,
+          content: ezState === 'VIEW_RESULTS' ? styles.drawerContentWithGradient : styles.drawerContent,
           body: styles.drawerBody
         }}
       >
         {{
-          WELCOME: <WelcomeView />,
-          PARAMETER_SELECTION: <ParameterSelectionView />,
-          RESULT_VIEW: <OutputView />,
+          WELCOME: <WelcomeView messageApi={messageApi} notificationApi={notificationApi} modal={modal} />,
+          SELECT_PARAMETERS: <ParameterSelectionView />,
+          VIEW_PARAMETERS: <ParameterSelectionView />,
+          VIEW_RESULTS: <OutputView />,
         }[ezState]}
       </Drawer>
-      {ezState === 'AWAIT_RESULTS' && <Progress />}
+      {isProcessState(ezState) && <Progress />}
       <DrawingControls />
-      <ExitModal />
     </>
   );
 };

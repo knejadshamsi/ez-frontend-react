@@ -5,6 +5,7 @@ import {
   type EZTripLegRecord,
 } from '~stores/output';
 import { useEZOutputFiltersStore } from '~stores/session';
+import { useEZServiceStore } from '~store';
 import { fetchTripLegsPage } from '~ez/api';
 import { SmartNumber } from '../components';
 import outputStyles from '../Output.module.less';
@@ -34,6 +35,9 @@ export const TripLegsTable = () => {
   const tripLegsViewMode = useEZOutputFiltersStore((s) => s.tripLegsViewMode);
   const setTripLegsViewMode = useEZOutputFiltersStore((s) => s.setTripLegsViewMode);
 
+  const sessionIntent = useEZServiceStore((s) => s.sessionIntent);
+  const isOffline = sessionIntent === 'VIEW_SCENARIO_OFFLINE';
+
   if (!pagination) {
     return (
       <div className={outputStyles.paragraphSpinnerContainer}>
@@ -49,6 +53,7 @@ export const TripLegsTable = () => {
   };
 
   const handlePageChange = (page: number) => {
+    if (isOffline) return;
     fetchTripLegsPage(page, excludeNC);
   };
 
@@ -123,6 +128,7 @@ export const TripLegsTable = () => {
               danger
               onClick={() => pagination && fetchTripLegsPage(pagination.currentPage, excludeNC)}
               loading={tableState === 'loading'}
+              disabled={isOffline}
             >
               {t('tripLegsTable.retry')}
             </Button>
@@ -140,6 +146,7 @@ export const TripLegsTable = () => {
           size="small"
           type={excludeNC ? 'default' : 'primary'}
           onClick={handleNCToggle}
+          disabled={isOffline}
         >
           {t('tripLegsTable.ncToggleLabel')}
         </Button>
@@ -169,7 +176,7 @@ export const TripLegsTable = () => {
         dataSource={tripLegRecords}
         columns={columns}
         loading={tableState === 'loading'}
-        pagination={{
+        pagination={isOffline ? false : {
           current: pagination.currentPage,
           pageSize: pagination.pageSize,
           total: pagination.totalRecords,

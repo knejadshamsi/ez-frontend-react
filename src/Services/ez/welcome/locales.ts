@@ -25,6 +25,7 @@ const locales = {
       enterValidId: 'Please enter a valid scenario ID',
       scenarioDeleted: 'This scenario has been deleted',
       draftLoadFailed: 'Failed to load draft',
+      draftRestoreFailed: 'Draft data is invalid or corrupted',
     },
     status: {
       cancelled: 'cancelled',
@@ -32,12 +33,13 @@ const locales = {
     },
     nonCompleted: {
       title: 'Scenario not completed',
-      content: 'This scenario was {{status}}. Would you like to view the inputs and try again?',
-      okText: 'View inputs',
-      cancelText: 'Back to welcome',
+      content: 'This scenario was {{status}}. Would you like to load its inputs or start fresh?',
+      okText: 'Load inputs',
+      cancelText: 'Start fresh',
+      dismissText: 'Cancel',
     },
     scenarios: {
-      SC001: {
+      '486343e9-cd8f-437f-a343-e9cd8fa37f50': {
         name: 'Downtown Montreal LEZ',
         description: 'Low emission zone analysis for downtown Montreal area',
       },
@@ -71,6 +73,7 @@ const locales = {
       enterValidId: 'Veuillez entrer un identifiant de scénario valide',
       scenarioDeleted: 'Ce scénario a été supprimé',
       draftLoadFailed: 'Échec du chargement du brouillon',
+      draftRestoreFailed: 'Les donnees du brouillon sont invalides ou corrompues',
     },
     status: {
       cancelled: 'annulé',
@@ -78,12 +81,13 @@ const locales = {
     },
     nonCompleted: {
       title: 'Scénario non complété',
-      content: 'Ce scénario a été {{status}}. Voulez-vous voir les paramètres et réessayer?',
-      okText: 'Voir les paramètres',
-      cancelText: 'Retour à l\'accueil',
+      content: 'Ce scénario a été {{status}}. Voulez-vous charger ses paramètres ou recommencer?',
+      okText: 'Charger les paramètres',
+      cancelText: 'Recommencer',
+      dismissText: 'Annuler',
     },
     scenarios: {
-      SC001: {
+      '486343e9-cd8f-437f-a343-e9cd8fa37f50': {
         name: 'ZFE du centre-ville de Montréal',
         description: 'Analyse de zone à faibles émissions pour le centre-ville de Montréal',
       },
