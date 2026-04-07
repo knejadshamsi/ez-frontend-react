@@ -30,7 +30,6 @@ export const getOutputErrorCount = (): number => {
     useEZOutputEmissionsStore.getState().emissionsWarmColdIntensityState,
     useEZOutputPeopleResponseStore.getState().peopleResponseParagraphState,
     useEZOutputPeopleResponseStore.getState().peopleResponseSankeyState,
-    useEZOutputPeopleResponseStore.getState().peopleResponseBarState,
     useEZOutputTripLegsStore.getState().tripLegsParagraphState,
     useEZOutputTripLegsStore.getState().tripLegsTableState,
     useEZOutputMapStore.getState().emissionsMapState,

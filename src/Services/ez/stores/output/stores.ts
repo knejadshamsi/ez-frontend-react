@@ -9,7 +9,6 @@ import type {
   EZEmissionsWarmColdIntensityData,
   EZPeopleResponseParagraphData,
   EZPeopleResponseSankeyData,
-  EZPeopleResponseBarData,
   EZTripLegRecord,
   EZTripLegsPaginationInfo,
   EZTripLegsParagraphData,
@@ -164,27 +163,21 @@ export const useEZOutputEmissionsStore = create<EZOutputEmissionsStoreState>((se
 interface EZOutputPeopleResponseStoreState {
   peopleResponseParagraphData: EZPeopleResponseParagraphData | null;
   peopleResponseSankeyData: EZPeopleResponseSankeyData | null;
-  peopleResponseBarData: EZPeopleResponseBarData | null;
 
   peopleResponseParagraphState: OutputComponentState;
   peopleResponseSankeyState: OutputComponentState;
-  peopleResponseBarState: OutputComponentState;
 
   peopleResponseParagraphError: string | null;
   peopleResponseSankeyError: string | null;
-  peopleResponseBarError: string | null;
 
   setPeopleResponseParagraphData: (data: EZPeopleResponseParagraphData) => void;
   setPeopleResponseSankeyData: (data: EZPeopleResponseSankeyData) => void;
-  setPeopleResponseBarData: (data: EZPeopleResponseBarData) => void;
 
   setPeopleResponseParagraphState: (state: OutputComponentState) => void;
   setPeopleResponseSankeyState: (state: OutputComponentState) => void;
-  setPeopleResponseBarState: (state: OutputComponentState) => void;
 
   setPeopleResponseParagraphError: (error: string | null) => void;
   setPeopleResponseSankeyError: (error: string | null) => void;
-  setPeopleResponseBarError: (error: string | null) => void;
 
   resetPeopleResponseStore: () => void;
 }
@@ -192,38 +185,29 @@ interface EZOutputPeopleResponseStoreState {
 export const useEZOutputPeopleResponseStore = create<EZOutputPeopleResponseStoreState>((set) => ({
   peopleResponseParagraphData: null,
   peopleResponseSankeyData: null,
-  peopleResponseBarData: null,
 
   peopleResponseParagraphState: 'inactive',
   peopleResponseSankeyState: 'inactive',
-  peopleResponseBarState: 'inactive',
 
   peopleResponseParagraphError: null,
   peopleResponseSankeyError: null,
-  peopleResponseBarError: null,
 
   setPeopleResponseParagraphData: (peopleResponseParagraphData) => set({ peopleResponseParagraphData }),
   setPeopleResponseSankeyData: (peopleResponseSankeyData) => set({ peopleResponseSankeyData }),
-  setPeopleResponseBarData: (peopleResponseBarData) => set({ peopleResponseBarData }),
 
   setPeopleResponseParagraphState: (peopleResponseParagraphState) => set({ peopleResponseParagraphState }),
   setPeopleResponseSankeyState: (peopleResponseSankeyState) => set({ peopleResponseSankeyState }),
-  setPeopleResponseBarState: (peopleResponseBarState) => set({ peopleResponseBarState }),
 
   setPeopleResponseParagraphError: (peopleResponseParagraphError) => set({ peopleResponseParagraphError }),
   setPeopleResponseSankeyError: (peopleResponseSankeyError) => set({ peopleResponseSankeyError }),
-  setPeopleResponseBarError: (peopleResponseBarError) => set({ peopleResponseBarError }),
 
   resetPeopleResponseStore: () => set({
     peopleResponseParagraphData: null,
     peopleResponseSankeyData: null,
-    peopleResponseBarData: null,
     peopleResponseParagraphState: 'inactive',
     peopleResponseSankeyState: 'inactive',
-    peopleResponseBarState: 'inactive',
     peopleResponseParagraphError: null,
     peopleResponseSankeyError: null,
-    peopleResponseBarError: null,
   }),
 }));
 

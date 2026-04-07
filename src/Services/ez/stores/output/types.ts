@@ -127,13 +127,6 @@ export interface EZPeopleResponseSankeyData {
   flows: Array<{ from: string; to: string; count: number }>;
 }
 
-// People Response Bar - mode share baseline vs policy (SSE: data_chart_bar_people_response)
-export interface EZPeopleResponseBarData {
-  modes: string[];
-  baseline: number[];
-  policy: number[];
-}
-
 // === TRIP PERFORMANCE TYPES ===
 
 // Trip Performance Paragraph - quadrant analysis (SSE: data_text_paragraph1_trip_legs)

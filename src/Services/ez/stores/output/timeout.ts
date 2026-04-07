@@ -65,11 +65,6 @@ export const setIncompleteComponentsToError = (): void => {
     peopleStore.setPeopleResponseSankeyError(errorMessage);
   }
 
-  if (peopleStore.peopleResponseBarState !== 'success') {
-    peopleStore.setPeopleResponseBarState('error');
-    peopleStore.setPeopleResponseBarError(errorMessage);
-  }
-
   // Trip Legs
   if (tripLegsStore.tripLegsParagraphState !== 'success') {
     tripLegsStore.setTripLegsParagraphState('error');

@@ -65,6 +65,7 @@ export interface EZSessionStore {
   isNewSimulation: boolean;
   simulationAreaDisplay: SimulationAreaDisplayConfig;
   carDistributionCategories: CarDistributionCategories;
+  pinned: boolean;
   exitState: ExitState;
   exitWarning: ExitWarning | null;
 
@@ -88,6 +89,8 @@ export interface EZSessionStore {
   setIsNewSimulation: (value: boolean) => void;
   setSimulationAreaDisplay: (config: Partial<SimulationAreaDisplayConfig>) => void;
   toggleCarDistributionCategory: (category: string) => void;
+  setCarDistributionCategories: (categories: CarDistributionCategories) => void;
+  setPinned: (pinned: boolean) => void;
   setExitState: (state: ExitState) => void;
   setExitWarning: (warning: ExitWarning | null) => void;
   reset: () => void;

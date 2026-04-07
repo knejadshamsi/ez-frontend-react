@@ -1,15 +1,18 @@
 import { useEZServiceStore, useAPIPayloadStore, useDrawToolStore } from './index';
 import { useEZSessionStore, useEZOutputFiltersStore, useDraftStore } from './session';
 import { useDrawingStateStore } from './drawingState';
+import { useBatchStore } from './batch';
 import { resetAllEZOutputStores } from './output';
 import { useProgressStore } from '../progress/store';
 import { cancelSimulation } from '../api/cancelSimulation';
-import { useScenarioSnapshotStore } from './scenario';
+import { stopBatchPolling } from '../api/batchPolling';
+import { useScenarioPreambleStore, useInputSnapshotStore } from './scenario';
 
 export const resetOutputState = (): void => {
   resetAllEZOutputStores();
   useEZOutputFiltersStore.getState().reset();
-  useScenarioSnapshotStore.getState().reset();
+  useScenarioPreambleStore.getState().reset();
+  useInputSnapshotStore.getState().reset();
   useProgressStore.getState().reset();
 };
 
@@ -27,8 +30,11 @@ export const resetAllEZStores = async (): Promise<void> => {
     useAPIPayloadStore.getState().reset();
     useDrawingStateStore.getState().reset();
     useDrawToolStore.getState().reset();
-    useScenarioSnapshotStore.getState().reset();
+    useScenarioPreambleStore.getState().reset();
+    useInputSnapshotStore.getState().reset();
     useDraftStore.getState().reset();
+    stopBatchPolling();
+    useBatchStore.getState().reset();
     useEZServiceStore.getState().reset();
   } catch (error) {
     console.error('[EZ Reset] Error during reset:', error);

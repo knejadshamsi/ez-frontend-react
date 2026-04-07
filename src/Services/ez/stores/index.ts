@@ -23,10 +23,18 @@ import { INITIAL_PAYLOAD } from './defaults';
 
 export const useEZServiceStore = create<EZServiceStore>((set) => ({
   state: 'WELCOME',
-  isEzBackendAlive: false,
+  sessionIntent: 'RUN_NEW_SIMULATION',
+  connectionState: 'FULL_CONNECT',
+  isSseActive: false,
+  isExiting: false,
+  isInputDirty: false,
   setState: (value) => set({ state: value }),
-  setIsEzBackendAlive: (alive) => set({ isEzBackendAlive: alive }),
-  reset: () => set({ state: 'WELCOME', isEzBackendAlive: false }),
+  setSessionIntent: (intent) => set({ sessionIntent: intent }),
+  setConnectionState: (state) => set({ connectionState: state }),
+  setIsSseActive: (active) => set({ isSseActive: active }),
+  setIsExiting: (exiting) => set({ isExiting: exiting }),
+  setIsInputDirty: (dirty) => set({ isInputDirty: dirty }),
+  reset: () => set({ state: 'WELCOME', sessionIntent: 'RUN_NEW_SIMULATION', connectionState: 'FULL_CONNECT', isSseActive: false, isExiting: false, isInputDirty: false }),
 }));
 
 // ============= DRAW TOOL STORE =============
@@ -379,6 +387,9 @@ export const useAPIPayloadStore = create<APIPayloadStore>((set, get) => ({
 
 // ============= DRAWING STATE STORE =============
 export { useDrawingStateStore } from './drawingState';
+
+// ============= BATCH STORE =============
+export { useBatchStore } from './batch';
 
 // ============= RESET =============
 export { resetAllEZStores } from './reset';

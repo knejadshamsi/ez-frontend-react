@@ -97,6 +97,7 @@ export const createInitialSessionState = () => ({
   isNewSimulation: true,
   simulationAreaDisplay: { ...DEFAULT_SIMULATION_AREA_DISPLAY },
   carDistributionCategories: { ...DEFAULT_CAR_DISTRIBUTION_CATEGORIES },
+  pinned: false,
   exitState: 'idle',
   exitWarning: null,
 });
@@ -255,6 +256,9 @@ export const useEZSessionStore = create<EZSessionStore>((set, get) => ({
       }
     })),
 
+  setCarDistributionCategories: (categories) =>
+    set({ carDistributionCategories: { ...categories } }),
+
   toggleCarDistributionCategory: (category: string) => {
     const state = get();
     const payloadStore = useAPIPayloadStore.getState();
@@ -312,6 +316,9 @@ export const useEZSessionStore = create<EZSessionStore>((set, get) => ({
       }));
     }
   },
+
+  setPinned: (pinned: boolean) =>
+    set({ pinned }),
 
   setExitState: (exitState: ExitState) =>
     set({ exitState }),

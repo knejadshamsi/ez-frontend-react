@@ -5,7 +5,11 @@ import type { MainInputPayload, ScenarioMetadata } from './types';
 
 export type ScenarioStatus = 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'DELETED';
 
-interface ScenarioSnapshotStore {
+// ============= SSE PREAMBLE STORE =============
+// Temporary buffer for scenario data arriving via SSE preamble messages.
+// Used by SSE handlers and welcome screen (non-completed scenario restore).
+
+interface ScenarioPreambleStore {
   status: ScenarioStatus | null;
   input: MainInputPayload | null;
   session: ScenarioMetadata | null;
@@ -15,7 +19,7 @@ interface ScenarioSnapshotStore {
   reset: () => void;
 }
 
-export const useScenarioSnapshotStore = create<ScenarioSnapshotStore>((set) => ({
+export const useScenarioPreambleStore = create<ScenarioPreambleStore>((set) => ({
   status: null,
   input: null,
   session: null,
@@ -25,43 +29,47 @@ export const useScenarioSnapshotStore = create<ScenarioSnapshotStore>((set) => (
   reset: () => set({ status: null, input: null, session: null }),
 }));
 
-// Captures the current store state as the immutable snapshot for change detection
-export const takeInputSnapshot = (): void => {
-  const payload = useAPIPayloadStore.getState().payload;
-  const session = useEZSessionStore.getState();
+// ============= INPUT SNAPSHOT STORE =============
+// Immutable copy of input data at the time results were generated.
+// Used ONLY for restoring inputs when user discards changes.
+// Never compared against current state.
 
-  useScenarioSnapshotStore.getState().setInput({
-    scenarioTitle: session.scenarioTitle,
-    scenarioDescription: session.scenarioDescription,
-    zones: payload.zones,
-    customSimulationAreas: payload.customSimulationAreas,
-    scaledSimulationAreas: payload.scaledSimulationAreas,
-    sources: payload.sources,
-    simulationOptions: payload.simulationOptions,
-    carDistribution: payload.carDistribution,
-    modeUtilities: payload.modeUtilities,
-  });
-};
+interface InputSnapshotStore {
+  input: MainInputPayload | null;
+  session: ScenarioMetadata | null;
+  save: () => void;
+  reset: () => void;
+}
 
-// Compares current editable stores against the immutable snapshot
-export const hasInputChanged = (): boolean => {
-  const snapshot = useScenarioSnapshotStore.getState().input;
-  if (!snapshot) return true; // No snapshot = treat as changed
+export const useInputSnapshotStore = create<InputSnapshotStore>((set) => ({
+  input: null,
+  session: null,
+  save: () => {
+    const payload = useAPIPayloadStore.getState().payload;
+    const sessionStore = useEZSessionStore.getState();
 
-  const payload = useAPIPayloadStore.getState().payload;
-  const session = useEZSessionStore.getState();
-
-  const current: MainInputPayload = {
-    scenarioTitle: session.scenarioTitle,
-    scenarioDescription: session.scenarioDescription,
-    zones: payload.zones,
-    customSimulationAreas: payload.customSimulationAreas,
-    scaledSimulationAreas: payload.scaledSimulationAreas,
-    sources: payload.sources,
-    simulationOptions: payload.simulationOptions,
-    carDistribution: payload.carDistribution,
-    modeUtilities: payload.modeUtilities,
-  };
-
-  return JSON.stringify(current) !== JSON.stringify(snapshot);
-};
+    set({
+      input: {
+        scenarioTitle: sessionStore.scenarioTitle,
+        scenarioDescription: sessionStore.scenarioDescription,
+        zones: structuredClone(payload.zones),
+        customSimulationAreas: structuredClone(payload.customSimulationAreas),
+        scaledSimulationAreas: structuredClone(payload.scaledSimulationAreas),
+        sources: structuredClone(payload.sources),
+        simulationOptions: structuredClone(payload.simulationOptions),
+        carDistribution: structuredClone(payload.carDistribution),
+        modeUtilities: structuredClone(payload.modeUtilities),
+      },
+      session: structuredClone({
+        zoneSessionData: sessionStore.zones,
+        simulationAreaDisplay: sessionStore.simulationAreaDisplay,
+        carDistributionCategories: sessionStore.carDistributionCategories,
+        customAreaSessionData: sessionStore.customAreas,
+        scaledAreaSessionData: sessionStore.scaledAreas,
+        activeZone: sessionStore.activeZone,
+        activeCustomArea: sessionStore.activeCustomArea,
+      }),
+    });
+  },
+  reset: () => set({ input: null, session: null }),
+}));
