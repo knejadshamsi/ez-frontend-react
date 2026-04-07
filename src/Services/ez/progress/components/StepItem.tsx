@@ -1,6 +1,6 @@
 import { CheckOutlined, LoadingOutlined, CloseOutlined } from '@ant-design/icons';
-import { StepState } from './store';
-import styles from './Progress.module.less';
+import type { StepState } from '../store';
+import styles from '../Progress.module.less';
 
 interface StepItemProps {
   label: string;

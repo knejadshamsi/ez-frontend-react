@@ -1,180 +1,76 @@
-import { useEffect, useState } from 'react';
-import { Button, message } from 'antd';
-import { LoadingOutlined } from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
 import { useProgressStore, canViewResultsEarly } from './store';
 import { useEZServiceStore } from '~store';
-import { useEZSessionStore } from '~stores/session';
+import { useCancelSimulation } from './useCancelSimulation';
+import { useStartNewSimulation } from './useStartNewSimulation';
 import {
-  useEZOutputOverviewStore,
-  useEZOutputEmissionsStore,
-  useEZOutputPeopleResponseStore,
-  useEZOutputTripLegsStore,
-} from '~stores/output';
-import { resetOutputState } from '~stores/reset';
-import { cancelSimulation } from '~ez/api';
-import { QueuedState, SuccessState, ErrorState, RunningState, CancellingState, PollingState } from './states';
-import styles from './Progress.module.less';
-import './locales';
+  QueuedState,
+  SuccessState,
+  ErrorState,
+  RunningState,
+  CancellingState,
+  PollingState,
+  LoadingScenarioState,
+} from './states';
 
 export { useProgressStore } from './store';
 export { decodeProgressAlert } from './decoder';
 
-const COMPLETION_TRANSITION_DELAY_MS = 3000;
-const SCENARIO_LOAD_TRANSITION_DELAY_MS = 3000;
-
 export const Progress = () => {
-  const { t } = useTranslation('ez-progress');
-  const [messageApi, contextHolder] = message.useMessage();
-  const state = useProgressStore();
+  const { handleCancel, contextHolder, cancelDestination } = useCancelSimulation();
+
+  const ezState = useEZServiceStore((s) => s.state);
+  const sessionIntent = useEZServiceStore((s) => s.sessionIntent);
   const setState = useEZServiceStore((s) => s.setState);
-  const requestId = useEZSessionStore((s) => s.requestId);
-  const isEzBackendAlive = useEZServiceStore((s) => s.isEzBackendAlive);
+  const progressState = useProgressStore();
+  const canViewEarly = canViewResultsEarly(progressState.completedSteps);
 
-  const [canTransition, setCanTransition] = useState(false);
+  const showStartNew = sessionIntent === 'RUN_NEW_SIMULATION';
+  const { handleStartNew, contextHolder: startNewContextHolder } = useStartNewSimulation();
 
-  const overviewData = useEZOutputOverviewStore((s) => s.overviewData);
-  const emissionsPara1 = useEZOutputEmissionsStore((s) => s.emissionsParagraph1Data);
-  const emissionsPara2 = useEZOutputEmissionsStore((s) => s.emissionsParagraph2Data);
-  const peoplePara = useEZOutputPeopleResponseStore((s) => s.peopleResponseParagraphData);
-  const tripLegRecords = useEZOutputTripLegsStore((s) => s.tripLegRecords);
-
-  const { status } = state;
-  const canViewEarly = canViewResultsEarly(state.completedSteps);
-
-  // Auto-transition to RESULT_VIEW on completion
-  useEffect(() => {
-    if (status === 'DISPLAY_COMPLETE') {
-      const timer = setTimeout(() => {
-        setState('RESULT_VIEW');
-      }, COMPLETION_TRANSITION_DELAY_MS);
-      return () => clearTimeout(timer);
-    }
-  }, [status, setState]);
-
-  // Scenario load transition timing
-  useEffect(() => {
-    if (status === 'DISPLAY_SCENARIO_LOAD' && !isEzBackendAlive) {
-      const timer = setTimeout(() => {
-        setCanTransition(true);
-      }, SCENARIO_LOAD_TRANSITION_DELAY_MS);
-      return () => clearTimeout(timer);
-    } else if (status === 'DISPLAY_SCENARIO_LOAD') {
-      setCanTransition(true);
-    }
-  }, [status, isEzBackendAlive]);
-
-  // Auto-transition to RESULT_VIEW when scenario data arrives
-  useEffect(() => {
-    if (status === 'DISPLAY_SCENARIO_LOAD' && canTransition) {
-      const hasData = !!(
-        overviewData ||
-        emissionsPara1 ||
-        emissionsPara2 ||
-        peoplePara ||
-        (tripLegRecords && tripLegRecords.length > 0)
-      );
-
-      if (hasData) {
-        setState('RESULT_VIEW');
-      }
-    }
-  }, [
-    status,
-    canTransition,
-    overviewData,
-    emissionsPara1,
-    emissionsPara2,
-    peoplePara,
-    tripLegRecords,
-    setState,
-  ]);
-
-  if (status === 'DISPLAY_CANCELLATION') {
+  if (ezState === 'PROCESS_CANCELLING') {
     return <>{contextHolder}<CancellingState /></>;
   }
 
-  if (status === 'DISPLAY_COMPLETE') {
+  if (ezState === 'PROCESS_COMPLETE') {
     return <>{contextHolder}<SuccessState /></>;
   }
 
-  if (status === 'DISPLAY_ERROR') {
+  if (ezState === 'PROCESS_ERROR') {
     return (
       <>{contextHolder}
       <ErrorState
-        errorMessage={state.errorMessage}
-        onClose={() => setState('PARAMETER_SELECTION')}
+        errorMessage={progressState.errorMessage}
+        onClose={() => setState(cancelDestination)}
       />
       </>
     );
   }
 
-  const handleCancel = async () => {
-    const currentStatus = useProgressStore.getState().status;
-    if (currentStatus === 'DISPLAY_CANCELLATION') return;
-
-    useProgressStore.getState().setStatus('DISPLAY_CANCELLATION');
-    const result = await cancelSimulation(requestId);
-
-    if (result !== 'conflict') {
-      useEZSessionStore.getState().abortSseStream();
-    }
-    resetOutputState();
-    setState('PARAMETER_SELECTION');
-
-    switch (result) {
-      case 'success':
-        messageApi.success(t('cancellation.success'));
-        break;
-      case 'timeout':
-        messageApi.error(t('cancellation.timeout'));
-        break;
-      case 'conflict':
-        messageApi.warning(t('cancellation.conflict'));
-        break;
-      case 'not_found':
-      case 'error':
-        messageApi.error(t('cancellation.failed'));
-        break;
-    }
-  };
-
-  if (status === 'DISPLAY_QUEUED') {
-    return <>{contextHolder}<QueuedState onCancel={handleCancel} /></>;
+  if (ezState === 'PROCESS_QUEUED') {
+    return <>{contextHolder}{startNewContextHolder}<QueuedState onCancel={handleCancel} onStartNew={showStartNew ? handleStartNew : undefined} /></>;
   }
 
-  if (status === 'DISPLAY_POLLING_RECOVERY') {
-    return <>{contextHolder}<PollingState pollingProgress={state.pollingProgress} onCancel={handleCancel} /></>;
+  if (ezState === 'PROCESS_POLLING') {
+    return <>{contextHolder}<PollingState onCancel={handleCancel} /></>;
   }
 
-  if (status === 'DISPLAY_SCENARIO_LOAD') {
-    return (
-      <>{contextHolder}
-      <div className={styles.loadingScenarioContainer}>
-        <div className={styles.loadingContent}>
-          <LoadingOutlined className={styles.spinner} />
-          <span className={styles.loadingText}>{t('loadingScenario')}</span>
-        </div>
-        <div className={styles.actionButtons}>
-          <Button onClick={handleCancel}>{t('buttons.cancel')}</Button>
-        </div>
-      </div>
-      </>
-    );
+  if (ezState === 'PROCESS_CONNECTION_LOST') {
+    return <>{contextHolder}<PollingState onCancel={handleCancel} /></>;
   }
 
-  // DISPLAY_SIMULATION
-  const handleViewResults = () => {
-    setState('RESULT_VIEW');
-  };
+  if (ezState === 'PROCESS_RUNNING' && sessionIntent !== 'RUN_NEW_SIMULATION') {
+    return <>{contextHolder}<LoadingScenarioState onCancel={handleCancel} /></>;
+  }
 
+  // PROCESS_RUNNING (RUN_NEW_SIMULATION)
   return (
-    <>{contextHolder}
+    <>{contextHolder}{startNewContextHolder}
     <RunningState
-      completedSteps={state.completedSteps}
+      completedSteps={progressState.completedSteps}
       canViewEarly={canViewEarly}
-      onViewResults={handleViewResults}
+      onViewResults={() => setState('VIEW_RESULTS')}
       onCancel={handleCancel}
+      onStartNew={showStartNew ? handleStartNew : undefined}
     />
     </>
   );

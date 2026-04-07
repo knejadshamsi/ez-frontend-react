@@ -1,128 +1,14 @@
-import { CheckOutlined, LoadingOutlined, WarningOutlined } from '@ant-design/icons';
+import { CheckOutlined } from '@ant-design/icons';
+import { Button } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { StepStatus, StepName, PREPROCESSING_STEPS, SIMULATING_STEPS, POSTPROCESSING_STEPS } from './store';
-import { getOutputErrorCount } from '~stores/output';
-import { StepItem } from './components';
-import styles from './Progress.module.less';
-import './locales';
+import type { StepStatus, StepName } from '../store';
+import { PREPROCESSING_STEPS, SIMULATING_STEPS, POSTPROCESSING_STEPS } from '../store';
+import { StepItem } from '../components/StepItem';
+import styles from '../Progress.module.less';
+import '../locales';
 
 const allCompleted = (steps: StepStatus, stepNames: StepName[]): boolean => {
   return stepNames.every(name => steps[name] === 'completed');
-};
-
-export const SuccessState = () => {
-  const { t } = useTranslation('ez-progress');
-  const errorCount = getOutputErrorCount();
-
-  return (
-    <div className={`${styles.simulationNotification} ${styles.successState}`}>
-      <div className={styles.notificationContent}>
-        {errorCount > 0 ? (
-          <WarningOutlined className={styles.warningIcon} />
-        ) : (
-          <CheckOutlined className={styles.successIcon} />
-        )}
-        <span className={styles.successMessage}>{t('success.title')}</span>
-      </div>
-      {errorCount > 0 && (
-        <div className={styles.errorCount}>
-          {t('success.withErrors', { count: errorCount })}
-        </div>
-      )}
-    </div>
-  );
-};
-
-interface StatusNotificationProps {
-  title: string;
-  subtitle?: string | null;
-  onCancel?: () => void;
-  cancelLabel?: string;
-}
-
-const StatusNotification = ({ title, subtitle, onCancel, cancelLabel }: StatusNotificationProps) => (
-  <div className={styles.simulationNotification}>
-    <div className={styles.queuedContent}>
-      <LoadingOutlined className={styles.queuedSpinner} />
-      <div className={styles.queuedTextContainer}>
-        <span className={styles.queuedTitle}>{title}</span>
-        {subtitle && <span className={styles.queuedSubtitle}>{subtitle}</span>}
-      </div>
-    </div>
-    {onCancel && (
-      <div className={styles.queuedFooter}>
-        <button className={styles.cancelButton} onClick={onCancel}>
-          {cancelLabel}
-        </button>
-      </div>
-    )}
-  </div>
-);
-
-interface QueuedStateProps {
-  onCancel: () => void;
-}
-
-export const QueuedState = ({ onCancel }: QueuedStateProps) => {
-  const { t } = useTranslation('ez-progress');
-
-  return (
-    <StatusNotification
-      title={t('queued.title')}
-      subtitle={t('queued.subtitle')}
-      onCancel={onCancel}
-      cancelLabel={t('buttons.cancel')}
-    />
-  );
-};
-
-export const CancellingState = () => {
-  const { t } = useTranslation('ez-progress');
-
-  return (
-    <StatusNotification title={t('cancellation.inProgress')} />
-  );
-};
-
-interface ErrorStateProps {
-  errorMessage: string;
-  onClose: () => void;
-}
-
-export const ErrorState = ({ errorMessage, onClose }: ErrorStateProps) => {
-  const { t } = useTranslation('ez-progress');
-
-  return (
-    <div className={`${styles.simulationNotification} ${styles.errorState}`}>
-      <div className={styles.notificationHeader}>
-        <span className={`${styles.phaseTitle} ${styles.error}`}>{t('error.title')}</span>
-      </div>
-      <div className={styles.errorMessage}>{errorMessage}</div>
-      <div className={styles.notificationFooter}>
-        <button className={styles.cancelButton} onClick={onClose}>
-          {t('buttons.close')}
-        </button>
-      </div>
-    </div>
-  );
-};
-
-interface PollingStateProps {
-  pollingProgress: string | null;
-  onCancel: () => void;
-}
-
-export const PollingState = ({ pollingProgress, onCancel }: PollingStateProps) => {
-  const { t } = useTranslation('ez-progress');
-
-  return (
-    <StatusNotification
-      title={t('polling.reconnecting')}
-      subtitle={pollingProgress}
-      onCancel={onCancel}
-      cancelLabel={t('buttons.cancel')}
-    />
-  );
 };
 
 interface RunningStateProps {
@@ -130,13 +16,15 @@ interface RunningStateProps {
   canViewEarly: boolean;
   onViewResults: () => void;
   onCancel: () => void;
+  onStartNew?: () => void;
 }
 
 export const RunningState = ({
   completedSteps,
   canViewEarly,
   onViewResults,
-  onCancel
+  onCancel,
+  onStartNew,
 }: RunningStateProps) => {
   const { t } = useTranslation('ez-progress');
   const showPreprocessing = !allCompleted(completedSteps, PREPROCESSING_STEPS);
@@ -223,13 +111,18 @@ export const RunningState = ({
 
       <div className={styles.notificationFooter}>
         {canViewEarly && (
-          <button className={styles.viewResultsButton} onClick={onViewResults}>
+          <Button size="small" ghost onClick={onViewResults}>
             {t('buttons.viewResults')}
-          </button>
+          </Button>
         )}
-        <button className={styles.cancelButton} onClick={onCancel}>
+        {onStartNew && (
+          <Button size="small" type="primary" onClick={onStartNew}>
+            {t('batch.startNew')}
+          </Button>
+        )}
+        <Button size="small" danger ghost onClick={onCancel}>
           {t('buttons.cancel')}
-        </button>
+        </Button>
       </div>
     </div>
   );

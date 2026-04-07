@@ -6,10 +6,11 @@ const locales = {
     buttons: {
       cancel: 'Cancel',
       close: 'Close',
-      viewResults: 'View Results',
+      viewResults: 'View Early',
     },
     success: {
       title: 'Simulation Complete!',
+      titleScenarioLoaded: 'Scenario Loaded!',
       withErrors: '{{count}} component(s) completed with errors',
     },
     error: {
@@ -48,7 +49,14 @@ const locales = {
       conflict: 'Simulation has already completed',
     },
     polling: {
-      reconnecting: 'Connection lost - monitoring simulation progress...',
+      monitoring: 'Monitoring simulation progress...',
+      subtitle: 'You will see results as soon as they are ready.',
+      connectionLost: 'Connection to the server lost.',
+      reconnectIn: 'Attempting to reconnect in {{seconds}}s...',
+      reconnecting: 'Attempting to reconnect...',
+      statusQueued: 'Simulation is queued',
+      statusRunning: 'Simulation is running',
+      batchSubtitle: 'You\'ll be redirected to results when complete.',
       failed: 'Simulation failed',
     },
     queued: {
@@ -60,16 +68,32 @@ const locales = {
       heartbeat: 'Connection to server was lost.',
       universal: 'Simulation timed out.',
     },
+    batch: {
+      startNew: 'Start a New',
+      modal: {
+        title: 'Start a New Simulation',
+        content: 'Your current simulation will continue running in the background. Choose how to start your next simulation:',
+        startFresh: 'Start Fresh',
+        keepInputs: 'Keep Inputs',
+        loadFromDraft: 'Load from Draft',
+        draftIdPlaceholder: 'Enter Draft ID (d_...)',
+        loadDraft: 'Load',
+        draftLoadFailed: 'Failed to load draft',
+        draftRestoreFailed: 'Draft data is invalid or corrupted. Starting fresh instead.',
+        back: 'Back',
+      },
+    },
   },
   fr: {
     loadingScenario: 'Chargement du scénario, veuillez patienter.',
     buttons: {
       cancel: 'Annuler',
       close: 'Fermer',
-      viewResults: 'Voir les résultats',
+      viewResults: 'Voir en avance',
     },
     success: {
       title: 'Simulation terminée !',
+      titleScenarioLoaded: 'Scénario chargé !',
       withErrors: '{{count}} composant(s) terminé(s) avec des erreurs',
     },
     error: {
@@ -108,7 +132,14 @@ const locales = {
       conflict: 'La simulation est déjà terminée',
     },
     polling: {
-      reconnecting: 'Connexion perdue - surveillance de la progression...',
+      monitoring: 'Surveillance de la progression...',
+      subtitle: 'Les resultats seront affiches des qu\'ils seront prets.',
+      connectionLost: 'Connexion au serveur perdue.',
+      reconnectIn: 'Tentative de reconnexion dans {{seconds}}s...',
+      reconnecting: 'Tentative de reconnexion...',
+      statusQueued: 'Simulation en file d\'attente',
+      statusRunning: 'Simulation en cours',
+      batchSubtitle: 'Vous serez redirige vers les resultats une fois termine.',
       failed: 'La simulation a echoue',
     },
     queued: {
@@ -119,6 +150,21 @@ const locales = {
       connection: 'Impossible de se connecter au serveur de simulation. Veuillez vérifier votre connexion et réessayer.',
       heartbeat: 'La connexion au serveur a été perdue.',
       universal: 'La simulation a expiré.',
+    },
+    batch: {
+      startNew: 'Nouveau',
+      modal: {
+        title: 'Demarrer une nouvelle simulation',
+        content: 'Votre simulation actuelle continuera en arriere-plan. Choisissez comment demarrer votre prochaine simulation:',
+        startFresh: 'Nouveau depart',
+        keepInputs: 'Garder les parametres',
+        loadFromDraft: 'Charger un brouillon',
+        draftIdPlaceholder: 'Entrez l\'ID du brouillon (d_...)',
+        loadDraft: 'Charger',
+        draftLoadFailed: 'Echec du chargement du brouillon',
+        draftRestoreFailed: 'Les donnees du brouillon sont invalides ou corrompues. Nouveau depart.',
+        back: 'Retour',
+      },
     },
   },
 } as const;

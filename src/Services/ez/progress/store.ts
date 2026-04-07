@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { useEZSessionStore } from '~stores/session';
 
 export type StepState = 'pending' | 'in_progress' | 'completed' | 'failed';
 
@@ -17,26 +16,15 @@ export type StepName =
 
 export type StepStatus = Record<StepName, StepState>;
 
-type ProgressStatus =
-  | 'DISPLAY_QUEUED'
-  | 'DISPLAY_SIMULATION'
-  | 'DISPLAY_SCENARIO_LOAD'
-  | 'DISPLAY_CANCELLATION'
-  | 'DISPLAY_POLLING_RECOVERY'
-  | 'DISPLAY_COMPLETE'
-  | 'DISPLAY_ERROR';
-
 interface ProgressState {
-  status: ProgressStatus;
   completedSteps: StepStatus;
   errorMessage: string;
   pollingProgress: string | null;
 }
 
 interface ProgressActions {
-  setStatus: (status: ProgressStatus) => void;
   handleEvent: (stepName: string, stepState: StepState) => void;
-  setError: (message: string) => void;
+  setErrorMessage: (message: string) => void;
   setPollingProgress: (progress: string | null) => void;
   reset: () => void;
 }
@@ -80,23 +68,9 @@ const VALID_STEP_NAMES: StepName[] = [
 ];
 
 export const useProgressStore = create<ProgressState & ProgressActions>((set) => ({
-  status: (useEZSessionStore.getState().isNewSimulation ? 'DISPLAY_QUEUED' : 'DISPLAY_SCENARIO_LOAD') as ProgressStatus,
   completedSteps: { ...initialSteps },
   errorMessage: '',
   pollingProgress: null,
-
-  setStatus: (status) => {
-    if (status === 'DISPLAY_QUEUED' || status === 'DISPLAY_SIMULATION' || status === 'DISPLAY_SCENARIO_LOAD') {
-      set({
-        status,
-        completedSteps: { ...initialSteps },
-        errorMessage: '',
-        pollingProgress: null,
-      });
-    } else {
-      set({ status });
-    }
-  },
 
   handleEvent: (stepName: string, stepState: StepState) => set((state) => {
     if (!VALID_STEP_NAMES.includes(stepName as StepName)) {
@@ -113,24 +87,17 @@ export const useProgressStore = create<ProgressState & ProgressActions>((set) =>
     };
   }),
 
-  setError: (message: string) => set({
-    status: 'DISPLAY_ERROR',
-    errorMessage: message,
-  }),
+  setErrorMessage: (message: string) => set({ errorMessage: message }),
 
   setPollingProgress: (progress: string | null) => set({
     pollingProgress: progress,
   }),
 
-  reset: () => {
-    const isNew = useEZSessionStore.getState().isNewSimulation;
-    set({
-      status: isNew ? 'DISPLAY_QUEUED' : 'DISPLAY_SCENARIO_LOAD',
-      completedSteps: { ...initialSteps },
-      errorMessage: '',
-      pollingProgress: null,
-    });
-  },
+  reset: () => set({
+    completedSteps: { ...initialSteps },
+    errorMessage: '',
+    pollingProgress: null,
+  }),
 }));
 
 // Computed values
