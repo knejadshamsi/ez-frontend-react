@@ -50,13 +50,18 @@ const generateDemoTripLegsPage = (page: number, pageSize: number, totalRecords: 
 
 export const fetchTripLegsPage = async (page: number, excludeNC?: boolean): Promise<void> => {
   const store = useEZOutputTripLegsStore.getState();
-  const isDemoMode = !useEZServiceStore.getState().isEzBackendAlive;
+  const sessionIntent = useEZServiceStore.getState().sessionIntent;
+  const isDemoMode = sessionIntent === 'LOAD_DEMO_SCENARIO';
+  const isOffline = sessionIntent === 'VIEW_SCENARIO_OFFLINE';
   const pagination = store.tripLegsPagination;
 
   if (!pagination) {
     console.warn('[TripLegsFetch] No pagination info available');
     return;
   }
+
+  // Offline mode: don't fetch, preserve existing data
+  if (isOffline) return;
 
   // Use store value if not explicitly provided
   const shouldExcludeNC = excludeNC ?? store.excludeNC;

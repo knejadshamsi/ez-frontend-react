@@ -1,21 +1,21 @@
 import { useEZServiceStore, useAPIPayloadStore } from '~store';
 import { useEZSessionStore } from '~stores/session';
-import type { EZStateType } from '~stores/types';
+import { useBatchStore } from '~stores/batch';
+import type { SessionState } from '~stores/types';
 import { createAPIRequest } from './apiRequestFactory';
 import { startSimulationStream } from './sse';
 import type { ValidationError } from './sse';
 import { getBackendUrl, isBackendConfigured } from './config';
-import { decodeProgressAlert } from '../progress';
 import { useProgressStore } from '../progress/store';
 import i18n from '~i18nConfig';
 import '../progress/locales';
 import '../locales';
 import { loadDemoData } from '../output/demo';
+import { decodeProgressAlert } from '../progress';
 import { restoreStoresFromInput } from './fetchScenarioInput';
-import { useScenarioSnapshotStore, takeInputSnapshot } from '~stores/scenario';
+import { useScenarioPreambleStore, useInputSnapshotStore } from '~stores/scenario';
 import { useDraftStore } from '~stores/session';
 import { deleteDraft } from './draft';
-import { fetchScenarioStatus, isTerminalStatus } from './scenarioStatus';
 import { resetOutputState } from '~stores/reset';
 
 const t = i18n.t.bind(i18n);
@@ -36,37 +36,36 @@ const getErrorMessage = (error: { code?: string; message?: string }): string => 
 };
 
 export const startSimulation = async (
-  setState: (state: EZStateType) => void,
+  setState: (state: SessionState) => void,
   onError: (errorMessage: string) => void,
   onValidationError: (errors: ValidationError[]) => void
 ): Promise<void> => {
-  const isEzBackendAlive = useEZServiceStore.getState().isEzBackendAlive;
-  const setSseCleanup = useEZSessionStore.getState().setSseCleanup;
-
   // If starting from a draft, delete it first (absorb errors)
   const draftStore = useDraftStore.getState();
-  if (draftStore.draftId) {
+  const wasDraft = draftStore.draftId;
+  if (wasDraft) {
     try {
-      await deleteDraft(draftStore.draftId);
+      await deleteDraft(wasDraft);
     } catch {
       // Absorb - simulation requestId is more important
     }
     draftStore.reset();
   }
 
-  if (!isEzBackendAlive) {
-    setState('AWAIT_RESULTS');
+  const intent = useEZServiceStore.getState().sessionIntent;
+  if (intent === 'LOAD_DEMO_SCENARIO') {
+    setState('PROCESS_QUEUED');
     const cleanup = runDemoSimulation(setState);
-    setSseCleanup(cleanup);
+    useEZSessionStore.getState().setSseCleanup(cleanup);
   } else {
-    runRealSimulation(setState, onError, onValidationError);
+    runRealSimulation(setState, onError, onValidationError, wasDraft);
   }
 };
 
 const DEMO_QUEUED_DELAY_MS = 1500;
+const DEMO_TOTAL_DELAY_MS = 8000;
 
-const runDemoSimulation = (setState: (state: EZStateType) => void): (() => void) => {
-
+const runDemoSimulation = (setState: (state: SessionState) => void): (() => void) => {
   const demoEvents = [
     { event: 'preprocessing_population_started', delay: 100 },
     { event: 'preprocessing_population_complete', delay: 600 },
@@ -92,9 +91,8 @@ const runDemoSimulation = (setState: (state: EZStateType) => void): (() => void)
 
   const timeoutIds: NodeJS.Timeout[] = [];
 
-  // Transition from queued to running progress after a brief delay
   const simulationStartId = setTimeout(() => {
-    useProgressStore.getState().setStatus('DISPLAY_SIMULATION');
+    setState('PROCESS_RUNNING');
   }, DEMO_QUEUED_DELAY_MS);
   timeoutIds.push(simulationStartId);
 
@@ -107,10 +105,12 @@ const runDemoSimulation = (setState: (state: EZStateType) => void): (() => void)
 
   const dataLoadId = setTimeout(() => {
     loadDemoData();
-    takeInputSnapshot();
-    useProgressStore.getState().setStatus('DISPLAY_COMPLETE');
-    // Auto-transition to RESULT_VIEW is handled by Progress component
-  }, DEMO_QUEUED_DELAY_MS + 8000);
+    useInputSnapshotStore.getState().save();
+    setState('PROCESS_COMPLETE');
+    setTimeout(() => {
+      setState('VIEW_RESULTS');
+    }, RESULT_TRANSITION_DELAY_MS);
+  }, DEMO_QUEUED_DELAY_MS + DEMO_TOTAL_DELAY_MS);
   timeoutIds.push(dataLoadId);
 
   return () => {
@@ -119,9 +119,10 @@ const runDemoSimulation = (setState: (state: EZStateType) => void): (() => void)
 };
 
 const runRealSimulation = (
-  setState: (state: EZStateType) => void,
+  setState: (state: SessionState) => void,
   onError: (errorMessage: string) => void,
-  onValidationError: (errors: ValidationError[]) => void
+  onValidationError: (errors: ValidationError[]) => void,
+  wasDraft?: string | null
 ): void => {
   const apiPayload = useAPIPayloadStore.getState().payload;
   const scenarioTitle = useEZSessionStore.getState().scenarioTitle;
@@ -149,12 +150,27 @@ const runRealSimulation = (
     onStarted: (requestId: string) => {
       console.log('[EZ API] Request ID:', requestId);
       setRequestId(requestId);
+      const batch = useBatchStore.getState();
+      if (batch.isBatchMode) {
+        if (wasDraft) {
+          batch.removeSimulation(wasDraft);
+        }
+        batch.removeSimulation('');
+        batch.addSimulation(requestId, 'queued');
+        batch.setActiveSimId(requestId);
+      }
       useProgressStore.getState().reset();
-      setState('AWAIT_RESULTS');
+      useEZServiceStore.getState().setIsSseActive(true);
+      setState('PROCESS_QUEUED');
     },
 
     onSimulationStart: () => {
-      useProgressStore.getState().setStatus('DISPLAY_SIMULATION');
+      const batch = useBatchStore.getState();
+      if (batch.isBatchMode) {
+        const rid = useEZSessionStore.getState().requestId;
+        if (rid) batch.updateStatus(rid, 'running');
+      }
+      setState('PROCESS_RUNNING');
     },
 
     onValidationError: (errors) => {
@@ -164,34 +180,55 @@ const runRealSimulation = (
 
     onCancelled: (_reason: string) => {
       setSseCleanup(null);
+      const batch = useBatchStore.getState();
+      if (batch.isBatchMode) {
+        const rid = useEZSessionStore.getState().requestId;
+        if (rid) batch.updateStatus(rid, 'error', 'Cancelled');
+      }
       resetOutputState();
-      setState('PARAMETER_SELECTION');
+      setState('SELECT_PARAMETERS');
     },
 
     onComplete: () => {
       setSseCleanup(null);
-      takeInputSnapshot();
-      useProgressStore.getState().setStatus('DISPLAY_COMPLETE');
+      useEZServiceStore.getState().setIsSseActive(false);
+      useEZServiceStore.getState().setConnectionState('FULL_CONNECT');
+      const batch = useBatchStore.getState();
+      if (batch.isBatchMode) {
+        const rid = useEZSessionStore.getState().requestId;
+        if (rid) batch.updateStatus(rid, 'completed');
+      }
+      useInputSnapshotStore.getState().save();
+      setState('PROCESS_COMPLETE');
       setTimeout(() => {
-        setState('RESULT_VIEW');
+        setState('VIEW_RESULTS');
       }, RESULT_TRANSITION_DELAY_MS);
     },
 
     onError: (error) => {
+      // Ignore SSE death during cancellation - cancel handler owns state transitions
+      if (useEZServiceStore.getState().state === 'PROCESS_CANCELLING') return;
+
       console.error('[SSE] Simulation error:', error);
       setSseCleanup(null);
+      useEZServiceStore.getState().setIsSseActive(false);
+      const batch = useBatchStore.getState();
+      if (batch.isBatchMode) {
+        const rid = useEZSessionStore.getState().requestId;
+        if (rid) batch.updateStatus(rid, 'error', error.message);
+      }
 
-      // Only attempt polling recovery for connection-type errors
+      // Connection-type errors: set HALF_DISCONNECT, let health check polling drive recovery
       const connectionErrors = ['HEARTBEAT_TIMEOUT', 'CONNECTION_TIMEOUT', 'STREAM_ERROR'];
-      const currentRequestId = useEZSessionStore.getState().requestId;
-
-      if (currentRequestId && currentRequestId.trim() !== '' && connectionErrors.includes(error.code || '')) {
-        startPollingRecovery(currentRequestId, setState, onError);
+      if (connectionErrors.includes(error.code || '')) {
+        useEZServiceStore.getState().setConnectionState('HALF_DISCONNECT');
+        setState('PROCESS_CONNECTION_LOST');
         return;
       }
 
       // Application error (error_global, etc.) - show in progress error display
-      useProgressStore.getState().setError(getErrorMessage(error));
+      useProgressStore.getState().setErrorMessage(getErrorMessage(error));
+      setState('PROCESS_ERROR');
     },
   });
 
@@ -200,37 +237,34 @@ const runRealSimulation = (
 
 export const loadScenario = async (
   requestId: string,
-  setState: (state: EZStateType) => void,
-  onError: (errorMessage: string) => void,
-  onNonCompleted?: (status: string) => void
+  setState: (state: SessionState) => void,
+  onError: (errorMessage: string) => void
 ): Promise<void> => {
-  const isEzBackendAlive = useEZServiceStore.getState().isEzBackendAlive;
-  const setIsNewSimulation = useEZSessionStore.getState().setIsNewSimulation;
-  const setSseCleanup = useEZSessionStore.getState().setSseCleanup;
-
-  setIsNewSimulation(false);
   useProgressStore.getState().reset();
-  setState('AWAIT_RESULTS');
+  setState('PROCESS_RUNNING');
 
-  if (!isEzBackendAlive) {
+  const intent = useEZServiceStore.getState().sessionIntent;
+  if (intent === 'LOAD_DEMO_SCENARIO') {
     const cleanup = runDemoScenarioLoad(setState);
-    setSseCleanup(cleanup);
-    return;
+    useEZSessionStore.getState().setSseCleanup(cleanup);
+  } else {
+    useEZServiceStore.getState().setIsSseActive(true);
+    runRealScenarioLoad(requestId, setState, onError);
   }
-
-  runRealScenarioLoad(requestId, setState, onError, onNonCompleted);
 };
 
-const runDemoScenarioLoad = (setState: (state: EZStateType) => void): (() => void) => {
-
+const runDemoScenarioLoad = (setState: (state: SessionState) => void): (() => void) => {
   const timeoutIds: NodeJS.Timeout[] = [];
 
   const dataLoadId = setTimeout(() => {
     loadDemoData();
     loadDemoInputData();
-    takeInputSnapshot();
+    useInputSnapshotStore.getState().save();
+    setState('PROCESS_COMPLETE');
+    setTimeout(() => {
+      setState('VIEW_RESULTS');
+    }, SCENARIO_LOAD_TRANSITION_DELAY_MS);
   }, 1000);
-
   timeoutIds.push(dataLoadId);
 
   return () => {
@@ -238,15 +272,18 @@ const runDemoScenarioLoad = (setState: (state: EZStateType) => void): (() => voi
   };
 };
 
+const loadDemoInputData = (): void => {
+  useEZSessionStore.getState().setScenarioTitle(t('ez-root:demoMode.scenarioTitle'));
+};
+
 const runRealScenarioLoad = (
   requestId: string,
-  setState: (state: EZStateType) => void,
-  onError: (errorMessage: string) => void,
-  onNonCompleted?: (status: string) => void
+  setState: (state: SessionState) => void,
+  onError: (errorMessage: string) => void
 ): void => {
   const setSseCleanup = useEZSessionStore.getState().setSseCleanup;
   const backendUrl = getBackendUrl();
-  const snapshotStore = useScenarioSnapshotStore.getState;
+  const snapshotStore = useScenarioPreambleStore.getState;
 
   let abortStream: (() => void) | null = null;
 
@@ -261,20 +298,14 @@ const runRealScenarioLoad = (
           abortStream();
           setSseCleanup(null);
         }
-        if (onNonCompleted) {
-          onNonCompleted(status);
-        } else {
-          onError(t('ez-progress:error.scenarioDeleted'));
-        }
+        onError(t('ez-progress:error.scenarioDeleted'));
       }
     },
 
     onScenarioSession: () => {
-      const status = snapshotStore().status;
       const input = snapshotStore().input;
       const session = snapshotStore().session;
 
-      // Both input and session are mandatory - abort if either is missing
       if (!input || !session) {
         console.error('[SSE] Missing preamble data - input:', !!input, 'session:', !!session);
         if (abortStream) {
@@ -286,42 +317,39 @@ const runRealScenarioLoad = (
         return;
       }
 
-      if (status === 'COMPLETED') {
-        restoreStoresFromInput(input, session);
-      } else if (status === 'CANCELLED' || status === 'FAILED') {
-        if (abortStream) {
-          abortStream();
-          setSseCleanup(null);
-        }
-        if (onNonCompleted) {
-          onNonCompleted(status);
-        } else {
-          onError(status === 'CANCELLED'
-            ? t('ez-progress:error.scenarioCancelled')
-            : t('ez-progress:error.scenarioFailed'));
-        }
-      }
+      restoreStoresFromInput(input, session);
     },
 
     onCancelled: (_reason: string) => {
       setSseCleanup(null);
       resetOutputState();
-      setState('PARAMETER_SELECTION');
+      setState('SELECT_PARAMETERS');
     },
 
     onComplete: () => {
       setSseCleanup(null);
-      takeInputSnapshot();
-      setTimeout(() => {
-        setState('RESULT_VIEW');
-      }, SCENARIO_LOAD_TRANSITION_DELAY_MS);
+      useEZServiceStore.getState().setIsSseActive(false);
+      useEZServiceStore.getState().setConnectionState('FULL_CONNECT');
+      useInputSnapshotStore.getState().save();
+      if (useBatchStore.getState().isBatchMode) {
+        setState('VIEW_RESULTS');
+      } else {
+        setState('PROCESS_COMPLETE');
+        setTimeout(() => {
+          setState('VIEW_RESULTS');
+        }, SCENARIO_LOAD_TRANSITION_DELAY_MS);
+      }
     },
 
     onError: (error) => {
+      // Ignore SSE death during cancellation - cancel handler owns state transitions
+      if (useEZServiceStore.getState().state === 'PROCESS_CANCELLING') return;
+
       console.error('[SSE] Scenario load error:', error);
       setSseCleanup(null);
-
-      startPollingRecovery(requestId, setState, onError);
+      useEZServiceStore.getState().setIsSseActive(false);
+      useEZServiceStore.getState().setConnectionState('HALF_DISCONNECT');
+      setState('PROCESS_CONNECTION_LOST');
     },
   });
 
@@ -329,62 +357,3 @@ const runRealScenarioLoad = (
   setSseCleanup(cleanup);
 };
 
-const POLL_INTERVAL_MS = 5000;
-const MAX_POLL_ATTEMPTS = 24; // 24 x 5s = 2 minutes max
-
-const startPollingRecovery = (
-  requestId: string,
-  setState: (state: EZStateType) => void,
-  onError: (errorMessage: string) => void
-): void => {
-  const progressStore = useProgressStore.getState();
-  progressStore.setStatus('DISPLAY_POLLING_RECOVERY');
-
-  let attempts = 0;
-
-  const poll = async () => {
-    attempts++;
-
-    if (attempts > MAX_POLL_ATTEMPTS) {
-      console.error('[Polling] Max attempts reached - giving up');
-      resetOutputState();
-      useEZSessionStore.getState().setRequestId('');
-      onError(t('ez-progress:timeout.heartbeat'));
-      return;
-    }
-
-    try {
-      const response = await fetchScenarioStatus(requestId);
-      const { status, progress } = response;
-
-      if (isTerminalStatus(status)) {
-        if (status === 'COMPLETED') {
-          useScenarioSnapshotStore.getState().reset();
-          loadScenario(requestId, setState, onError);
-        } else {
-          resetOutputState();
-          useEZSessionStore.getState().setRequestId('');
-          onError(t('ez-progress:polling.failed'));
-        }
-        return;
-      }
-
-      // Still running - update progress text and poll again
-      useProgressStore.getState().setPollingProgress(progress);
-      setTimeout(poll, POLL_INTERVAL_MS);
-    } catch (error) {
-      console.error('[Polling] Status check failed:', error);
-      // Network still down - keep polling (up to max attempts)
-      useProgressStore.getState().setPollingProgress(null);
-      setTimeout(poll, POLL_INTERVAL_MS);
-    }
-  };
-
-  setTimeout(poll, POLL_INTERVAL_MS);
-};
-
-const loadDemoInputData = (): void => {
-  const sessionStore = useEZSessionStore.getState();
-
-  sessionStore.setScenarioTitle(t('ez-root:demoMode.scenarioTitle'));
-};

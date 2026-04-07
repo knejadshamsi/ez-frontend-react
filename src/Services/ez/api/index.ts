@@ -9,7 +9,7 @@
  * - tripLegsFetch.ts    - REST fetch for paginated trip legs (pages 2+)
  */
 
-export { checkBackendHealth } from './healthCheck';
+export { checkBackendHealth, checkBackendHealthInitial } from './healthCheck';
 export { cancelSimulation } from './cancelSimulation';
 export { startSimulation, loadScenario } from './startSimulation';
 export { fetchMapData } from './mapDataFetch';
@@ -24,3 +24,7 @@ export { retryComponentData } from './retryComponent';
 export { updateScenarioMetadata, createMetadataPayload } from './updateScenarioMetadata';
 export { deleteScenario } from './deleteScenario';
 export { restoreStoresFromInput } from './fetchScenarioInput';
+export { startBatchPolling, stopBatchPolling } from './batchPolling';
+export { toggleScenarioPin } from './pinScenario';
+export { sendKeepalive } from './keepalive';
+export { fetchScenarioPreamble } from './fetchScenarioPreamble';

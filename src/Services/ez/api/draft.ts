@@ -11,11 +11,8 @@ interface DraftPayload {
 }
 
 interface DraftCreateResponse {
-  requestId: string;
+  draftId: string;
 }
-
-const stripDraftPrefix = (draftId: string): string =>
-  draftId.startsWith('d_') ? draftId.slice(2) : draftId;
 
 export const createDraft = async (
   input: MainInputPayload,
@@ -28,16 +25,15 @@ export const createDraft = async (
     { timeout: REQUEST_TIMEOUT_MS }
   );
   const data = unwrapResponse(response);
-  return `d_${data.requestId}`;
+  return data.draftId;
 };
 
 export const fetchDraft = async (
   draftId: string
 ): Promise<DraftPayload> => {
-  const uuid = stripDraftPrefix(draftId);
   const backendUrl = getBackendUrl();
   const response = await axios.get<ApiResponse<DraftPayload>>(
-    `${backendUrl}/draft/${uuid}`,
+    `${backendUrl}/draft/${draftId}`,
     { timeout: REQUEST_TIMEOUT_MS }
   );
   return unwrapResponse(response);
@@ -48,10 +44,9 @@ export const updateDraft = async (
   input: MainInputPayload,
   session: ScenarioMetadata
 ): Promise<void> => {
-  const uuid = stripDraftPrefix(draftId);
   const backendUrl = getBackendUrl();
   await axios.put(
-    `${backendUrl}/draft/${uuid}`,
+    `${backendUrl}/draft/${draftId}`,
     { inputData: input, sessionData: session },
     { timeout: REQUEST_TIMEOUT_MS }
   );
@@ -60,7 +55,6 @@ export const updateDraft = async (
 export const deleteDraft = async (
   draftId: string
 ): Promise<void> => {
-  const uuid = stripDraftPrefix(draftId);
   const backendUrl = getBackendUrl();
-  await axios.delete(`${backendUrl}/draft/${uuid}`, { timeout: REQUEST_TIMEOUT_MS });
+  await axios.delete(`${backendUrl}/draft/${draftId}`, { timeout: REQUEST_TIMEOUT_MS });
 };

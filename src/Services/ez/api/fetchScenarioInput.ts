@@ -3,11 +3,26 @@ import { useEZSessionStore } from '~stores/session';
 import { COLOR_PALETTE } from '~stores/session/defaults';
 import type { MainInputPayload, ScenarioMetadata } from '~ez/stores/types';
 
+function validateInputData(input: MainInputPayload): void {
+  if (!input.sources) throw new Error('Missing sources data');
+  for (const key of ['population', 'network', 'publicTransport'] as const) {
+    const source = input.sources[key];
+    if (!source || typeof source.year !== 'number' || typeof source.name !== 'string') {
+      throw new Error(`Invalid or missing source: ${key}`);
+    }
+  }
+  if (!Array.isArray(input.zones)) throw new Error('Missing zones data');
+  if (!input.simulationOptions) throw new Error('Missing simulation options');
+  if (!input.carDistribution) throw new Error('Missing car distribution');
+  if (!input.modeUtilities) throw new Error('Missing mode utilities');
+}
+
 export function restoreStoresFromInput(
   mainInput: MainInputPayload,
   metadata: ScenarioMetadata | null
 ): void {
   try {
+    validateInputData(mainInput);
 
     const apiPayloadStore = useAPIPayloadStore.getState();
     const sessionStore = useEZSessionStore.getState();
@@ -34,13 +49,9 @@ export function restoreStoresFromInput(
         sessionStore.setSimulationAreaDisplay(metadata.simulationAreaDisplay);
       }
 
-      // Restore car distribution categories
+      // Restore car distribution categories (direct set - toggle breaks when defaults differ from backend)
       if (metadata.carDistributionCategories) {
-        Object.entries(metadata.carDistributionCategories).forEach(([category, enabled]) => {
-          if (!enabled) {
-            sessionStore.toggleCarDistributionCategory(category);
-          }
-        });
+        sessionStore.setCarDistributionCategories(metadata.carDistributionCategories);
       }
 
       // Restore active selections

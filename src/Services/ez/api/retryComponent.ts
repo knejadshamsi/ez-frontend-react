@@ -55,10 +55,6 @@ const LOADING_STATE_MAP: Record<string, () => void> = {
     useEZOutputPeopleResponseStore.getState().setPeopleResponseSankeyState('loading');
     useEZOutputPeopleResponseStore.getState().setPeopleResponseSankeyError(null);
   },
-  chart_bar_people_response: () => {
-    useEZOutputPeopleResponseStore.getState().setPeopleResponseBarState('loading');
-    useEZOutputPeopleResponseStore.getState().setPeopleResponseBarError(null);
-  },
   text_paragraph1_trip_legs: () => {
     useEZOutputTripLegsStore.getState().setTripLegsParagraphState('loading');
     useEZOutputTripLegsStore.getState().setTripLegsParagraphError(null);
@@ -101,10 +97,6 @@ const ERROR_STATE_MAP: Record<string, (msg: string) => void> = {
   chart_sankey_people_response: (msg) => {
     useEZOutputPeopleResponseStore.getState().setPeopleResponseSankeyState('error');
     useEZOutputPeopleResponseStore.getState().setPeopleResponseSankeyError(msg);
-  },
-  chart_bar_people_response: (msg) => {
-    useEZOutputPeopleResponseStore.getState().setPeopleResponseBarState('error');
-    useEZOutputPeopleResponseStore.getState().setPeopleResponseBarError(msg);
   },
   text_paragraph1_trip_legs: (msg) => {
     useEZOutputTripLegsStore.getState().setTripLegsParagraphState('error');

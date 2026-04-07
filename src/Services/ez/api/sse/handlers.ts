@@ -9,9 +9,10 @@ import { decodeProgressAlert } from '../../progress';
 import type { SSEMessage, SimulationStreamConfig } from './types';
 import { decodeSSEMessage } from './decoder';
 import type { OutputComponentState } from '~stores/output/types';
-import { useScenarioSnapshotStore } from '~stores/scenario';
+import { useScenarioPreambleStore } from '~stores/scenario';
 import type { ScenarioStatus } from '~stores/scenario';
 import type { MainInputPayload, ScenarioMetadata } from '~stores/types';
+import { useEZSessionStore } from '~stores/session';
 
 // === ERROR HANDLER CONFIGURATION ===
 
@@ -57,10 +58,6 @@ const ERROR_HANDLER_MAP: Record<string, ErrorHandlerConfig> = {
   error_chart_sankey_people_response: {
     setState: (state) => useEZOutputPeopleResponseStore.getState().setPeopleResponseSankeyState(state),
     setError: (error) => useEZOutputPeopleResponseStore.getState().setPeopleResponseSankeyError(error),
-  },
-  error_chart_bar_people_response: {
-    setState: (state) => useEZOutputPeopleResponseStore.getState().setPeopleResponseBarState(state),
-    setError: (error) => useEZOutputPeopleResponseStore.getState().setPeopleResponseBarError(error),
   },
   error_text_paragraph1_trip_legs: {
     setState: (state) => useEZOutputTripLegsStore.getState().setTripLegsParagraphState(state),
@@ -168,7 +165,7 @@ function handleProgressAlertMessage(
 
     case 'scenario_status': {
       const data = payload as { status: string };
-      useScenarioSnapshotStore.getState().setStatus(data.status as ScenarioStatus);
+      useScenarioPreambleStore.getState().setStatus(data.status as ScenarioStatus);
       if (config.onScenarioStatus) {
         config.onScenarioStatus(data.status);
       }
@@ -176,7 +173,7 @@ function handleProgressAlertMessage(
     }
 
     case 'scenario_input': {
-      useScenarioSnapshotStore.getState().setInput(payload as unknown as MainInputPayload);
+      useScenarioPreambleStore.getState().setInput(payload as unknown as MainInputPayload);
       if (config.onScenarioInput) {
         config.onScenarioInput(payload as Record<string, unknown>);
       }
@@ -184,9 +181,18 @@ function handleProgressAlertMessage(
     }
 
     case 'scenario_session': {
-      useScenarioSnapshotStore.getState().setSession(payload as unknown as ScenarioMetadata);
+      useScenarioPreambleStore.getState().setSession(payload as unknown as ScenarioMetadata);
       if (config.onScenarioSession) {
         config.onScenarioSession(payload as Record<string, unknown>);
+      }
+      break;
+    }
+
+    case 'scenario_pin': {
+      const data = payload as { pinned: boolean };
+      useEZSessionStore.getState().setPinned(data.pinned);
+      if (config.onScenarioPin) {
+        config.onScenarioPin(data.pinned);
       }
       break;
     }
@@ -233,7 +239,6 @@ const SUCCESS_STATE_MAP: Record<string, () => void> = {
   data_warm_cold_intensity_emissions: () => useEZOutputEmissionsStore.getState().setEmissionsWarmColdIntensityState('success'),
   data_text_paragraph1_people_response: () => useEZOutputPeopleResponseStore.getState().setPeopleResponseParagraphState('success'),
   data_chart_sankey_people_response: () => useEZOutputPeopleResponseStore.getState().setPeopleResponseSankeyState('success'),
-  data_chart_bar_people_response: () => useEZOutputPeopleResponseStore.getState().setPeopleResponseBarState('success'),
   data_text_paragraph1_trip_legs: () => useEZOutputTripLegsStore.getState().setTripLegsParagraphState('success'),
   data_table_trip_legs: () => useEZOutputTripLegsStore.getState().setTripLegsTableState('success'),
 };
@@ -381,16 +386,6 @@ export function handleDataMessage(
         flows: Array<{ from: string; to: string; count: number }>;
       };
       useEZOutputPeopleResponseStore.getState().setPeopleResponseSankeyData(data);
-      break;
-    }
-
-    case 'data_chart_bar_people_response': {
-      const data = payload as {
-        modes: string[];
-        baseline: number[];
-        policy: number[];
-      };
-      useEZOutputPeopleResponseStore.getState().setPeopleResponseBarData(data);
       break;
     }
 

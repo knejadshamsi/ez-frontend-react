@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getBackendUrl } from './config';
 
-const CANCEL_TIMEOUT_MS = 35000;
+const CANCEL_TIMEOUT_MS = 125000;
 
 type CancelResult = 'success' | 'conflict' | 'timeout' | 'not_found' | 'error';
 

@@ -135,13 +135,6 @@ interface PeopleResponseSankeyPayload {
   flows: Array<{ from: string; to: string; count: number }>;
 }
 
-// Mode share percentages (SSE: data_chart_bar_people_response)
-interface PeopleResponseBarPayload {
-  modes: string[];
-  baseline: number[];
-  policy: number[];
-}
-
 // === TRIP PERFORMANCE PAYLOADS ===
 
 // Trip performance paragraph - quadrant analysis (SSE: data_text_paragraph1_trip_legs)
@@ -209,7 +202,6 @@ export type SSEMessage =
   // People response data
   | { messageType: 'data_text_paragraph1_people_response'; payload: PeopleResponseParagraphPayload; timestamp: string }
   | { messageType: 'data_chart_sankey_people_response'; payload: PeopleResponseSankeyPayload; timestamp: string }
-  | { messageType: 'data_chart_bar_people_response'; payload: PeopleResponseBarPayload; timestamp: string }
 
   // Trip legs data
   | { messageType: 'data_text_paragraph1_trip_legs'; payload: TripPerformanceParagraphPayload; timestamp: string }
@@ -231,6 +223,7 @@ export type SSEMessage =
   | { messageType: 'scenario_status'; payload: { status: string }; timestamp: string }
   | { messageType: 'scenario_input'; payload: Record<string, unknown>; timestamp: string }
   | { messageType: 'scenario_session'; payload: Record<string, unknown>; timestamp: string }
+  | { messageType: 'scenario_pin'; payload: { pinned: boolean }; timestamp: string }
 
   // Catch-all for unknown message types
   | { messageType: string; payload: Record<string, unknown>; timestamp: string };
@@ -268,4 +261,5 @@ export interface SimulationStreamConfig {
   onScenarioStatus?: (status: string) => void;
   onScenarioInput?: (input: Record<string, unknown>) => void;
   onScenarioSession?: (session: Record<string, unknown>) => void;
+  onScenarioPin?: (pinned: boolean) => void;
 }
