@@ -27,5 +27,3 @@ const locales = {
 
 i18n.addResourceBundle('en', 'ez-output-utils', locales.en);
 i18n.addResourceBundle('fr', 'ez-output-utils', locales.fr);
-
-type EZOutputUtilsLocale = typeof locales.en;

@@ -4,18 +4,13 @@ import { useEZSessionStore } from '~stores/session';
 import { checkBackendHealth, checkBackendHealthInitial, getBackendUrl } from '~ez/api';
 import { loadScenario } from '~ez/api/startSimulation';
 import { fetchScenarioStatus, isTerminalStatus } from '~ez/api/scenarioStatus';
-import { isProcessState } from './stores/types';
-import type { ConnectionState } from './stores/types';
-import i18n from '~i18nConfig';
 import './locales';
 
-const t = i18n.t.bind(i18n);
 const POLL_INTERVAL_MS = 30000;
 
 export const useHealthCheckPolling = (): void => {
   const connectionState = useEZServiceStore((s) => s.connectionState);
   const ezState = useEZServiceStore((s) => s.state);
-  const isSseActive = useEZServiceStore((s) => s.isSseActive);
   const hasInitialized = useRef(false);
 
   // Initial health check on mount

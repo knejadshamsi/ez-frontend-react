@@ -2,7 +2,7 @@ import { Spin, Alert, Button, message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useEZOutputOverviewStore } from '~stores/output';
 import { useEZSessionStore, useEZOutputFiltersStore } from '~stores/session';
-import { useEZServiceStore, useAPIPayloadStore } from '~store';
+import { useAPIPayloadStore } from '~store';
 import { retryComponentData } from '~ez/api';
 import { CopyRequestIdButton } from '../components/CopyRequestIdButton';
 import { InputLayerToggleButton } from './InputLayerToggleButton';

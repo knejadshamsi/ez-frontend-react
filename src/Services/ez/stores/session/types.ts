@@ -50,8 +50,8 @@ export interface ExitWarning {
   message: string;
 }
 
-// Main session store interface
-export interface EZSessionStore {
+// Data-only slice of the session store (no actions) - used to type initial state factories
+export interface EZSessionStoreData {
   scenarioTitle: string;
   scenarioDescription: string;
   requestId: string;
@@ -68,7 +68,10 @@ export interface EZSessionStore {
   pinned: boolean;
   exitState: ExitState;
   exitWarning: ExitWarning | null;
+}
 
+// Main session store interface: state fields + actions
+export interface EZSessionStore extends EZSessionStoreData {
   setScenarioTitle: (title: string) => void;
   setScenarioDescription: (description: string) => void;
   setRequestId: (id: string) => void;
@@ -116,8 +119,8 @@ export type PeopleResponseCategory = 'modeShift' | 'rerouted' | 'paidPenalty' | 
 // Emissions view mode for private/all toggle
 export type EmissionsViewMode = 'private' | 'all';
 
-// Output filters store interface
-export interface EZOutputFiltersStore {
+// Data-only slice of the output filters store (no actions) - used to type initial state factories
+export interface EZOutputFiltersStoreData {
   // Map visibility states
   isEmissionsMapVisible: boolean;
   isPeopleResponseMapVisible: boolean;
@@ -139,7 +142,10 @@ export interface EZOutputFiltersStore {
   // Input layer visibility states (output view only)
   inputZoneLayerOpacity: 'hidden' | 'low' | 'medium' | 'normal';
   inputSimulationAreaLayerOpacity: 'hidden' | 'low' | 'medium' | 'normal';
+}
 
+// Output filters store interface: state fields + actions
+export interface EZOutputFiltersStore extends EZOutputFiltersStoreData {
   // Emissions map actions
   toggleEmissionsMapVisibility: () => void;
   setSelectedVisualizationType: (type: VisualizationType) => void;

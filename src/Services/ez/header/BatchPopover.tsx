@@ -29,8 +29,9 @@ import { isProcessState } from '~ez/stores/types';
 import type { HookAPI } from 'antd/es/modal/useModal';
 import type { MessageInstance } from 'antd/es/message/interface';
 import type { BackgroundSimStatus, BackgroundSimulation } from '~stores/batch';
-import { useScenarioPreambleStore } from '~ez/stores/scenario';
 import { restoreStoresFromInput } from '~ez/api/fetchScenarioInput';
+import { fetchScenarioPreamble } from '~ez/api/fetchScenarioPreamble';
+import { fetchScenarioStatus } from '~ez/api/scenarioStatus';
 import '~ez/locales';
 import '~ez/components/locales';
 import styles from './header.module.less';
@@ -133,13 +134,13 @@ export const BatchPopover = ({ messageApi, modal }: BatchPopoverProps) => {
 
   // === Non-completed scenario handler ===
 
-  const handleNonCompleted = (status: string) => {
+  const handleNonCompleted = (status: string, requestId: string) => {
     const setState = useEZServiceStore.getState().setState;
 
     if (status === 'DELETED') {
-      messageApi.error(t('ez-components:exitModal.draftError'));
-      setState('WELCOME');
+      messageApi.error(t('ez-welcome:errors.scenarioDeleted'));
       resetOutputState();
+      setState('WELCOME');
       return;
     }
 
@@ -157,15 +158,13 @@ export const BatchPopover = ({ messageApi, modal }: BatchPopoverProps) => {
         {
           label: t('batch.nonCompleted.editParameters'),
           highlight: true,
-          onClick: () => {
-            const snapshot = useScenarioPreambleStore.getState();
-            if (snapshot.input) {
-              try {
-                restoreStoresFromInput(snapshot.input, snapshot.session);
-              } catch {
-                messageApi.error(t('batch.draftRestoreFailed'));
-                return;
-              }
+          onClick: async () => {
+            try {
+              const preamble = await fetchScenarioPreamble(requestId);
+              restoreStoresFromInput(preamble.input, preamble.session);
+            } catch {
+              messageApi.error(t('batch.draftRestoreFailed'));
+              return;
             }
             useEZSessionStore.getState().setRequestId('');
             useEZServiceStore.getState().setSessionIntent('RUN_NEW_SIMULATION');
@@ -235,6 +234,21 @@ export const BatchPopover = ({ messageApi, modal }: BatchPopoverProps) => {
     const success = await prepareTransition(requestId);
     if (!success) return;
 
+    let currentStatus: string;
+    try {
+      currentStatus = (await fetchScenarioStatus(requestId)).status;
+    } catch {
+      messageApi.error(t('batch.simFailed'));
+      setState('WELCOME');
+      return;
+    }
+
+    if (currentStatus === 'DELETED' || currentStatus === 'CANCELLED' || currentStatus === 'FAILED') {
+      useBatchStore.getState().updateStatus(requestId, 'error');
+      handleNonCompleted(currentStatus, requestId);
+      return;
+    }
+
     useEZServiceStore.getState().setSessionIntent('LOAD_PREVIOUS_SCENARIO');
     useBatchStore.getState().setActiveSimId(requestId);
 
@@ -256,20 +270,28 @@ export const BatchPopover = ({ messageApi, modal }: BatchPopoverProps) => {
     useBatchStore.getState().setActiveSimId(requestId);
     setState('PROCESS_POLLING');
 
-    watchForTerminal(requestId, (status) => {
+    watchForTerminal(requestId, async (status) => {
       if (useEZSessionStore.getState().requestId !== requestId) return;
       if (status === 'completed') {
         loadScenario(requestId, setState, (errorMsg) => {
           messageApi.error(errorMsg);
           setState('WELCOME');
         });
-      } else {
+        return;
+      }
+
+      let backendStatus: string;
+      try {
+        backendStatus = (await fetchScenarioStatus(requestId)).status;
+      } catch {
         const errorMsg = useBatchStore.getState().simulations
           .find(s => s.requestId === requestId)?.errorMessage;
         messageApi.error(errorMsg || t('batch.simFailed'));
         resetOutputState();
         setState('WELCOME');
+        return;
       }
+      handleNonCompleted(backendStatus, requestId);
     });
   };
 

@@ -5,7 +5,9 @@ import type {
   CustomAreaSessionData,
   ScaledAreaSessionData,
   EZSessionStore,
+  EZSessionStoreData,
   EZOutputFiltersStore,
+  EZOutputFiltersStoreData,
   VisualizationType,
   PollutantType,
   EmissionsScenarioType,
@@ -81,15 +83,15 @@ const redistributeOnEnable = (
 
 // === SESSION STORE ===
 
-export const createInitialSessionState = () => ({
+export const createInitialSessionState = (): EZSessionStoreData => ({
   scenarioTitle: DEFAULT_SCENARIO_TITLE,
   scenarioDescription: DEFAULT_SCENARIO_DESCRIPTION,
   requestId: DEFAULT_REQUEST_ID,
   zones: {
     [DEFAULT_ZONE_ID]: DEFAULT_ZONE_SESSION_DATA
   },
-  customAreas: {} as Record<string, CustomAreaSessionData>,
-  scaledAreas: {} as Record<string, ScaledAreaSessionData>,
+  customAreas: {},
+  scaledAreas: {},
   activeZone: DEFAULT_ZONE_ID,
   activeCustomArea: null,
   colorPalette: [...COLOR_PALETTE],
@@ -338,7 +340,7 @@ export const useEZSessionStore = create<EZSessionStore>((set, get) => ({
 
 // === OUTPUT FILTERS STORE ===
 
-const createInitialFiltersState = () => ({
+const createInitialFiltersState = (): EZOutputFiltersStoreData => ({
   isEmissionsMapVisible: false,
   isPeopleResponseMapVisible: false,
   isTripLegsMapVisible: false,

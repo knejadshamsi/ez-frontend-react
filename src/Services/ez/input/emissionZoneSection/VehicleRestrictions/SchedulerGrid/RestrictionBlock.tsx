@@ -45,7 +45,7 @@ export const RestrictionBlock = ({
       // restricted blocks spesifics
       const width = blockDuration * timeColumnWidth;
       if (width > FULL_LABEL_THRESHOLD) {
-        return `${timeText} | ${t('vehicleRestrictions.blockEditor.penaltyFormat', { penalty: block.penalty, interval: block.interval })}`;
+        return `${timeText} | ${t('vehicleRestrictions.blockEditor.penaltyFormat', { currency: '$', penalty: block.penalty, interval: block.interval })}`;
       } else {
         return timeText;
       }

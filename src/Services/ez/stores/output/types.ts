@@ -227,9 +227,43 @@ export interface PeopleResponseMapData {
 
 // === OUTPUT COMPONENT STATE MACHINE ===
 export type OutputComponentState =
-  | 'inactive'     
+  | 'inactive'
   | 'error_initial'
   | 'success_initial'
   | 'loading'
   | 'error'
   | 'success';
+
+// === MAP STORE ===
+
+// Data-only slice of the map store (no actions) - used to type initial state factories
+export interface EZOutputMapStoreData {
+  emissionsMapState: OutputComponentState;
+  emissionsMapData: EmissionsMapData | null;
+  emissionsMapError: string | null;
+
+  peopleResponseMapState: OutputComponentState;
+  peopleResponseMapData: PeopleResponseMapData | null;
+  peopleResponseMapError: string | null;
+
+  tripLegsMapState: OutputComponentState;
+  tripLegsMapData: TripLegsMapData | null;
+  tripLegsMapError: string | null;
+}
+
+// Full map store interface: state fields + actions
+export interface EZOutputMapStoreState extends EZOutputMapStoreData {
+  setEmissionsMapState: (state: OutputComponentState) => void;
+  setEmissionsMapData: (data: EmissionsMapData) => void;
+  setEmissionsMapError: (error: string | null) => void;
+
+  setPeopleResponseMapState: (state: OutputComponentState) => void;
+  setPeopleResponseMapData: (data: PeopleResponseMapData) => void;
+  setPeopleResponseMapError: (error: string | null) => void;
+
+  setTripLegsMapState: (state: OutputComponentState) => void;
+  setTripLegsMapData: (data: TripLegsMapData) => void;
+  setTripLegsMapError: (error: string | null) => void;
+
+  resetMapStore: () => void;
+}

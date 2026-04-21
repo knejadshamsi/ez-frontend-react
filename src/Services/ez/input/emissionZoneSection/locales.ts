@@ -57,7 +57,7 @@ const locales = {
         penalty: 'Penalty',
         interval: 'Interval (s)',
         delete: 'Delete restriction',
-        penaltyFormat: '${{penalty}}/{{interval}}s',
+        penaltyFormat: '{{currency}}{{penalty}}/{{interval}}s',
       },
       a11y: {
         restrictionBlock: '{{type}} restriction from {{start}} to {{end}}',
@@ -122,7 +122,7 @@ const locales = {
         penalty: 'Pénalité',
         interval: 'Intervalle (s)',
         delete: 'Supprimer la restriction',
-        penaltyFormat: '{{penalty}}$/{{interval}}s',
+        penaltyFormat: '{{penalty}}{{currency}}/{{interval}}s',
       },
       a11y: {
         restrictionBlock: 'Restriction {{type}} de {{start}} a {{end}}',
